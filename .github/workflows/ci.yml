@@ -36,7 +36,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test -- --ci --coverage --coverageReporters=lcov --coverageReporters=text-summary
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: app/coverage/lcov.info
@@ -59,7 +59,7 @@ jobs:
           npm test -- --experimental-test-coverage
           --test-reporter=spec --test-reporter-destination=stdout
           --test-reporter=lcov --test-reporter-destination=lcov.info
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: server/lcov.info
