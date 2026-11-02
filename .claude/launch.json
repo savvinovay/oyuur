@@ -1,0 +1,45 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "app-web",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8081"
+      ],
+      "cwd": "app",
+      "port": 8081
+    },
+    {
+      "name": "app-web-8090",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--port",
+        "8090"
+      ],
+      "cwd": "app",
+      "port": 8090
+    },
+    {
+      "name": "app-web-clear",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "expo",
+        "start",
+        "--web",
+        "--clear",
+        "--port",
+        "8095"
+      ],
+      "cwd": "app",
+      "port": 8095
+    }
+  ]
+}

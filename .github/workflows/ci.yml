@@ -1,0 +1,170 @@
+# Tests, the web build and the Android APK on every push and pull request.
+# A tag vX.Y.Z (= expo.version in app/app.json) also makes a GitHub Release with the APK and the web build.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*.*.*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: 24
+
+jobs:
+  app:
+    name: App tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test -- --ci --coverage --coverageReporters=lcov --coverageReporters=text-summary
+      - uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: app/coverage/lcov.info
+          flags: app
+          fail_ci_if_error: false
+
+  server:
+    name: Server tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # No dependencies: nothing to install.
+      - run: >-
+          npm test -- --experimental-test-coverage
+          --test-reporter=spec --test-reporter-destination=stdout
+          --test-reporter=lcov --test-reporter-destination=lcov.info
+      - uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: server/lcov.info
+          flags: server
+          fail_ci_if_error: false
+
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v5
+      # One version for everything: expo.version in app/app.json; a release tag must match it.
+      - id: v
+        run: |
+          v="$(node -p "require('./app/app.json').expo.version")"
+          echo "$v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$' || { echo "::error::expo.version $v is not x.y.z"; exit 1; }
+          for p in app/package.json server/package.json; do
+            [ "$(node -p "require('./$p').version")" = "$v" ] || { echo "::error::$p version is not $v"; exit 1; }
+          done
+          if [[ "$GITHUB_REF" == refs/tags/v* && "${GITHUB_REF#refs/tags/v}" != "$v" ]]; then
+            echo "::error::tag $GITHUB_REF_NAME does not match expo.version $v in app/app.json"; exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+  web:
+    name: Web build
+    needs: version
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - run: npm ci
+      - run: npx expo export -p web
+      - run: tar -czf "../oyuur-web-${{ needs.version.outputs.version }}.tar.gz" -C dist .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: oyuur-web-*.tar.gz
+          if-no-files-found: error
+
+  android:
+    name: Android APK
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: app
+    env:
+      NODE_ENV: production
+      # Phones only (ARM), no x86 emulators: a smaller APK and less memory to build.
+      ORG_GRADLE_PROJECT_reactNativeArchitectures: armeabi-v7a,arm64-v8a
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - run: npm ci
+      - run: npx expo prebuild -p android --no-install --clean
+      # The open React Native test key (app/credentials/README.md): the same as APK 1.0, so it installs over it.
+      - run: cp credentials/test-debug.keystore android/app/debug.keystore
+      - run: ./gradlew assembleRelease --no-daemon
+        working-directory: app/android
+      - name: Check the signing key
+        run: |
+          apk=android/app/build/outputs/apk/release/app-release.apk
+          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify --print-certs "$apk" \
+            | grep -qi '5e8f16062ea3cd2c4a0d547876baa6f38cabf625' || { echo "::error::APK is not signed with the test key"; exit 1; }
+          mv "$apk" "../oyuur-${{ needs.version.outputs.version }}.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: oyuur-*.apk
+          if-no-files-found: error
+
+  release:
+    name: Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [app, server, web, android]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            oyuur-*.apk
+            oyuur-web-*.tar.gz
+          generate_release_notes: true

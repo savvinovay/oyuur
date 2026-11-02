@@ -1,0 +1,14 @@
+# What the Expo cloud build doesn't need (the app is in app/). Without it the archive is ~300 MB.
+# Same rules as .gitignore, plus:
+node_modules/
+.claude/
+.playwright-mcp/
+design/
+исследования/
+server/
+app/dist/
+app/.expo/
+app/tools/
+*.png.bak
+app/dist-apk/
+app/android/

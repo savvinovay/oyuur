@@ -1,0 +1,12 @@
+{
+  "name": "oyuur-server",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Oyuur test server: accounts, friends, shared trees. No dependencies.",
+  "engines": { "node": ">=24" },
+  "scripts": {
+    "start": "node src/main.js",
+    "test": "node --test --no-warnings"
+  }
+}

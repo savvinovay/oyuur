@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light dark">
+  <title>Oyuur — для владельца</title>
+  <link rel="stylesheet" href="/owner/owner.css">
+</head>
+<body>
+  <!-- Sign-in: the key from OWNER_TOKEN. The hidden "owner" lets the phone's keychain save it. -->
+  <main id="signin" class="signin" hidden>
+    <h1>Oyuur</h1>
+    <p class="muted">Страница владельца</p>
+    <form id="signin-form" autocomplete="on">
+      <input type="text" name="username" value="owner" autocomplete="username" hidden>
+      <label for="key">Ключ владельца</label>
+      <input id="key" name="password" type="password" autocomplete="current-password" required autocapitalize="off" spellcheck="false">
+      <p id="signin-error" class="error" role="alert"></p>
+      <button type="submit" class="primary" id="signin-button">Войти</button>
+    </form>
+  </main>
+
+  <main id="reports" hidden>
+    <header class="top">
+      <h1 id="title">Жалобы</h1>
+      <div class="top-actions">
+        <button type="button" id="refresh" class="ghost" aria-label="Обновить">Обновить</button>
+        <button type="button" id="signout" class="ghost">Выйти</button>
+      </div>
+    </header>
+    <!-- The latest daily copy of the base (OYUUR-36): encrypted with the owner's key. -->
+    <section class="backup" aria-label="Резервная копия базы">
+      <p id="backup-line" class="backup-line">Последняя копия: …</p>
+      <button type="button" id="backup-download" class="ghost" hidden>Скачать копию</button>
+    </section>
+    <!-- Two parts of the page: reports and the numbers (OYUUR-27). -->
+    <nav class="sections" aria-label="Разделы">
+      <button type="button" id="go-reports" data-section="reports" aria-current="page">Жалобы <span class="count" id="count-badge"></span></button>
+      <button type="button" id="go-stats" data-section="stats">Аналитика</button>
+    </nav>
+    <section id="sec-reports">
+    <nav class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab-open" data-status="open" aria-selected="true">Новые <span class="count" id="count-open"></span></button>
+      <button type="button" role="tab" id="tab-done" data-status="done" aria-selected="false">Разобранные <span class="count" id="count-done"></span></button>
+    </nav>
+    <p id="list-error" class="error" role="alert"></p>
+    <ul id="list" class="list" aria-live="polite"></ul>
+    <p id="empty" class="empty" hidden></p>
+    </section>
+
+    <section id="sec-stats" hidden>
+      <div class="period" role="radiogroup" aria-label="Период">
+        <button type="button" role="radio" data-period="7" aria-checked="false">7 дней</button>
+        <button type="button" role="radio" data-period="30" aria-checked="true">30 дней</button>
+        <button type="button" role="radio" data-period="all" aria-checked="false">Всё время</button>
+      </div>
+      <p id="stats-error" class="error" role="alert"></p>
+      <p id="stats-empty" class="empty" hidden>Данных пока нет — появятся, когда друзья откроют новую версию.</p>
+      <div id="stats" class="stats" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <!-- "Are you sure?" for every action. -->
+  <div id="confirm" class="scrim" hidden>
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-text"></p>
+      <div class="sheet-actions">
+        <button type="button" id="confirm-no" class="ghost">Отмена</button>
+        <button type="button" id="confirm-yes" class="primary"></button>
+      </div>
+    </div>
+  </div>
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="/owner/owner.js"></script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+{
+  "expo": {
+    "name": "Oyuur",
+    "slug": "oyuur",
+    "version": "1.2.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {}
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#C9F0FA",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "package": "me.oyuur.app",
+      "versionCode": 3,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/web-icon.png"
+    },
+    "plugins": [
+      "expo-localization",
+      "expo-font",
+      "expo-router",
+      "expo-audio",
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 288,
+          "backgroundColor": "#C9F0FA",
+          "dark": {
+            "image": "./assets/splash-icon-dark.png",
+            "backgroundColor": "#191E5E"
+          }
+        }
+      ],
+      [
+        "react-native-android-widget",
+        {
+          "fonts": [
+            "./assets/widget/fonts/Nunito_800ExtraBold.ttf",
+            "./assets/widget/fonts/Nunito_900Black.ttf"
+          ],
+          "widgets": [
+            {
+              "name": "Tree",
+              "label": "Tree",
+              "description": "Streak of one tree",
+              "minWidth": "130dp",
+              "minHeight": "117dp",
+              "targetCellWidth": 2,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget/preview/tree.webp",
+              "widgetFeatures": "reconfigurable"
+            },
+            {
+              "name": "Today",
+              "label": "Today",
+              "description": "Trees waiting for water",
+              "minWidth": "276dp",
+              "minHeight": "117dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget/preview/today.webp"
+            },
+            {
+              "name": "Forest",
+              "label": "My forest",
+              "description": "Your forest and all your days",
+              "minWidth": "276dp",
+              "minHeight": "249dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 4,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget/preview/forest.webp"
+            },
+            {
+              "name": "Row",
+              "label": "Row",
+              "description": "Scene or Simple",
+              "minWidth": "276dp",
+              "minHeight": "51dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 1,
+              "resizeMode": "horizontal|vertical",
+              "updatePeriodMillis": 1800000,
+              "previewImage": "./assets/widget/preview/row.webp",
+              "widgetFeatures": "reconfigurable"
+            }
+          ]
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "# react-native-android-widget brings WorkManager 2.8.1 (Room 2.5): R8 full mode strips the no-argument\n# constructors Room and WorkManager create by reflection, and the release app crashes at start\n# (github.com/sAleksovski/react-native-android-widget/issues/159).\n-keep class * extends androidx.room.RoomDatabase { <init>(); }\n-keep class androidx.work.impl.WorkDatabase_Impl { <init>(); }\n-keep class * extends androidx.work.InputMerger { <init>(); }\n-keep class * extends androidx.work.ListenableWorker { <init>(android.content.Context, androidx.work.WorkerParameters); }"
+          }
+        }
+      ],
+      "./plugins/with-widget-strings",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#4CC764"
+        }
+      ],
+      "expo-secure-store"
+    ],
+    "scheme": "oyuur",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "4bb0bb23-f546-4ac8-b6fb-353e41d0f2b4"
+      }
+    },
+    "owner": "ayuaya123"
+  }
+}

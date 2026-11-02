@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Имя дерева — волна 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens: the numbers of tokens.ts (waves 2–3); nothing new except the bubble text at night ===== */
+.ph {
+  --page:#FFF0DA; --sheet:#FFE3BE; --card:#FFFFFF; --sunken:#F7D5A6;
+  --text:#1E1B16; --soft:#6E6152; --muted:#A08E78; --outline:#3A2E22; --divider:rgba(58,46,34,.12);
+  --accent:#4CC764; --accentLip:#34A64D; --accentSoft:#DDF5DF; --dangerText:#B23A3A;
+  --gold:#FFCF4D; --goldLip:#D99A1E; --goldInk:#5A3A0E;
+  --sec:#F5D3A0; --secLip:#DDB47A; --skyCard:#DDF5FB;
+  --scrim:rgba(36,24,8,.34);
+  --e1:0 2px 6px rgba(90,58,18,.14); --e2:0 6px 14px rgba(90,58,18,.16); --e3:0 14px 32px rgba(90,58,18,.24);
+  --sheetShadow:0 -6px 24px rgba(90,58,18,.12);
+  --bubble:#FFFFFF; --bubbleInk:#1E1B16;
+  /* keyboard (iOS look, only for the mockup) */
+  --kb:#D1D4D9; --key:#FFFFFF; --keyAlt:#ABB0BA; --keyInk:#000; --keyShadow:#898A8D; --kbLine:#BEC1C6;
+}
+.ph.night {
+  --page:#2E2D63; --sheet:#43427A; --card:#6467B3; --sunken:#383769;
+  --text:#FFFFFF; --soft:#C9C8EE; --muted:#9C9BD0; --outline:#15142E; --divider:rgba(255,255,255,.12);
+  --accentSoft:#2E5E55; --dangerText:#FF8A80; --sec:#6467B3; --secLip:#4B4E96; --skyCard:#4A4C9A;
+  --scrim:rgba(6,6,26,.5);
+  --e1:0 2px 6px rgba(5,4,26,.40); --e2:0 6px 14px rgba(5,4,26,.45); --e3:0 14px 32px rgba(5,4,26,.55);
+  --sheetShadow:0 -6px 24px rgba(5,4,26,.35);
+  --bubble:#E9E8FF; --bubbleInk:#2E2D63;
+  --kb:#2B2B2D; --key:#636366; --keyAlt:#47474A; --keyInk:#fff; --keyShadow:#1A1A1A; --kbLine:#48484A;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#EFE3CF; font-family:'Nunito',system-ui,sans-serif; font-weight:700; color:#1E1B16; }
+.intro { max-width:900px; margin:32px auto 8px; padding:0 16px; }
+.intro h1 { font-weight:900; font-size:30px; }
+.intro p { color:#6E6152; margin-top:6px; line-height:1.45; }
+.group { max-width:1700px; margin:28px auto 0; padding:0 16px; font-weight:900; font-size:20px; color:#5A3A0E; }
+.list { display:flex; flex-wrap:wrap; gap:36px 28px; justify-content:center; padding:20px 16px 40px; }
+.cell { width:375px; } .cell.w320 { width:320px; } .cell.w430 { width:430px; }
+.cap { margin-top:10px; }
+.cap b { font-weight:900; font-size:17px; display:block; }
+.cap span { color:#6E6152; font-size:13.5px; line-height:1.4; display:block; margin-top:3px; }
+.ph { position:relative; overflow:hidden; border-radius:40px; box-shadow:0 18px 40px rgba(60,40,10,.18),0 0 0 1px rgba(0,0,0,.06); background:var(--page); color:var(--text); }
+body.single { background:transparent; }
+body.single .ph { border-radius:0; box-shadow:none; }
+.bg { position:absolute; left:0; top:0; display:block; }
+.abs { position:absolute; }
+.scrim { position:absolute; inset:0; background:var(--scrim); }
+
+/* ===== Header lines (TreeHeader): line 1 — the tree's name, line 2 — the habit ===== */
+.hdr { position:absolute; left:24px; right:24px; text-align:center; pointer-events:none; }
+.h1 { position:absolute; left:0; right:0; top:110px; height:24px; font-weight:900; font-size:18px; line-height:24px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:var(--text); }
+.h2 { position:absolute; left:0; right:0; top:134px; height:20px; font-weight:700; font-size:14px; line-height:20px; color:var(--soft); white-space:nowrap; display:flex; justify-content:center; }
+.h2 .hb { overflow:hidden; text-overflow:ellipsis; min-width:0; }
+.h2 .hg { flex:none; }
+.night .h1 { text-shadow:0 1px 2px rgba(0,0,0,.25); }
+.letter { display:inline-block; }
+.glow { position:absolute; border-radius:50%; background:radial-gradient(closest-side, rgba(255,226,140,.95), rgba(255,231,160,.5) 55%, rgba(255,231,160,0)); }
+.spark { position:absolute; }
+
+/* ===== Bubble "What's my name?" ===== */
+.bub { position:absolute; height:38px; border-radius:19px; background:var(--bubble); display:flex; align-items:center; gap:6px; padding:0 14px 0 10px; font-weight:900; font-size:14px; line-height:18px; color:var(--bubbleInk); white-space:nowrap; box-shadow:0 6px 14px rgba(30,70,100,.22); z-index:5; }
+.bub .tail { position:absolute; }
+.halo { position:absolute; border-radius:50%; background:radial-gradient(closest-side, rgba(201,199,255,.55), rgba(201,199,255,0)); }
+
+/* ===== Name sheet ===== */
+.sheet { position:absolute; left:0; right:0; height:1200px; background:var(--sheet); border:1.5px solid var(--outline); border-bottom:0; border-radius:32px 32px 0 0; box-shadow:var(--sheetShadow), inset 0 1px 0 rgba(255,255,255,.55); padding-top:8px; z-index:20; }
+.night .sheet { box-shadow:var(--sheetShadow), inset 0 1px 0 rgba(255,255,255,.10); }
+.handle { height:20px; position:relative; }
+.handle i { position:absolute; top:7px; left:50%; width:36px; height:5px; margin-left:-18px; border-radius:3px; background:var(--card); box-shadow:0 1px 1px rgba(0,0,0,.08); }
+.ns { padding:4px 16px 0; }
+.nhead { display:flex; align-items:center; gap:12px; height:48px; }
+.thumb { width:48px; height:48px; border-radius:12px; overflow:hidden; flex:none; position:relative; }
+.thumb img { width:48px; height:48px; display:block; }
+.ntitle { font-weight:900; font-size:18px; line-height:24px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nsub { font-weight:700; font-size:14px; line-height:20px; color:var(--soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.field { margin-top:14px; height:56px; border-radius:16px; background:var(--card); border:2px solid var(--accent); box-shadow:var(--e1); display:flex; align-items:center; padding:0 10px 0 14px; gap:8px; }
+.field .val { flex:1; min-width:0; font-weight:800; font-size:20px; line-height:26px; white-space:nowrap; overflow:hidden; display:flex; align-items:center; }
+.field .ph2 { color:var(--muted); }
+.caret { display:inline-block; width:2px; height:24px; background:var(--accent); border-radius:1px; margin-left:1px; }
+.sel { background:rgba(76,199,100,.28); border-radius:3px; }
+.cnt { font-weight:800; font-size:12px; line-height:16px; color:var(--muted); flex:none; }
+.cnt.max { color:var(--dangerText); }
+.clr { width:24px; height:24px; border-radius:12px; background:var(--sunken); display:flex; align-items:center; justify-content:center; flex:none; }
+.chips { margin-top:10px; height:34px; display:flex; gap:8px; align-items:center; overflow:hidden; }
+.chip { height:34px; border-radius:17px; padding:0 14px; background:var(--sunken); display:flex; align-items:center; gap:6px; font-weight:800; font-size:14px; line-height:18px; white-space:nowrap; flex:none; }
+.chip.heir { background:var(--accentSoft); padding-left:10px; }
+.shuf { width:34px; height:34px; border-radius:17px; background:var(--sunken); display:flex; align-items:center; justify-content:center; flex:none; margin-left:auto; }
+.hint { margin-top:10px; height:34px; display:flex; align-items:center; gap:6px; font-weight:800; font-size:13px; line-height:18px; color:var(--soft); }
+.btns { margin-top:14px; display:flex; gap:8px; }
+.btn { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-radius:14px; position:relative; height:48px; font-size:16px; white-space:nowrap; }
+.btn.pri { background:var(--accent); color:#fff; box-shadow:0 4px 0 var(--accentLip); }
+.btn.sec { background:var(--sec); color:var(--text); box-shadow:0 4px 0 var(--secLip); }
+.btn.off { background:var(--sunken); color:var(--muted); box-shadow:none; }
+.btn.off svg { filter:grayscale(1); opacity:.45; }
+.btn.down { transform:translateY(3px); box-shadow:0 1px 0 var(--accentLip); }
+.compact .nhead { height:40px; } .compact .thumb, .compact .thumb img { width:40px; height:40px; }
+.compact .ntitle { font-size:17px; line-height:22px; } .compact .nsub { font-size:13px; line-height:18px; }
+.compact .field { margin-top:12px; height:52px; } .compact .field .val { font-size:18px; }
+.compact .btns { margin-top:12px; }
+
+/* ===== Keyboard (iOS look, mockup only) ===== */
+.kb { position:absolute; left:0; right:0; bottom:0; background:var(--kb); font-family:-apple-system,'SF Pro Text','Segoe UI',system-ui,sans-serif; z-index:30; }
+.kbar { display:flex; align-items:center; }
+.kbar div { flex:1; text-align:center; font-size:16px; color:var(--keyInk); opacity:.9; white-space:nowrap; overflow:hidden; }
+.kbar i { width:1px; height:24px; background:var(--kbLine); }
+.key { position:absolute; border-radius:5px; background:var(--key); box-shadow:0 1px 0 var(--keyShadow); color:var(--keyInk); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:400; }
+.key.alt { background:var(--keyAlt); font-size:15px; }
+.key.ret { background:#0A84FF; color:#fff; font-size:15px; }
+.homei { position:absolute; bottom:8px; left:50%; width:134px; height:5px; margin-left:-67px; border-radius:3px; background:var(--keyInk); opacity:.85; }
+
+/* ===== Bits of screens drawn over the screenshots ===== */
+.note { position:absolute; z-index:60; background:#5A3A0E; color:#FFF3C4; font-weight:800; font-size:11px; line-height:14px; padding:3px 7px; border-radius:6px; white-space:nowrap; }
+.searchx { position:absolute; width:16px; height:16px; }
+</style>
+</head>
+<body>
+<div class="intro" id="intro">
+  <h1>Имя дерева — волна 4 (v0.9)</h1>
+  <p>Кадры 375×812, ключевые ещё 320×568 (с клавиатурой) и 430×932. Фон каждого кадра — снимок настоящего приложения (Expo web); поверх нарисовано новое: пузырь, окно имени, шапка, праздник. Клавиатура нарисована для понимания места (вид iOS), в коде её рисует система. `?f=01` … `?f=22` — один кадр без рамки. Спецификация — <b>спец.md</b> рядом.</p>
+</div>
+<div id="root"></div>
+
+<script>
+// ===== Glyphs and icons (viewBox 24). New: G.nameTag, I.shuffle, I.pencil — copy into glyphs.tsx / icons.tsx unchanged. =====
+const G = {
+  // A wooden name tag on a string, tilted. Colors: wood #F2C27E / edge #A0692F / lines #C68B4A / string #7A4E26 / leaf #8BC34A–#4E8A2A.
+  nameTag: `<path d="M3.2 3.6 C5.4 2.2 7.6 3.2 8.4 6.2" stroke="#7A4E26" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <g transform="rotate(28 13 13)"><path d="M4.6 13 L8.6 8.6 H19.6 Q21.4 8.6 21.4 10.4 V15.6 Q21.4 17.4 19.6 17.4 H8.6 Z" fill="#F2C27E" stroke="#A0692F" stroke-width="1.4" stroke-linejoin="round"/>
+    <circle cx="8.5" cy="13" r="1.35" fill="#7A4E26"/>
+    <path d="M11.4 11.6 H18.4 M11.4 14.4 H16.2" stroke="#C68B4A" stroke-width="1.4" stroke-linecap="round"/>
+    <path d="M9.6 9.6 H19.4" stroke="#FFF3C4" stroke-width="1" stroke-linecap="round" opacity=".7"/></g>
+    <path d="M17.6 4.8 C17.8 2.8 19.2 1.7 21.2 1.8 C21.2 3.9 19.8 5 17.6 4.8Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1"/>`,
+  seed: `<ellipse cx="12" cy="20.6" rx="7" ry="2" fill="#C99A60"/>
+    <ellipse cx="10.6" cy="15.6" rx="5.2" ry="3.6" transform="rotate(-20 10.6 15.6)" fill="#9A6634" stroke="#6B4320" stroke-width="1.2"/>
+    <ellipse cx="9.2" cy="14.6" rx="2" ry="1" transform="rotate(-20 9.2 14.6)" fill="#C99060"/>
+    <path d="M14.4 13 C15.2 9.8 17 8 19.8 7.4" stroke="#5E9A2C" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M17.4 8.2 C17.2 5.8 18.6 4.2 20.8 4 C21 6.4 19.6 7.8 17.4 8.2Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1"/>`,
+};
+const I = {
+  close: `<path d="M6 6 L18 18 M18 6 L6 18"/>`,
+  shuffle: `<path d="M3.5 7 H7 C9.6 7 10.6 8.8 12 12 C13.4 15.2 14.4 17 17 17 H20.5"/><path d="M3.5 17 H7 C8.6 17 9.6 16.3 10.4 15"/><path d="M13.6 9 C14.4 7.7 15.4 7 17 7 H20.5"/><path d="M18 4.5 L20.5 7 L18 9.5"/><path d="M18 14.5 L20.5 17 L18 19.5"/>`,
+  pencil: `<path d="M4 20 L4.6 16.4 L15.8 5.2 A1.9 1.9 0 0 1 18.5 5.2 L18.8 5.5 A1.9 1.9 0 0 1 18.8 8.2 L7.6 19.4 Z"/><path d="M13.6 7.4 L16.6 10.4"/><path d="M12.5 20 L20 20"/>`,
+  info: `<circle cx="12" cy="12" r="9"/><path d="M12 11 V16.5"/><circle cx="12" cy="7.8" r="1.2" fill="currentColor" stroke="none"/>`,
+};
+const glyph = (n, s) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="flex:none;display:block">${G[n]}</svg>`;
+const icon = (n, s, color = 'currentColor', w = 2.2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="flex:none;display:block;color:${color}"><g fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${I[n]}</g></svg>`;
+const star = (x, y, s, o = 1) => `<svg class="spark" style="left:${x - s / 2}px;top:${y - s / 2}px;opacity:${o}" width="${s}" height="${s}" viewBox="-1.1 -1.1 2.2 2.2"><path d="M0 -1 C.12 -.12 .12 -.12 1 0 C.12 .12 .12 .12 0 1 C-.12 .12 -.12 .12 -1 0 C-.12 -.12 -.12 -.12 0 -1Z" fill="#FFF6C2" stroke="#E9A92A" stroke-width=".16"/></svg>`;
+
+// ===== Keyboard =====
+function keyboard(w, o = {}) {
+  const lang = o.lang || 'ru', compact = w < 360, big = w > 400;
+  const barH = compact ? 37 : big ? 46 : 44, keyH = compact ? 39 : big ? 45 : 42, gy = compact ? 15 : big ? 11 : 12, top = compact ? 6 : 8, bottom = compact ? 9 : 80;
+  const gx = compact ? 5 : 6, side = 3;
+  const rows = lang === 'ru' ? ['йцукенгшщзх', 'фывапролджэ', 'ячсмитьбю'] : ['qwertyuiop', 'asdfghjkl', 'zxcvbnm'];
+  const up = o.upper ? (s) => s.toUpperCase() : (s) => s;
+  let keys = '';
+  const total = barH + top + 4 * keyH + 3 * gy + bottom;
+  const rowY = (i) => barH + top + i * (keyH + gy);
+  // rows 1 and 2
+  const kw = (w - 2 * side - (rows[0].length - 1) * gx) / rows[0].length;
+  [0, 1].forEach((r) => {
+    const n = rows[r].length, rw = n * kw + (n - 1) * gx, x0 = (w - rw) / 2;
+    [...rows[r]].forEach((ch, i) => { keys += `<div class="key" style="left:${x0 + i * (kw + gx)}px;top:${rowY(r)}px;width:${kw}px;height:${keyH}px">${up(ch)}</div>`; });
+  });
+  // row 3: shift, letters, backspace
+  const sw = compact ? 36 : big ? 46 : 40;
+  const n3 = rows[2].length, kw3 = Math.min(kw, (w - 2 * side - 2 * sw - (n3 + 1) * gx - (lang === 'en' ? 2 * 10 : 0)) / n3);
+  const lw = n3 * kw3 + (n3 - 1) * gx, lx = (w - lw) / 2;
+  keys += `<div class="key alt" style="left:${side}px;top:${rowY(2)}px;width:${sw}px;height:${keyH}px">${shiftSvg(o.upper)}</div>`;
+  [...rows[2]].forEach((ch, i) => { keys += `<div class="key" style="left:${lx + i * (kw3 + gx)}px;top:${rowY(2)}px;width:${kw3}px;height:${keyH}px">${up(ch)}</div>`; });
+  keys += `<div class="key alt" style="left:${w - side - sw}px;top:${rowY(2)}px;width:${sw}px;height:${keyH}px">${backSvg()}</div>`;
+  // row 4
+  const a = Math.round(w * 0.115), g2 = Math.round(w * 0.11), rt = Math.round(w * 0.235);
+  const sp = w - 2 * side - a - g2 - rt - 3 * gx;
+  let x = side;
+  keys += `<div class="key alt" style="left:${x}px;top:${rowY(3)}px;width:${a}px;height:${keyH}px">123</div>`; x += a + gx;
+  keys += `<div class="key alt" style="left:${x}px;top:${rowY(3)}px;width:${g2}px;height:${keyH}px">${smileSvg()}</div>`; x += g2 + gx;
+  keys += `<div class="key" style="left:${x}px;top:${rowY(3)}px;width:${sp}px;height:${keyH}px;font-size:16px">${lang === 'ru' ? 'Пробел' : 'space'}</div>`; x += sp + gx;
+  keys += `<div class="key ${o.retOff ? 'alt' : 'ret'}" style="left:${x}px;top:${rowY(3)}px;width:${rt}px;height:${keyH}px">${lang === 'ru' ? 'Готово' : 'done'}</div>`;
+  const words = o.words || ['', '', ''];
+  const bar = `<div class="kbar" style="height:${barH}px"><div>${words[0]}</div><i></i><div>${words[1]}</div><i></i><div>${words[2]}</div></div>`;
+  const home = compact ? '' : `<div class="abs" style="left:22px;bottom:38px;opacity:.85">${globeSvg()}</div><div class="abs" style="right:24px;bottom:38px;opacity:.85">${micSvg()}</div><div class="homei"></div>`;
+  return { h: total, html: `<div class="kb" style="height:${total}px;${o.dy ? `transform:translateY(${o.dy}px)` : ''}">${bar}${keys}${home}</div>` };
+}
+const shiftSvg = (on) => `<svg width="20" height="20" viewBox="0 0 24 24"><path d="M12 3.5 L21 13 H16 V20.5 H8 V13 H3 Z" fill="${on ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+const backSvg = () => `<svg width="24" height="20" viewBox="0 0 28 22"><path d="M9 2 H25 Q27 2 27 4 V18 Q27 20 25 20 H9 L1 11 Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 7 L21 15 M21 7 L13 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const smileSvg = () => `<svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="9" cy="10" r="1.2" fill="currentColor"/><circle cx="15" cy="10" r="1.2" fill="currentColor"/><path d="M8 14 Q12 18 16 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+const globeSvg = () => `<svg width="26" height="26" viewBox="0 0 24 24" style="color:var(--keyInk)"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="9" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 12 H21 M5 7 H19 M5 17 H19" stroke="currentColor" stroke-width="1.3"/></svg>`;
+const micSvg = () => `<svg width="22" height="26" viewBox="0 0 22 26" style="color:var(--keyInk)"><rect x="7" y="2" width="8" height="14" rx="4" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12 Q3 20 11 20 Q19 20 19 12 M11 20 V24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+// ===== Name sheet (section 3 of спец.md) =====
+// Heights: 375/430 — 280 (8 + 20 + 4 + 48 + 14 + 56 + 10 + 34 + 14 + 52 + 12 + 12); 320 — 254.
+function nameSheet(o) {
+  const compact = o.w < 360;
+  const h = compact ? 254 : 280;
+  let val;
+  if (o.value) {
+    val = o.selected ? `<span class="sel">${o.value}</span>` : `<span>${o.value}</span>`;
+    if (!o.selected) val += '<span class="caret"></span>';
+  } else {
+    val = `<span class="caret" style="margin:0 2px 0 0"></span><span class="ph2">${o.placeholder}</span>`;
+  }
+  const right = (o.counter ? `<span class="cnt ${o.counterMax ? 'max' : ''}">${o.counter}</span>` : '') +
+    (o.value ? `<span class="clr">${icon('close', 12, 'var(--text)', 2.6)}</span>` : '');
+  const chips = o.hint
+    ? `<div class="hint">${icon('info', 16, 'var(--soft)')}<span>${o.hint}</span></div>`
+    : `<div class="chips">${o.chips.map((c, i) => `<div class="chip ${i === 0 && o.heir ? 'heir' : ''}">${i === 0 && o.heir ? glyph('seed', 16) : ''}${c}</div>`).join('')}<div class="shuf">${icon('shuffle', 18, 'var(--soft)', 2.2)}</div></div>`;
+  const priCls = o.primaryOff ? 'off' : 'pri' + (o.pressed ? ' down' : '');
+  return {
+    h,
+    html: `<div class="sheet ${compact ? 'compact' : ''}" style="top:${o.top}px;${o.dy ? `transform:translateY(${o.dy}px)` : ''}">
+      <div class="handle"><i></i></div>
+      <div class="ns">
+        <div class="nhead"><div class="thumb"><img src="img/${o.thumb}"></div>
+          <div style="min-width:0;flex:1"><div class="ntitle">${o.title}</div><div class="nsub">${o.sub}</div></div></div>
+        <div class="field"><div class="val">${val}</div>${right}</div>
+        ${chips}
+        <div class="btns">
+          <div class="btn sec" style="flex:1">${o.secondary}</div>
+          <div class="btn ${priCls}" style="flex:1.5">${o.primaryGlyph === false ? '' : glyph('nameTag', 22)}${o.primary}</div>
+        </div>
+      </div></div>`,
+  };
+}
+
+// ===== Bubble at the crown (section 2.3) =====
+// anchor = middle of the would-be round 38 bubble (bubbleSpot); tail tip 24 px down-left of it.
+function bubble(o) {
+  const w = o.width, left = Math.min(o.ax - 19, o.W - 8 - w), top = o.ay - 19;
+  const tx = o.ax - left; // tail base, px from the pill's left edge
+  const tail = `<svg class="tail" width="40" height="34" viewBox="0 0 40 34" style="left:${tx - 30}px;top:22px"><path d="M30 2 Q26 20 6 30 Q18 16 18 2 Z" fill="var(--bubble)"/></svg>`;
+  const halo = o.night ? `<div class="halo" style="left:${left - 30}px;top:${top - 34}px;width:${w + 60}px;height:106px"></div>` : '';
+  return `${halo}<div class="bub" style="left:${left}px;top:${top}px;width:${w}px">${tail}<span style="position:relative">${glyph('nameTag', 20)}</span><span style="position:relative">${o.text}</span></div>`;
+}
+
+// ===== Header =====
+function header(o) {
+  const l1 = o.letters
+    ? [...o.name].map((ch, i) => { const p = o.letters[i] ?? 1; return `<span class="letter" style="opacity:${p};transform:translateY(${(1 - p) * 8}px) scale(${0.6 + 0.4 * p})">${ch === ' ' ? '&nbsp;' : ch}</span>`; }).join('')
+    : o.name;
+  const l2 = o.habit === undefined ? '' : `<div class="h2" style="${o.l2style || ''}"><span class="hb">${o.habit}</span>${o.gen ? `<span class="hg">&nbsp;· ${o.gen}</span>` : ''}</div>`;
+  return `<div class="hdr" style="top:0;height:160px">${o.extra || ''}<div class="h1" style="${o.l1style || ''}">${l1}</div>${l2}</div>`;
+}
+
+// ===== Frames =====
+const T = {
+  ru: { ask: 'Как меня зовут?', title: 'Как назовёшь дерево?', rename: 'Новое имя дерева', habit: (h) => `Привычка: ${h}`, later: 'Позже', name: 'Назвать', save: 'Сохранить', cancel: 'Отмена', remove: 'Убрать имя' },
+  en: { ask: 'What’s my name?', title: 'Name your tree', habit: (h) => `Habit: ${h}`, later: 'Later', name: 'Name it' },
+};
+const frames = [];
+const F = (id, size, theme, title, text, build, group) => frames.push({ id, size, theme, title, text, build, group });
+const SZ = { 375: [375, 812], 320: [320, 568], 430: [430, 932] };
+
+function withSheet(W, H, bg, sheetOpts, kbOpts = {}, extra = '') {
+  const kb = keyboard(W, kbOpts);
+  const sh = nameSheet({ ...sheetOpts, w: W, top: 0 });
+  const top = H - kb.h - sh.h;
+  const sheet = nameSheet({ ...sheetOpts, w: W, top });
+  return `<img class="bg" src="img/${bg}">${extra}<div class="scrim"></div>${sheet.html}${kb.html}`;
+}
+
+// --- 1. Invitation ---
+F('01', 375, 'day', 'Приглашение: дерево спрашивает имя',
+  'После праздника «Сеянец» (3-й день) через 400 мс у кроны выскакивает пузырь. Не окно: можно не отвечать. Тап по пузырю — окно имени.',
+  () => `<img class="bg" src="img/d375.png">${bubble({ ax: 232, ay: 444, W: 375, width: 160, text: T.ru.ask })}`, 'Предложение назвать');
+F('02', 375, 'day', 'Окно имени открыто',
+  'Плашка над клавиатурой, курсор в поле, на клавиатуре заглавные (первая буква имени). Подсказки — имена для дуба, справа «перемешать». «Назвать» неактивна, пока пусто.',
+  () => withSheet(375, 812, 'd375.png', { thumb: 'th-oak3.png', title: T.ru.title, sub: T.ru.habit('Не курить'), placeholder: 'Например, Добрыня', chips: ['Добрыня', 'Жёлудь', 'Тихон'], secondary: T.ru.later, primary: T.ru.name, primaryOff: true }, { upper: true, retOff: true }), 'Предложение назвать');
+F('03', 375, 'day', 'Набрано «Дубок», «Назвать» нажата',
+  'Кнопка «Назвать» в нажатом состоянии: лицо утоплено на 3 px. «Готово» на клавиатуре делает то же самое.',
+  () => withSheet(375, 812, 'd375.png', { thumb: 'th-oak3.png', title: T.ru.title, sub: T.ru.habit('Не курить'), value: 'Дубок', chips: ['Добрыня', 'Жёлудь', 'Тихон'], secondary: T.ru.later, primary: T.ru.name, pressed: true }, { words: ['«Дубок»', 'Дубки', 'Дубком'] }), 'Предложение назвать');
+
+// --- 2. Celebration ---
+F('04', 375, 'day', 'Праздник, 160 мс: окно уходит',
+  'Клавиатура и плашка уезжают вниз (240 мс), затемнение гаснет. «Не курить» тает в первой строке и проступает мелко во второй.',
+  () => {
+    const kb = keyboard(375, { dy: 150 });
+    const sh = nameSheet({ w: 375, top: 196, dy: 150, thumb: 'th-oak3.png', title: T.ru.title, sub: T.ru.habit('Не курить'), value: 'Дубок', chips: ['Добрыня', 'Жёлудь', 'Тихон'], secondary: T.ru.later, primary: T.ru.name });
+    return `<img class="bg" src="img/d375-nohdr.png">` +
+      header({ name: 'Не курить', l1style: 'font-weight:800;opacity:.3;transform:translateY(6px)', habit: 'Не курить', l2style: 'opacity:.6;transform:translateY(-3px)' }) +
+      `<div class="scrim" style="opacity:.35"></div>${sh.html}${kb.html}`;
+  }, 'Праздник имени');
+F('05', 375, 'day', 'Праздник, 520 мс: буквы по одной',
+  'Буквы «Дубок» выпрыгивают по одной (через 40 мс), за именем золотое свечение, вокруг искры. Дерево в этот момент радостно качнулось (±3°, 700 мс). Звук и вибрация — на 420 мс.',
+  () => `<img class="bg" src="img/d375-nohdr.png">` + header({
+    name: 'Дубок', letters: [1, 1, 1, 0.55, 0.1], habit: 'Не курить',
+    extra: `<div class="glow" style="left:${163.5 - 85}px;top:88px;width:170px;height:68px"></div>` +
+      star(80, 112, 18, .95) + star(250, 104, 20, 1) + star(100, 142, 12, .75) + star(228, 144, 14, .85) + star(200, 90, 10, .6) + star(128, 90, 10, .5),
+  }), 'Праздник имени');
+F('06', 375, 'day', 'Итог: в шапке имя дерева, ниже — привычка',
+  'Имя — 18/24 Black, как было название. Привычка — 14/20 мелко, textSoft. Высота шапки — как у шапки с поколениями (96), сцена не прыгает.',
+  () => `<img class="bg" src="img/d375-nohdr.png">` + header({ name: 'Дубок', habit: 'Не курить' }), 'Праздник имени');
+
+// --- 3. Night, sizes, EN ---
+F('07', 375, 'night', 'Ночь: пузырь',
+  'Пузырь ночью светлый лиловый (#E9E8FF), текст тёмный, за ним лунное свечение — как у пузыря-капли.',
+  () => `<img class="bg" src="img/n375.png">${bubble({ ax: 232, ay: 444, W: 375, width: 160, text: T.ru.ask, night: true })}`, 'Ночь, размеры, английский');
+F('08', 375, 'night', 'Ночь: шапка с именем',
+  'Имя белое с лёгкой тенью, привычка — #C9C8EE.',
+  () => `<img class="bg" src="img/n375-nohdr.png">` + header({ name: 'Дубок', habit: 'Не курить' }), 'Ночь, размеры, английский');
+F('09', 320, 'day', '320×568: окно с клавиатурой',
+  'Плотный вид: картинка 40, поле 52, две подсказки. Плашка 254 + клавиатура 253 — сверху остаётся 61 px, всё помещается.',
+  () => withSheet(320, 568, 'd320.png', { thumb: 'th-oak3.png', title: T.ru.title, sub: T.ru.habit('Не курить'), value: 'Дуб', chips: ['Кузьма', 'Савва'], secondary: T.ru.later, primary: T.ru.name }, { words: ['«Дуб»', 'Дубок', 'Дубы'] }), 'Ночь, размеры, английский');
+F('10', 320, 'day', '320×568: длинное имя и поколения',
+  'Имя в 20 знаков влезает в одну строку. Вторая строка — «привычка · поколение 2 из 2»; не влезет — обрезается название привычки, «поколение» остаётся.',
+  () => `<img class="bg" src="img/d320-gen-nohdr.png">` + header({ name: 'Великий Дуб Добрыня', habit: 'Сон до 23', gen: 'поколение 2 из 2' }), 'Ночь, размеры, английский');
+F('11', 430, 'day', '430×932: окно имени',
+  'То же, что 375; в ряд входят четыре подсказки.',
+  () => withSheet(430, 932, 'd430.png', { thumb: 'th-oak3.png', title: T.ru.title, sub: T.ru.habit('Не курить'), placeholder: 'Например, Добрыня', chips: ['Добрыня', 'Жёлудь', 'Тихон', 'Савва'], secondary: T.ru.later, primary: T.ru.name, primaryOff: true }, { upper: true, retOff: true }), 'Ночь, размеры, английский');
+F('12', 375, 'night', 'EN, ночь: сакура',
+  'Английские подсказки для сакуры. Плашка ночная, клавиатура тёмная (так её покажет система при тёмной теме приложения: keyboardAppearance).',
+  () => withSheet(375, 812, 'n375-en.png', { thumb: 'th-sakura18-night.png', title: T.en.title, sub: T.en.habit('Read 20 minutes'), value: 'Hana', chips: ['Blossom', 'Petal', 'Sakura'], secondary: T.en.later, primary: T.en.name }, { lang: 'en', words: ['“Hana”', 'Hanna', 'Hand'] }), 'Ночь, размеры, английский');
+F('13', 375, 'day', 'EN, день: шапка',
+  '«Blossom» / «Read 20 minutes». Пузырь-капля у неполитого дерева работает как раньше: имя ему не мешает.',
+  () => `<img class="bg" src="img/d375-en-nohdr.png">` + header({ name: 'Blossom', habit: 'Read 20 minutes' }), 'Ночь, размеры, английский');
+F('14', 375, 'day', 'Ограничения: счётчик и запрещённый знак',
+  'Счётчик появляется с 15 знаков. Эмодзи и знаки, кроме букв, цифр, пробела, дефиса, точки и апострофа, не вводятся: вместо подсказок на 2 с — строка с объяснением. Отклик error.',
+  () => withSheet(375, 812, 'd375.png', { thumb: 'th-oak3.png', title: T.ru.title, sub: T.ru.habit('Не курить'), value: 'Дубок Великолепный', counter: '18/20', hint: 'Только буквы, цифры, пробел и дефис', secondary: T.ru.later, primary: T.ru.name }, { words: ['', '', ''] }), 'Ночь, размеры, английский');
+
+// --- 4. Forest ---
+F('15', 375, 'day', 'Лес: карточка дерева',
+  'Первая строка — имя (одна строка), под ней привычка 14/20 ExtraBold textSoft, ниже строка состояния. Карточка выше на 20 px — высота меряется.',
+  () => `<img class="bg" src="img/f375-card.png">`, 'Лес и переименование');
+F('16', 375, 'day', 'Лес: «⋯» → «Переименовать»',
+  'Первый пункт меню. У дерева без имени — «Дать имя». Значок — карандаш (новая иконка pencil).',
+  () => `<img class="bg" src="img/f375-menu.png">`, 'Лес и переименование');
+F('17', 375, 'day', 'Переименовать',
+  'То же окно. Заголовок «Новое имя дерева», имя выделено целиком — можно сразу печатать новое. Кнопки «Отмена» / «Сохранить».',
+  () => withSheet(375, 812, 'f375-card.png', { thumb: 'th-oak3.png', title: T.ru.rename, sub: T.ru.habit('Не курить'), value: 'Дубок', selected: true, chips: ['Добрыня', 'Жёлудь', 'Тихон'], secondary: T.ru.cancel, primary: T.ru.save }, { words: ['«Дубок»', 'Дубки', 'Дубком'] }), 'Лес и переименование');
+F('18', 375, 'day', 'Убрать имя',
+  'Поле очищено — главная кнопка становится «Убрать имя» (без значка). Дерево снова называется по привычке.',
+  () => withSheet(375, 812, 'f375-card.png', { thumb: 'th-oak3.png', title: T.ru.rename, sub: T.ru.habit('Не курить'), placeholder: 'Без имени', chips: ['Добрыня', 'Жёлудь', 'Тихон'], secondary: T.ru.cancel, primary: T.ru.remove, primaryGlyph: false }, { upper: true }), 'Лес и переименование');
+F('19', 375, 'day', 'Лес: поиск находит и по имени',
+  '«со» нашло «Соня» (имя), «Сон до 23» и «Без соцсетей» (привычки). Строка списка: имя жирным, «· привычка» обычным textSoft, в одну строку.',
+  () => `<img class="bg" src="img/f375-list.png"><div class="searchx" style="left:335px;top:149px">${icon('close', 16, '#6E6152', 2.2)}</div>`, 'Лес и переименование');
+
+// --- 5. Generations, lock-in, view ---
+F('20', 375, 'day', 'Новое поколение: подсказка-наследник',
+  'У прошлого поколения было имя «Тихон» — первая подсказка «Тихон II» на зелёной фишке с семечком. Можно взять её или дать новое имя.',
+  () => withSheet(375, 812, 'd375-gen.png', { thumb: 'th-gen2.png', title: T.ru.title, sub: T.ru.habit('Сон до 23'), placeholder: 'Например, Тихон II', chips: ['Тихон II', 'Добрыня', 'Жёлудь'], heir: true, secondary: T.ru.later, primary: T.ru.name, primaryOff: true }, { upper: true, retOff: true }), 'Поколения, закрепление, просмотр');
+F('21', 375, 'day', 'Закрепление с именем',
+  'Заголовок — по привычке (закрепляется привычка). Текст — по имени: «Добрыня уйдёт в твой лес как есть…». В шапке за окном — имя и привычка.',
+  () => `<img class="bg" src="img/d375-lock.png">`, 'Поколения, закрепление, просмотр');
+F('22', 375, 'day', 'Просмотр дерева (только смотреть)',
+  'Та же шапка: «Шишка» / «Без соцсетей». Здесь переименовать нельзя — только через «⋯» в лесу.',
+  () => `<img class="bg" src="img/d375-habit.png">`, 'Поколения, закрепление, просмотр');
+
+// ===== Render =====
+const params = new URLSearchParams(location.search);
+const only = params.get('f');
+const root = document.getElementById('root');
+const phone = (f) => { const [w, h] = SZ[f.size]; return `<div class="ph ${f.theme === 'night' ? 'night' : ''}" style="width:${w}px;height:${h}px">${f.build()}</div>`; };
+if (only) {
+  document.body.classList.add('single');
+  document.getElementById('intro').remove();
+  const f = frames.find((x) => x.id === only);
+  root.innerHTML = phone(f);
+} else {
+  let html = '', group = null, list = '';
+  for (const f of frames) {
+    if (f.group !== group) { if (list) html += `<div class="list">${list}</div>`; list = ''; group = f.group; html += `<div class="group">${group}</div>`; }
+    list += `<div class="cell ${f.size === 320 ? 'w320' : f.size === 430 ? 'w430' : ''}">${phone(f)}<div class="cap"><b>${f.id} · ${f.title}</b><span>${f.text}</span></div></div>`;
+  }
+  html += `<div class="list">${list}</div>`;
+  root.innerHTML = html;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Интерфейс волны 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens (the same numbers as спец.md, раздел 5) ===== */
+.ph {
+  --page:#FFF0DA; --sheet:#FFE3BE; --card:#FFFFFF; --sunken:#F7D5A6; --header:#F4C98E;
+  --text:#1E1B16; --soft:#6E6152; --muted:#A08E78; --outline:#3A2E22; --divider:rgba(58,46,34,.12);
+  --accent:#4CC764; --accentLip:#34A64D; --accentSoft:#DDF5DF;
+  --water:#3FA2DE; --waterSoft:#DCEFFB;
+  --gold:#FFCF4D; --goldLip:#D99A1E; --goldInk:#5A3A0E;
+  --danger:#D24A43; --dangerLip:#A3332D; --dangerText:#B23A3A;
+  --frozen:#7FC8F0; --frozenInk:#0D2B3E;
+  --sec:#F5D3A0; --secLip:#DDB47A; --cardLip:#E9D3B0;
+  --scrim:rgba(36,24,8,.34);
+  --e1:0 2px 6px rgba(90,58,18,.14); --e2:0 6px 14px rgba(90,58,18,.16); --e3:0 14px 32px rgba(90,58,18,.24);
+  --sheetShadow:0 -6px 24px rgba(90,58,18,.12);
+  --tint-forest:#E3F4D3; --tint-settings:#F6E9D6; --chipBg:rgba(255,255,255,.7);
+  --skyCard:#DDF5FB; --headerBtn:rgba(255,255,255,.55);
+}
+.ph.night {
+  --page:#2E2D63; --sheet:#43427A; --card:#6467B3; --sunken:#383769; --header:#34336A;
+  --text:#FFFFFF; --soft:#C9C8EE; --muted:#9C9BD0; --outline:#15142E; --divider:rgba(255,255,255,.12);
+  --accentSoft:#2E5E55; --waterSoft:#34508A;
+  --sec:#6467B3; --secLip:#4B4E96; --cardLip:#4B4E96;
+  --scrim:rgba(6,6,26,.5);
+  --e1:0 2px 6px rgba(5,4,26,.40); --e2:0 6px 14px rgba(5,4,26,.45); --e3:0 14px 32px rgba(5,4,26,.55);
+  --sheetShadow:0 -6px 24px rgba(5,4,26,.35);
+  --tint-forest:#4A6F70; --tint-settings:#55569A; --chipBg:rgba(255,255,255,.14);
+  --skyCard:#2C2D6A; --headerBtn:rgba(255,255,255,.14);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#EFE3CF; font-family:'Nunito',system-ui,sans-serif; font-weight:700; color:#1E1B16; }
+.intro { max-width:820px; margin:32px auto 8px; padding:0 16px; }
+.intro h1 { font-weight:900; font-size:30px; }
+.intro p { color:#6E6152; margin-top:6px; line-height:1.45; }
+.list { display:flex; flex-wrap:wrap; gap:36px 28px; justify-content:center; padding:24px 16px 64px; }
+.cell { width:375px; }
+.cell.w320 { width:320px; }
+.cap { margin-top:10px; }
+.cap b { font-weight:900; font-size:17px; display:block; }
+.cap span { color:#6E6152; font-size:13.5px; line-height:1.4; display:block; margin-top:3px; }
+.ph { position:relative; width:375px; height:812px; overflow:hidden; border-radius:40px; box-shadow:0 18px 40px rgba(60,40,10,.18),0 0 0 1px rgba(0,0,0,.06); background:var(--page); color:var(--text); }
+.ph.s320 { width:320px; height:568px; border-radius:24px; }
+body.single { background:transparent; }
+body.single .ph { border-radius:0; box-shadow:none; }
+.abs { position:absolute; }
+.bgimg { position:absolute; left:0; width:375px; }
+/* status bar + home indicator */
+.sbar { position:absolute; top:0; left:0; right:0; height:47px; display:flex; justify-content:space-between; align-items:center; padding:0 30px 0 36px; font-weight:800; font-size:15px; z-index:50; }
+.home { position:absolute; bottom:8px; left:50%; width:134px; height:5px; margin-left:-67px; border-radius:3px; background:#1E1B16; opacity:.85; z-index:60; }
+.night .home, .home.light { background:#fff; }
+/* scene header */
+.hdr { position:absolute; left:0; right:0; text-align:center; z-index:5; }
+.cnt { display:inline-flex; align-items:center; gap:8px; }
+.num { font-weight:900; font-size:46px; line-height:52px; letter-spacing:-.5px; text-shadow:0 1px 0 rgba(255,255,255,.55),0 2px 8px rgba(255,255,255,.35); }
+.night .num { text-shadow:0 2px 8px rgba(0,0,30,.4); }
+.hname { font-weight:800; font-size:18px; line-height:24px; opacity:.88; margin-top:2px; }
+/* sheet */
+.sheet { position:absolute; left:0; right:0; height:900px; background:var(--sheet); border:1.5px solid var(--outline); border-bottom:0; border-radius:32px 32px 0 0; box-shadow:var(--sheetShadow), inset 0 1px 0 rgba(255,255,255,.55); z-index:20; padding-top:8px; }
+.night .sheet { box-shadow:var(--sheetShadow), inset 0 1px 0 rgba(255,255,255,.10); }
+.handle { height:20px; position:relative; }
+.handle i { position:absolute; top:6px; width:19px; height:5px; border-radius:3px; background:var(--card); box-shadow:0 1px 1px rgba(0,0,0,.08); }
+.statusB { height:52px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; padding:0 16px; }
+.sl1 { display:flex; align-items:center; gap:7px; font-weight:800; font-size:16px; line-height:22px; }
+.sl2 { display:flex; align-items:center; gap:6px; font-size:13.5px; color:var(--soft); }
+.strip { position:relative; height:96px; margin-top:4px; overflow:hidden; }
+.day { position:absolute; top:8px; width:64px; height:80px; border-radius:16px; background:var(--card); box-shadow:var(--e1); display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--text); }
+.day .wd { font-size:12.5px; font-weight:800; line-height:16px; }
+.day .dn { font-size:22px; font-weight:900; line-height:26px; }
+.day .mk { height:20px; display:flex; align-items:center; }
+.lockrow { height:36px; display:flex; justify-content:center; align-items:center; gap:6px; font-size:14px; font-weight:800; color:var(--soft); }
+.menuB { padding:0 16px; }
+.divider { height:1px; background:var(--divider); margin:0 0 16px; }
+.wrow { display:flex; gap:10px; height:100px; }
+.wt { flex:1; border-radius:20px; background:var(--card); box-shadow:0 3px 0 var(--cardLip), var(--e1); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; position:relative; color:var(--text); }
+.wt .gc { width:48px; height:48px; border-radius:24px; display:flex; align-items:center; justify-content:center; }
+.wt b { font-weight:800; font-size:14px; line-height:17px; text-align:center; }
+.wt small { font-size:11.5px; color:var(--soft); line-height:13px; }
+.wt.acc { background:var(--accent); box-shadow:0 3px 0 var(--accentLip), var(--e1); color:#fff; }
+.wt.acc small { color:rgba(255,255,255,.85); }
+.mcap { display:flex; align-items:center; gap:6px; margin:16px 0 10px 2px; font-size:12px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; color:var(--soft); height:16px; }
+.srow { display:flex; gap:10px; }
+.st { flex:1; border-radius:18px; background:var(--sunken); position:relative; color:var(--soft); }
+.st.wide { height:72px; display:flex; align-items:center; gap:10px; padding:0 14px; }
+.st.small { height:76px; display:flex; flex-direction:column; align-items:center; padding-top:22px; gap:3px; }
+.st b { font-weight:800; font-size:14px; line-height:17px; }
+.st.small b { font-size:12.5px; }
+.st .g { opacity:.78; }
+.soon { position:absolute; top:7px; right:7px; font-size:9.5px; font-weight:900; letter-spacing:.6px; text-transform:uppercase; padding:2px 6px; border-radius:8px; background:var(--chipBg); color:var(--soft); }
+.scrim { position:absolute; inset:0; background:var(--scrim); z-index:15; }
+/* misc */
+.pill { display:inline-flex; align-items:center; gap:6px; padding:0 12px; height:32px; border-radius:16px; background:var(--card); box-shadow:var(--e1); font-size:13px; font-weight:800; }
+.callout { position:absolute; z-index:40; background:var(--card); border-radius:18px; box-shadow:var(--e3); padding:14px 16px 14px 14px; display:flex; gap:12px; }
+.callout:after { content:''; position:absolute; bottom:-8px; width:18px; height:18px; background:var(--card); transform:rotate(45deg); border-radius:3px; left:var(--ax); margin-left:-9px; }
+.callout h4 { font-weight:900; font-size:15px; line-height:20px; }
+.callout p { font-size:13.5px; line-height:18px; color:var(--soft); margin-top:2px; }
+.finger { position:absolute; width:46px; height:46px; border-radius:23px; background:rgba(255,255,255,.55); border:2px solid rgba(30,27,22,.35); z-index:70; box-shadow:0 4px 14px rgba(0,0,0,.18); }
+.trail { position:absolute; width:12px; border-radius:6px; z-index:69; background:linear-gradient(to bottom, rgba(255,255,255,.7), rgba(255,255,255,0)); }
+.note { position:absolute; z-index:80; background:#1E1B16; color:#fff; font-size:12px; font-weight:800; padding:5px 9px; border-radius:10px; }
+/* buttons */
+.btn { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-radius:16px; position:relative; }
+.btn.L { height:56px; font-size:18px; } .btn.M { height:48px; font-size:16px; border-radius:14px; } .btn.S { height:36px; font-size:14px; border-radius:12px; padding:0 14px; }
+.btn.pri { background:var(--accent); color:#fff; box-shadow:0 4px 0 var(--accentLip); }
+.btn.sec { background:var(--sec); color:var(--text); box-shadow:0 4px 0 var(--secLip); }
+.btn.gold { background:var(--gold); color:var(--goldInk); box-shadow:0 4px 0 var(--goldLip); }
+.btn.dan { background:var(--danger); color:#fff; box-shadow:0 4px 0 var(--dangerLip); }
+.btn.txt { background:transparent; color:var(--soft); }
+.btn.pressed { transform:translateY(3px); box-shadow:0 1px 0 var(--accentLip); }
+.btn.sec.pressed { box-shadow:0 1px 0 var(--secLip); }
+.btn.dis { background:var(--sunken); color:var(--muted); box-shadow:none; }
+/* page */
+.phdr { position:absolute; top:0; left:0; right:0; height:103px; background:var(--header); border-radius:0 0 24px 24px; box-shadow:var(--e1); z-index:10; }
+.phdr h2 { position:absolute; top:47px; left:0; right:0; height:56px; line-height:56px; text-align:center; font-weight:900; font-size:22px; }
+.back { position:absolute; left:12px; top:55px; width:40px; height:40px; border-radius:20px; background:var(--headerBtn); display:flex; align-items:center; justify-content:center; }
+.body { position:absolute; top:103px; left:0; right:0; bottom:0; padding:16px; overflow:hidden; }
+.sec-t { font-weight:900; font-size:18px; line-height:24px; margin:20px 0 10px 2px; }
+.hint { font-size:13.5px; color:var(--soft); line-height:18px; margin:8px 2px 0; }
+.seg { display:flex; background:var(--sunken); border-radius:14px; padding:4px; height:48px; }
+.seg div { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; border-radius:11px; font-weight:800; font-size:15px; color:var(--soft); }
+.seg div.on { background:var(--card); color:var(--text); box-shadow:var(--e1); }
+.input { height:56px; border-radius:16px; background:var(--card); box-shadow:var(--e1); display:flex; align-items:center; padding:0 16px; font-size:17px; font-weight:800; }
+.input.focus { box-shadow:0 0 0 2px var(--accent), var(--e1); }
+.chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.chip { height:34px; padding:0 14px; border-radius:17px; background:var(--sunken); display:flex; align-items:center; font-size:14px; font-weight:800; color:var(--text); }
+.group { background:var(--card); border-radius:20px; box-shadow:var(--e1); overflow:hidden; }
+.row { min-height:56px; display:flex; align-items:center; gap:12px; padding:0 16px; position:relative; }
+.row + .row:before { content:''; position:absolute; top:0; left:60px; right:0; height:1px; background:var(--divider); }
+.row .ic { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; }
+.row .lb { flex:1; font-weight:800; font-size:16px; }
+.tog { width:52px; height:32px; border-radius:16px; background:var(--sunken); position:relative; box-shadow:inset 0 1px 3px rgba(0,0,0,.12); flex:none; }
+.tog i { position:absolute; top:3px; left:3px; width:26px; height:26px; border-radius:13px; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2); }
+.tog.on { background:var(--accent); } .tog.on i { left:23px; }
+.gcap { font-size:12px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; color:var(--soft); margin:20px 0 8px 6px; }
+.fcard { width:calc(50% - 6px); border-radius:20px; background:var(--card); box-shadow:var(--e1); padding:8px 8px 10px; position:relative; }
+.fsky { height:112px; border-radius:14px; background:var(--skyCard); overflow:hidden; position:relative; }
+.fcard b { display:block; font-weight:900; font-size:15.5px; margin:8px 2px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.fcard .fs { display:flex; align-items:center; gap:5px; font-size:13px; color:var(--soft); margin-left:2px; }
+.more { position:absolute; top:12px; right:12px; width:28px; height:28px; border-radius:14px; background:rgba(255,255,255,.75); display:flex; align-items:center; justify-content:center; }
+.ribbon { position:absolute; left:50%; transform:translateX(-50%); width:268px; height:66px; z-index:30; }
+.medal { position:absolute; border-radius:50%; background:radial-gradient(circle at 38% 32%, #FFF3C4 0%, #FFD866 45%, #F0B53A 100%); border:3px solid #fff; box-shadow:0 0 0 2px #D99A1E, 0 0 28px 8px rgba(255,214,90,.65); z-index:45; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+.glowring { box-shadow:0 0 0 3px #FFCF4D, 0 0 20px 4px rgba(255,207,77,.75), 0 3px 0 var(--cardLip) !important; }
+.plus1 { position:absolute; top:-8px; right:-6px; background:var(--accent); color:#fff; font-weight:900; font-size:13px; padding:2px 8px; border-radius:11px; border:2px solid #fff; box-shadow:0 3px 8px rgba(30,90,40,.3); }
+.sheetT { font-size:11px; color:#6E6152; }
+.lbl { font-size:11px; color:var(--soft); text-align:center; margin-top:4px; font-weight:800; }
+.swatch { height:36px; border-radius:10px; box-shadow:inset 0 0 0 1px rgba(0,0,0,.08); }
+</style>
+</head>
+<body>
+<div class="intro" id="intro">
+  <h1>Волна 2 — интерфейс уровня большого продукта</h1>
+  <p>Ключевые кадры: плашка-меню за пальцем (свёрнута / обычная / меню / середина жеста), разделы «скоро», переход после закрепления, ночь, маленький экран 320×568, экраны леса, новой привычки, настроек и просмотра в новой системе, лист значков, кнопки и токены. Сцена взята со снимков v0.6 (на них дерево и луг); всё, что поверх, — новое. Подробности и числа — в <b>спец.md</b>. Режимы: <code>?f=01</code> — один кадр, без параметров — все.</p>
+</div>
+<div class="list" id="list"></div>
+
+<script>
+// ============ Glyphs: colored brand icons, viewBox 24 (copy these paths into ui/ds/glyphs.tsx) ============
+const GEAR = 'M19.95 9.97 L22.50 10.52 L22.50 13.48 L19.95 14.03 L19.05 16.18 L20.47 18.38 L18.38 20.47 L16.18 19.05 L14.03 19.95 L13.48 22.50 L10.52 22.50 L9.97 19.95 L7.82 19.05 L5.62 20.47 L3.53 18.38 L4.95 16.18 L4.05 14.03 L1.50 13.48 L1.50 10.52 L4.05 9.97 L4.95 7.82 L3.53 5.62 L5.62 3.53 L7.82 4.95 L9.97 4.05 L10.52 1.50 L13.48 1.50 L14.03 4.05 L16.18 4.95 L18.38 3.53 L20.47 5.62 L19.05 7.82 Z';
+const SPROUT = `<path d="M12 20.5 V12.5" stroke="#5E9A2C" stroke-width="2" stroke-linecap="round"/><path d="M12 13.5 C7.2 13.6 4.4 10.8 4.2 6.6 C8.6 6.4 11.8 9 12 13.5Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.3" stroke-linejoin="round"/><path d="M12 11.6 C12.2 7.4 15.2 4.4 19.8 4.3 C19.8 8.8 16.8 11.6 12 11.6Z" fill="#B9DE6C" stroke="#4E8A2A" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.8 8.4 C8.3 9 9.6 10.2 10.6 12" stroke="#4E8A2A" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".55"/>`;
+const G = {
+  rings: `<circle cx="12" cy="12" r="11" fill="#7A4E26"/><circle cx="12" cy="12" r="9.2" fill="#F3CF92"/><circle cx="11.6" cy="12.3" r="6.4" fill="none" stroke="#B57A3E" stroke-width="1.8"/><circle cx="11.35" cy="12.45" r="3.4" fill="none" stroke="#B57A3E" stroke-width="1.8"/><circle cx="11" cy="12.7" r="1.2" fill="#9A6230"/>`,
+  drop: `<path d="M12 2.5 C12 2.5 4.5 11 4.5 15 A7.5 7.5 0 0 0 19.5 15 C19.5 11 12 2.5 12 2.5Z" fill="#3FA2DE" stroke="#2A80BC" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.6 15.2 A3.6 3.6 0 0 0 11.4 18.6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".85"/>`,
+  check: `<circle cx="12" cy="12" r="10.5" fill="#4CC764" stroke="#34A64D" stroke-width="1.3"/><path d="M7.2 12.4 L10.4 15.5 L16.8 8.9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  sprout: `<ellipse cx="12" cy="20.8" rx="6.5" ry="1.9" fill="#C99A60"/>` + SPROUT,
+  stageUp: `<ellipse cx="11" cy="21" rx="6" ry="1.7" fill="#C99A60"/><path d="M11 21 V13" stroke="#8A6A3B" stroke-width="2.2" stroke-linecap="round"/><circle cx="11" cy="10.5" r="6.3" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.3"/><circle cx="8.8" cy="8.6" r="2" fill="#B9DE6C"/><path d="M19 1.8 Q19.5 4.5 22.2 5 Q19.5 5.5 19 8.2 Q18.5 5.5 15.8 5 Q18.5 4.5 19 1.8Z" fill="#FFCF4D" stroke="#D99A1E" stroke-width=".9" stroke-linejoin="round"/>`,
+  snowflake: `<g stroke="#2F86BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 3 V21 M4.2 7.5 L19.8 16.5 M4.2 16.5 L19.8 7.5"/><path d="M9.6 4.6 L12 6.6 L14.4 4.6 M9.6 19.4 L12 17.4 L14.4 19.4"/></g><circle cx="12" cy="12" r="1.8" fill="#2F86BE"/>`,
+  tombstone: `<path d="M6 21 V10 A6 6 0 0 1 18 10 V21Z" fill="#C3C6CE" stroke="#6F7380" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.2 10.6 A4 4 0 0 1 11 7.2" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".7"/><path d="M9.5 12 H14.5 M9.5 15 H14.5 M9.5 18 H13" stroke="#6F7380" stroke-width="1.4" stroke-linecap="round"/><path d="M3 21.3 H21" stroke="#5E9A2C" stroke-width="2.4" stroke-linecap="round"/>`,
+  plaque: `<path d="M12 14 V22" stroke="#8A6A3B" stroke-width="2.4" stroke-linecap="round"/><rect x="3.5" y="3.5" width="17" height="11.5" rx="2.6" fill="#FFCF4D" stroke="#B9801E" stroke-width="1.4"/><path d="M12 5.6 L13.25 8.2 L16 8.5 L13.95 10.35 L14.5 13.1 L12 11.75 L9.5 13.1 L10.05 10.35 L8 8.5 L10.75 8.2Z" fill="#FFF7E0" stroke="#D99A1E" stroke-width=".8" stroke-linejoin="round"/>`,
+  seed: `<ellipse cx="12" cy="20.6" rx="7" ry="2" fill="#C99A60"/><ellipse cx="10.6" cy="15.6" rx="5.2" ry="3.6" transform="rotate(-20 10.6 15.6)" fill="#9A6634" stroke="#6B4320" stroke-width="1.2"/><ellipse cx="9.2" cy="14.6" rx="2" ry="1" transform="rotate(-20 9.2 14.6)" fill="#C99060"/><path d="M14.4 13 C15.2 9.8 17 8 19.8 7.4" stroke="#5E9A2C" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M17.4 8.2 C17.2 5.8 18.6 4.2 20.8 4 C21 6.4 19.6 7.8 17.4 8.2Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1"/>`,
+  heart: `<path d="M12 20.5 C5.2 15.2 2.5 12 2.5 8.3 A4.8 4.8 0 0 1 12 6.2 A4.8 4.8 0 0 1 21.5 8.3 C21.5 12 18.8 15.2 12 20.5Z" fill="#E0485F" stroke="#A82A3F" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.2 8.4 A2.4 2.4 0 0 1 8.6 6.1" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".7"/>`,
+  heartEmpty: `<path d="M12 20.5 C5.2 15.2 2.5 12 2.5 8.3 A4.8 4.8 0 0 1 12 6.2 A4.8 4.8 0 0 1 21.5 8.3 C21.5 12 18.8 15.2 12 20.5Z" fill="rgba(255,255,255,.35)" stroke="#A82A3F" stroke-width="1.6" stroke-linejoin="round"/>`,
+  coin: `<circle cx="12" cy="12" r="10" fill="#FFCF4D" stroke="#C98A16" stroke-width="1.4"/><circle cx="12" cy="12" r="7" fill="none" stroke="#F0B53A" stroke-width="1.4"/><path d="M12 7.6 C9.4 9.5 9.2 13.4 12 16.3 C14.8 13.4 14.6 9.5 12 7.6Z" fill="#E59E1E"/><path d="M12 9 V15.6" stroke="#FFE7A0" stroke-width=".9"/>`,
+  forest: `<ellipse cx="12" cy="20.8" rx="10.5" ry="1.9" fill="#B9DE6C" opacity=".8"/><path d="M5.6 15 V19.6" stroke="#8A6A3B" stroke-width="1.6" stroke-linecap="round"/><path d="M5.6 4.8 L9.6 15.2 H1.6Z" fill="#3E8E4A" stroke="#2A6A36" stroke-width="1.1" stroke-linejoin="round"/><path d="M18.2 13.4 V19.6" stroke="#8A6A3B" stroke-width="1.6" stroke-linecap="round"/><circle cx="18.2" cy="9.6" r="4.3" fill="#F4A6C6" stroke="#C9779C" stroke-width="1.1"/><path d="M12 21 V13" stroke="#8A6A3B" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="9.8" r="5.6" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.2"/><circle cx="10" cy="8" r="1.8" fill="#B9DE6C"/>`,
+  newHabit: `<g transform="translate(-2 0)">${SPROUT}</g><circle cx="18" cy="18" r="5" fill="#fff" stroke="#34A64D" stroke-width="1.3"/><path d="M18 15.4 V20.6 M15.4 18 H20.6" stroke="#34A64D" stroke-width="2" stroke-linecap="round"/>`,
+  settings: `<path d="${GEAR}" fill="#CDBB9E" stroke="#8A7458" stroke-width="1.3" stroke-linejoin="round"/><circle cx="12" cy="12" r="4.6" fill="#E8DAC4" stroke="#8A7458" stroke-width="1.2"/><circle cx="12" cy="12" r="2" fill="#8A7458"/>`,
+  friends: `<circle cx="16.2" cy="7.6" r="3.2" fill="#BFE6FA" stroke="#2F86BE" stroke-width="1.2"/><path d="M10.6 19.6 C11 15.4 13.2 12.6 16.2 12.6 C19.6 12.6 22 15.2 22 19.6Z" fill="#7FC8F0" stroke="#2F86BE" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8.5" cy="8.6" r="3.6" fill="#FFD3A8" stroke="#C47F3E" stroke-width="1.2"/><path d="M2 20.2 C2 15.8 4.8 13.6 8.5 13.6 C12.2 13.6 15 15.8 15 20.2Z" fill="#FF9E5E" stroke="#C4652A" stroke-width="1.2" stroke-linejoin="round"/>`,
+  leaders: `<rect x="2" y="13" width="6.5" height="8" rx="1.2" fill="#E7E9EE" stroke="#8D93A1" stroke-width="1.2"/><rect x="15.5" y="15" width="6.5" height="6" rx="1.2" fill="#F2B98A" stroke="#B97A4A" stroke-width="1.2"/><rect x="8.5" y="9" width="7" height="12" rx="1.2" fill="#FFCF4D" stroke="#B9801E" stroke-width="1.2"/><path d="M9 7 L9.6 2.8 L12 5 L14.4 2.8 L15 7Z" fill="#FFCF4D" stroke="#B9801E" stroke-width="1.1" stroke-linejoin="round"/><circle cx="12" cy="14" r="1.6" fill="#FFF7E0"/>`,
+  tasks: `<rect x="4" y="4" width="16" height="18" rx="3" fill="#FFFFFF" stroke="#B48A55" stroke-width="1.3"/><rect x="8.5" y="2.4" width="7" height="3.6" rx="1.4" fill="#F4C98E" stroke="#B48A55" stroke-width="1.1"/><path d="M7.4 11.2 L8.8 12.6 L11 10.2 M7.4 16.4 L8.8 17.8 L11 15.4" stroke="#4CC764" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 11.4 H16.6 M13 16.6 H16.6" stroke="#D8C3A3" stroke-width="1.7" stroke-linecap="round"/>`,
+  profile: `<circle cx="12" cy="12" r="10.3" fill="#B7A6FF" stroke="#7B66D6" stroke-width="1.3"/><circle cx="12" cy="10" r="3.6" fill="#fff"/><path d="M5.6 18.4 C7 15.6 9.2 14.4 12 14.4 C14.8 14.4 17 15.6 18.4 18.4 A10.3 10.3 0 0 1 5.6 18.4Z" fill="#fff"/>`,
+  shop: `<rect x="4" y="10" width="16" height="11" rx="1.6" fill="#FFF1DC" stroke="#B48A55" stroke-width="1.3"/><rect x="9.5" y="14" width="5" height="7" rx="1" fill="#F4C98E" stroke="#B48A55" stroke-width="1.1"/><path d="M3 10 L4.6 3.6 H19.4 L21 10Z" fill="#FF8A80" stroke="#C4554C" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.3 3.8 L7.6 10 M12 3.8 V10 M15.7 3.8 L16.4 10" stroke="#fff" stroke-width="1.8"/><path d="M3 10 A2.25 2.25 0 0 0 7.5 10 A2.25 2.25 0 0 0 12 10 A2.25 2.25 0 0 0 16.5 10 A2.25 2.25 0 0 0 21 10" fill="#FF8A80" stroke="#C4554C" stroke-width="1.3" stroke-linejoin="round"/>`,
+  sparkle: `<path d="M12 2 Q13.2 10.8 22 12 Q13.2 13.2 12 22 Q10.8 13.2 2 12 Q10.8 10.8 12 2Z" fill="#FFE27A" stroke="#D99A1E" stroke-width="1" stroke-linejoin="round"/>`,
+};
+function glyph(name, size = 24, style = '') { return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="flex:none;${style}" class="g">${G[name]}</svg>`; }
+
+// ============ Mono icons: one stroke 2.2, round caps, color from the theme ============
+const I = {
+  chevronLeft: `<path d="M15 5 L8 12 L15 19"/>`, chevronRight: `<path d="M9 5 L16 12 L9 19"/>`,
+  chevronDown: `<path d="M5 9 L12 16 L19 9"/>`, chevronUp: `<path d="M5 15 L12 8 L19 15"/>`,
+  close: `<path d="M6 6 L18 18 M18 6 L6 18"/>`, check: `<path d="M5 12.5 L10 17 L19 7.5"/>`, plus: `<path d="M12 5 V19 M5 12 H19"/>`,
+  more: `<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>`,
+  lock: `<rect x="5" y="10.5" width="14" height="10" rx="2.6"/><path d="M8 10.5 V8 A4 4 0 0 1 16 8 V10.5"/><circle cx="12" cy="15.5" r="1.3" fill="currentColor"/>`,
+  people: `<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5 C3 15.8 5.6 13.8 9 13.8 C12.4 13.8 15 15.8 15 19.5"/><circle cx="16.6" cy="7.6" r="2.6"/><path d="M17.2 12.8 C19.6 13 21 15 21 18"/>`,
+  sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2.5 V4.5 M12 19.5 V21.5 M2.5 12 H4.5 M19.5 12 H21.5 M5.3 5.3 L6.7 6.7 M17.3 17.3 L18.7 18.7 M5.3 18.7 L6.7 17.3 M17.3 6.7 L18.7 5.3"/>`,
+  moon: `<path d="M19.5 14.6 A8 8 0 1 1 9.4 4.5 A6.4 6.4 0 0 0 19.5 14.6Z"/>`,
+  auto: `<circle cx="12" cy="12" r="8"/><path d="M12 4 A8 8 0 0 0 12 20Z" fill="currentColor"/>`,
+  sparkles: `<path d="M10 3 Q11 9 17 10 Q11 11 10 17 Q9 11 3 10 Q9 9 10 3Z"/><path d="M18 14 Q18.4 16.6 21 17 Q18.4 17.4 18 20 Q17.6 17.4 15 17 Q17.6 16.6 18 14Z"/>`,
+  speaker: `<path d="M4 9.5 H7.5 L12 5.5 V18.5 L7.5 14.5 H4Z"/><path d="M15.5 9 A4.2 4.2 0 0 1 15.5 15 M18.2 6.4 A8 8 0 0 1 18.2 17.6"/>`,
+  speakerOff: `<path d="M4 9.5 H7.5 L12 5.5 V18.5 L7.5 14.5 H4Z"/><path d="M16 9.5 L21 14.5 M21 9.5 L16 14.5"/>`,
+  vibrate: `<rect x="8" y="4" width="8" height="16" rx="2"/><path d="M4.5 9 V15 M19.5 9 V15 M2 10.5 V13.5 M22 10.5 V13.5"/>`,
+  globe: `<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/><path d="M3 12 H21"/>`,
+  trash: `<path d="M4.5 7 H19.5 M9.5 7 V4.8 H14.5 V7 M6.6 7 L7.4 19.2 A1.6 1.6 0 0 0 9 20.7 H15 A1.6 1.6 0 0 0 16.6 19.2 L17.4 7 M10.2 10.5 V17 M13.8 10.5 V17"/>`,
+  eye: `<path d="M2.5 12 C5 7.5 8.3 5.5 12 5.5 C15.7 5.5 19 7.5 21.5 12 C19 16.5 15.7 18.5 12 18.5 C8.3 18.5 5 16.5 2.5 12Z"/><circle cx="12" cy="12" r="3"/>`,
+  info: `<circle cx="12" cy="12" r="9"/><path d="M12 11 V16.5"/><circle cx="12" cy="7.8" r="1.2" fill="currentColor" stroke="none"/>`,
+  noSign: `<circle cx="12" cy="12" r="8.5"/><path d="M6 6 L18 18"/>`,
+  checkCircle: `<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3 L10.8 15 L16.2 9.4"/>`,
+};
+function icon(name, size = 24, color = 'currentColor', sw = 2.2) { return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:${color}">${I[name]}</svg>`; }
+
+// ============ Building blocks ============
+const TOP = 47, BOT = 34;
+const PEEK = 686, NORMAL = 554, MENU = 214;
+function statusBar(dark) { const c = dark ? '#fff' : '#1E1B16'; return `<div class="sbar" style="color:${c}"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="${c}"/><rect x="5" y="5" width="3" height="7" rx="1" fill="${c}"/><rect x="10" y="2" width="3" height="10" rx="1" fill="${c}"/><rect x="15" y="0" width="3" height="12" rx="1" fill="${c}" opacity=".35"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" fill="none" stroke="${c}" opacity=".5"/><rect x="2.5" y="2.5" width="16" height="8" rx="2" fill="${c}"/><rect x="23.5" y="4" width="2" height="5" rx="1" fill="${c}" opacity=".5"/></svg></span></div>`; }
+const BG = { day: ['img/day.png', '#99e6f9', 'linear-gradient(#9ce8f8,#b5effb)', 'linear-gradient(#aaebfa,#b8effb)'], night: ['img/night.png', '#1d2369', 'linear-gradient(#1f246d,#272c7a)', '#262b77'], empty: ['img/empty.png', '#92e5f9', 'linear-gradient(#9de8f9,#afedfa)', 'linear-gradient(#a8ebfa,#b2eefa)'], nightDone: ['img/night-done.png', '#1d2369', 'linear-gradient(#1f246d,#272c7a)', '#262b77'], locked: ['img/locked.png', '#bcf0fd', 'linear-gradient(#bff1fc,#c4f2fc)', 'linear-gradient(#c3f2fc,#c5f3fd)'] };
+// Scene from a v0.6 shot, moved down by the status bar. patch = draw a new header over the old one (also hides the dev bar).
+function scene(o) {
+  const [src, top, pg1, pg2] = BG[o.bg];
+  const night = o.bg === 'night' || o.bg === 'nightDone';
+  let s = `<div class="abs" style="left:0;top:0;width:375px;height:${TOP}px;background:${top}"></div><img class="bgimg" src="${src}" style="top:${TOP}px">`;
+  if (o.patch) {
+    const g = pg1;
+    s += `<div class="abs" style="left:66px;width:243px;top:97px;height:120px;background:${g};-webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent),linear-gradient(transparent, #000 10px, #000 calc(100% - 10px), transparent);-webkit-mask-composite:source-in;mask-composite:intersect"></div>`;
+    s += `<div class="abs" style="left:24px;width:327px;top:150px;height:84px;background:${pg2};-webkit-mask-image:linear-gradient(90deg,transparent,#000 18px,#000 calc(100% - 18px),transparent)"></div>`;
+    if (night) s += `<svg class="abs" style="left:0;top:0" width="375" height="260"><circle cx="96" cy="200" r="1.2" fill="#fff" opacity=".8"/><circle cx="286" cy="110" r="1" fill="#fff" opacity=".6"/><circle cx="262" cy="196" r="1.4" fill="#FFE39A" opacity=".8"/></svg>`;
+    if (o.patch !== 'blank') s += header(o.patch);
+  }
+  if (o.ext) {
+    const gr = night ? 'linear-gradient(#514d62,#4c3e3a 40%,#4A3A2E)' : 'linear-gradient(#e6dd98,#ECD39A 40%,#E8C68A)';
+    s += `<div class="abs" style="left:0;right:0;top:${o.ext}px;bottom:0;background:${gr};-webkit-mask-image:linear-gradient(transparent,#000 22px)"></div>${grass(o.ext + 10, night)}`;
+  }
+  return s;
+}
+function grass(y, night) { // a band of tufts and flowers to cover the old sheet in the shots
+  let s = `<svg class="abs" style="left:0;top:${y}px" width="375" height="260">`;
+  let seed = 7; const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+  for (let i = 0; i < 70; i++) {
+    const x = r() * 375, yy = 10 + r() * 240, h = 6 + r() * 10 * (0.6 + yy / 240);
+    const c = night ? (r() > .5 ? '#3E6440' : '#2F5233') : (r() > .5 ? '#9CCB5E' : '#7DB24A');
+    s += `<path d="M${x} ${yy} q -2 ${-h * .6} -4 ${-h} M${x} ${yy} q 0 ${-h * .7} 1 ${-h * 1.1} M${x} ${yy} q 2 ${-h * .5} 5 ${-h * .8}" stroke="${c}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
+    if (r() > .8) s += `<circle cx="${x + 3}" cy="${yy - h}" r="2.2" fill="${night ? '#C9C2F0' : ['#FFFFFF', '#FFD84D', '#FF9FB8', '#B7A6FF'][i % 4]}" opacity="${night ? .55 : 1}"/>`;
+  }
+  return s + '</svg>';
+}
+function header(h) {
+  const g = h.glyph || 'rings';
+  return `<div class="hdr" style="top:${h.top || 104}px;${h.op !== undefined ? `opacity:${h.op}` : ''}"><div class="cnt">${glyph(g, 40)}<span class="num">${h.n}</span></div><div class="hname">${h.name}</div>${h.gen ? `<div style="font-size:14px;color:var(--soft)">${h.gen}</div>` : ''}</div>`;
+}
+function dayCard(x, wd, dn, kind) {
+  let style = '', mk = '', fg = '';
+  if (kind === 'done') mk = glyph('sprout', 18);
+  if (kind === 'todayDone') { style = 'box-shadow:0 0 0 3px var(--accent),var(--e1)'; mk = glyph('sprout', 18); wd = 'сегодня'; }
+  if (kind === 'todayThirsty') { style = 'box-shadow:0 0 0 3px var(--water),var(--e1)'; mk = glyph('drop', 16); wd = 'сегодня'; }
+  if (kind === 'stage') { style = 'outline:2px dashed var(--accent);outline-offset:-2px;'; mk = glyph('stageUp', 18); }
+  if (kind === 'future') { style = 'opacity:.55'; }
+  if (kind === 'frozen') { style = 'background:var(--frozen);'; fg = 'color:var(--frozenInk)'; mk = glyph('snowflake', 16); }
+  if (kind === 'missed') { style = 'background:var(--danger);'; fg = 'color:#fff'; mk = icon('close', 14, '#fff', 2.6); }
+  if (kind === 'died') { style = 'background:var(--danger);'; fg = 'color:#fff'; mk = glyph('tombstone', 18); }
+  if (kind === 'locked') { mk = glyph('plaque', 18); style = 'box-shadow:0 0 0 2px var(--gold),var(--e1)'; }
+  return `<div class="day" style="left:${x}px;${style};${fg}"><div class="wd">${wd}</div><div class="dn">${dn}</div><div class="mk">${mk}</div></div>`;
+}
+function strip(today = 'todayThirsty', x0 = -2) {
+  const d = [['вс', 25, 'done'], ['пн', 26, 'done'], ['вт', 27, today], ['ср', 28, 'stage'], ['чт', 29, 'future']];
+  return `<div class="strip">${d.map((c, i) => dayCard(x0 + i * 74, c[0], c[1], c[2])).join('')}</div>`;
+}
+function handle(p, w = 375) { // p: 0 = flat pill, 1 = chevron down (menu is open)
+  const a = 14 * p, cx = w / 2;
+  return `<div class="handle"><i style="left:${cx - 18}px;transform:rotate(${a}deg);transform-origin:100% 50%"></i><i style="left:${cx - 1}px;transform:rotate(${-a}deg);transform-origin:0 50%"></i></div>`;
+}
+function statusBlock(kind) {
+  if (kind === 'thirsty') return `<div class="statusB"><div class="sl1">${glyph('drop', 20)}<span>Дерево ждёт полива — нажми</span></div><div class="sl2">${glyph('rings', 16)}Деревце через 1 день · вт 27</div></div>`;
+  if (kind === 'done') return `<div class="statusB"><div class="sl1" style="color:var(--accent)">${glyph('check', 20)}<span>Сегодня выросло — до завтра</span></div><div class="sl2">${glyph('rings', 16)}Деревце через 11 дней · сб 7</div></div>`;
+  if (kind === 'locking') return `<div class="statusB"><div class="sl1">${glyph('plaque', 20)}<span>Результат закреплён</span></div><div class="sl2">20 дней роста · дерево уходит в лес</div></div>`;
+  if (kind === 'thirsty320') return `<div class="statusB" style="padding:0 12px"><div class="sl1" style="font-size:15px">${glyph('drop', 18)}<span>Дерево ждёт полива — нажми</span></div><div class="sl2" style="font-size:13px">${glyph('rings', 16)}Дерево — сегодня, если полить</div></div>`;
+  if (kind === 'allDone') return `<div style="padding:4px 20px 0;text-align:center;height:150px"><div style="font-weight:900;font-size:22px;line-height:28px">Все деревья в лесу</div><div style="font-size:14px;line-height:19px;color:var(--soft);margin-top:4px">Все привычки закреплены. Посади новое дерево для следующей.</div><div class="btn L pri" style="margin-top:14px">${glyph('seed', 22)}Посадить дерево</div></div>`;
+  if (kind === 'empty') return `<div style="padding:4px 20px 0;text-align:center"><div style="font-weight:900;font-size:22px;line-height:28px">Посади первое дерево</div><div style="font-size:14px;line-height:19px;color:var(--soft);margin-top:4px">Одна привычка — одно дерево. Нажимай на него каждый день и смотри, как оно растёт.</div><div class="btn L pri" style="margin-top:14px">${glyph('seed', 22)}Посадить дерево</div></div>`;
+  return '';
+}
+function menuBlock(o) {
+  const w = o.w || 375, inner = w - 32;
+  const tint = (t) => `background:var(--tint-${t})`;
+  const small = w < 360;
+  return `<div class="menuB" style="opacity:${o.mp};transform:translateY(${12 * (1 - o.mp)}px)">
+    <div class="divider"></div>
+    <div class="wrow" ${small ? 'style="height:92px"' : ''}>
+      <div class="wt ${o.glowForest ? 'glowring' : ''}" id="tForest"><div class="gc" style="${tint('forest')}">${glyph('forest', 34)}</div><b>Мой лес</b><small>${o.forestN || '3 дерева'}</small>${o.glowForest ? '<div class="plus1">+1</div>' : ''}</div>
+      <div class="wt acc ${o.glowNew ? 'glowring' : ''}" ${o.pressNew ? 'style="transform:translateY(2px) scale(.97);box-shadow:0 1px 0 var(--accentLip)"' : ''}><div class="gc" style="background:rgba(255,255,255,.28)">${glyph('newHabit', 34)}</div><b>Новая<br>привычка</b></div>
+      <div class="wt"><div class="gc" style="${tint('settings')}">${glyph('settings', 32)}</div><b>Настройки</b><small>тема, звук</small></div>
+    </div>
+    <div class="mcap">${glyph('sparkle', 14)}Скоро в Elevate</div>
+    <div class="srow">
+      <div class="st wide" ${o.pressFriends ? 'style="transform:scale(.97)"' : ''}>${glyph('friends', small ? 30 : 34)}<b>Друзья</b><span class="soon">скоро</span></div>
+      <div class="st wide">${glyph('leaders', small ? 30 : 34)}<b>Лидеры</b><span class="soon">скоро</span></div>
+    </div>
+    <div class="srow" style="margin-top:10px">
+      <div class="st small">${glyph('tasks', 28)}<b>Задания</b><span class="soon">скоро</span></div>
+      <div class="st small">${glyph('profile', 28)}<b>Профиль</b><span class="soon">скоро</span></div>
+      <div class="st small">${glyph('shop', 28)}<b>Магазин</b><span class="soon">скоро</span></div>
+    </div>
+  </div>`;
+}
+// The bottom sheet. top = where its top edge is now; np / mp = how far strip / menu are faded in (0..1).
+function sheet(o) {
+  const w = o.w || 375;
+  const np = o.np ?? 1, mp = o.mp ?? 0;
+  return `<div class="sheet" style="top:${o.top}px">${handle(o.hp ?? mp, w)}
+    ${statusBlock(o.status || 'thirsty')}
+    ${o.status === 'empty' || o.status === 'allDone' ? '' : `<div style="opacity:${np}">${strip(o.today || 'todayThirsty', o.x0)}<div class="lockrow">${glyph('plaque', 16)}Закрепить результат</div></div>`}
+    <div style="height:8px"></div>${menuBlock({ ...o, mp })}
+  </div>`;
+}
+function phone(inner, o = {}) { return `<div class="ph ${o.night ? 'night' : ''} ${o.cls || ''}">${inner}${o.noBar ? '' : statusBar(o.darkBar ?? o.night)}${o.noHome ? '' : `<div class="home ${o.lightHome ? 'light' : ''}"></div>`}</div>`; }
+function ribbon(y, title, sub) {
+  return `<svg class="ribbon" style="top:${y}px" viewBox="0 0 268 66"><defs><linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD866"/><stop offset="1" stop-color="#F0B53A"/></linearGradient></defs>
+    <path d="M0 14 H30 V56 H0 L10 35Z" fill="#D9962A"/><path d="M268 14 H238 V56 H268 L258 35Z" fill="#D9962A"/><path d="M22 52 L30 56 V48Z" fill="#9C6516"/><path d="M246 52 L238 56 V48Z" fill="#9C6516"/>
+    <rect x="22" y="4" width="224" height="48" rx="10" fill="url(#rb)" stroke="#B9801E" stroke-width="1.5"/>
+    <text x="134" y="22" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="11.5" letter-spacing="1.8" fill="#FFF7E0">${title}</text>
+    <text x="134" y="43" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="19" fill="#5A3A0E">${sub}</text></svg>`;
+}
+function sparkles(list) { return list.map(([x, y, k, c]) => `<svg class="abs" style="left:${x - k}px;top:${y - k}px;z-index:31" width="${2 * k}" height="${2 * k}" viewBox="-1 -1 2 2"><path d="M0 -1 Q .16 -.16 1 0 Q .16 .16 0 1 Q -.16 .16 -1 0 Q -.16 -.16 0 -1Z" fill="${c || '#FFF6C2'}"/></svg>`).join(''); }
+function signpost(x, y, s = 1, op = 1) { // the gold plaque that rises next to the trunk (bottom-centre at x, y)
+  return `<svg class="abs" style="left:${x - 26 * s}px;top:${y - 58 * s}px;opacity:${op};z-index:12" width="${52 * s}" height="${58 * s}" viewBox="0 0 52 58"><ellipse cx="26" cy="55" rx="14" ry="3" fill="rgba(80,50,20,.25)"/><rect x="23" y="26" width="6" height="30" rx="2" fill="#8A6A3B"/><rect x="3" y="3" width="46" height="30" rx="7" fill="#FFCF4D" stroke="#B9801E" stroke-width="2.4"/><rect x="7" y="6" width="38" height="6" rx="3" fill="#FFF3C4" opacity=".6"/><path d="M26 9 L28.9 15 L35.4 15.7 L30.6 20.1 L31.9 26.5 L26 23.3 L20.1 26.5 L21.4 20.1 L16.6 15.7 L23.1 15Z" fill="#FFF7E0" stroke="#D99A1E" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+}
+function topbar320() { return ''; }
+
+// ============ Frames ============
+const F = [];
+const add = (id, title, text, html, opts = {}) => F.push({ id, title, text, html, opts });
+
+// 01 normal
+add('01', 'Плашка «обычная» — день', 'Положение по умолчанию на высоких экранах. Три кнопки снизу ушли в меню, плашка стала ниже на ~50 px — сцене больше места. Строка статуса со значком капли, карточка «сегодня» с синей рамкой и каплей (ждёт полива).',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' } }) + sheet({ top: NORMAL })));
+
+// 02 peek
+add('02', 'Плашка «свёрнута»', 'Свайп вниз или тап по ручке. Видны только статус и прогноз. Сцена не перестраивается: под деревом просто открывается больше луга. На маленьких экранах (высота меньше 700) — положение по умолчанию.',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' }, ext: 540 }) + sheet({ top: PEEK, np: 0 })));
+
+// 03 mid gesture
+const MID = 380, midP = (NORMAL - MID) / (NORMAL - MENU);
+add('03', 'Середина жеста', `Плашка идёт за пальцем 1:1. Чем выше, тем темнее сцена (затемнение ${Math.round(midP * 34)} % из 34 %), меню проявляется с 30 % пути и подъезжает на 12 px. Ручка начинает сгибаться в «галочку вниз».`,
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' } }) + `<div class="scrim" style="opacity:${midP}"></div>` + sheet({ top: MID, mp: Math.max(0, (midP - .3) / .7), hp: midP }) + `<div class="trail" style="left:181px;top:${MID + 2}px;height:150px"></div><div class="finger" style="left:164px;top:${MID - 6}px"></div>`));
+
+// 04 menu
+add('04', 'Плашка «поднята» — меню', 'Сверху остаются статус и дни (как в макете владельца), ниже — меню. Три рабочих раздела — объёмные карточки с «губой»; будущие — утопленные плитки с пометкой «скоро». Сцена затемнена; тап по ней или свайп вниз закрывает меню. Ручка — галочка вниз.',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' } }) + `<div class="scrim"></div>` + sheet({ top: MENU, mp: 1 })));
+
+// 05 soon tap
+add('05', 'Тап по «скоро»', 'Плитка чуть сжимается, над ней всплывает подсказка: что это будет и зачем. Живёт 3,2 с или до любого касания. Мягкая вибрация, без звука ошибки — это не ошибка, а анонс.',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' } }) + `<div class="scrim"></div>` + sheet({ top: MENU, mp: 1, pressFriends: true }) +
+    `<div class="callout" style="left:16px;top:488px;width:292px;--ax:83px">${glyph('friends', 36)}<div><h4>Друзья — скоро</h4><p>Друзья увидят твои серии, а ты — их. Скрытые деревья останутся скрытыми.</p></div></div><div class="finger" style="left:60px;top:610px;opacity:.7"></div>`));
+
+// 06 hint
+add('06', 'Подсказка при первом запуске', 'Если человек ни разу не открывал меню: через 1,2 с плашка дважды «подпрыгивает» на 24 px, над ручкой — тёмная подсказка. Показывается в первых двух запусках, пока меню не открыли.',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' } }) + sheet({ top: NORMAL - 24 }) +
+    `<div class="abs" style="z-index:40;left:50%;transform:translateX(-50%);top:${NORMAL - 24 - 50}px;background:#1E1B16;color:#fff;border-radius:14px;padding:8px 14px;font-size:14px;font-weight:800;display:flex;gap:6px;align-items:center;white-space:nowrap;box-shadow:var(--e2)">${icon('chevronUp', 16, '#fff', 2.6)}Потяни вверх — там меню<div style="position:absolute;bottom:-6px;left:50%;margin-left:-7px;width:14px;height:14px;background:#1E1B16;transform:rotate(45deg);border-radius:2px"></div></div>`));
+
+// 07 confirm
+add('07', 'Закрепление · 1. Подтверждение', 'Своё окно вместо системного: дерево на карточке, понятный текст, золотая основная кнопка (это праздник, а не удаление). Отмена — текстовой кнопкой.',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое' } }) + sheet({ top: NORMAL }) + `<div class="scrim" style="z-index:25;background:rgba(36,24,8,.5)"></div>
+  <div class="abs" style="z-index:30;left:24px;right:24px;top:196px;background:var(--card);border-radius:28px;box-shadow:var(--e3);padding:24px 20px 12px;text-align:center">
+    <div style="width:132px;height:120px;margin:0 auto;border-radius:24px;background:linear-gradient(#BDEAF6,#E8F8FB 70%,#EED8A0 70%);position:relative;overflow:hidden"><img src="img/oak-bush.png" style="position:absolute;left:28px;bottom:6px;height:118px">${'<div style="position:absolute;right:8px;bottom:6px">' + glyph('plaque', 34) + '</div>'}</div>
+    <div style="font-weight:900;font-size:22px;line-height:28px;margin-top:16px">Закрепить «Не есть сладкое» навсегда?</div>
+    <div style="font-size:15px;line-height:21px;color:var(--soft);margin-top:8px">Дерево уйдёт в твой лес таким, какое оно сейчас — 20 дней роста. Поливать его больше будет нельзя. Отменить нельзя.</div>
+    <div class="btn L gold" style="margin-top:20px">${glyph('plaque', 22)}Закрепить навсегда</div>
+    <div class="btn M txt" style="margin-top:6px">Отмена</div>
+  </div>`));
+
+// 08 plaque + ribbon
+add('08', 'Закрепление · 2. Табличка и лента', '0–2,0 с. Плашка уходит вниз, чтобы дерево было видно целиком. Из земли пружиной вырастает золотая табличка, вокруг — золотые блёстки, под шапкой — лента «Результат закреплён». Вибрация «успех».',
+  phone(scene({ bg: 'day', patch: { n: 20, name: 'Не есть сладкое', op: .35 }, ext: 540 }) +
+    `<div class="abs" style="left:57px;top:290px;width:260px;height:260px;border-radius:50%;background:radial-gradient(rgba(255,231,160,.55),rgba(255,231,160,0) 70%);z-index:11"></div>` +
+    signpost(248, 532) + sparkles([[120, 360, 7], [262, 420, 6], [300, 470, 9, '#FFE27A'], [96, 450, 5, '#FFE27A'], [210, 330, 6], [160, 300, 4]]) +
+    ribbon(220, 'РЕЗУЛЬТАТ ЗАКРЕПЛЁН', '20 дней роста') + sheet({ top: PEEK, np: 0, status: 'locking' })));
+
+// 09 medal
+add('09', 'Закрепление · 3. Дерево сворачивается в медаль', '2,0–2,3 с. Дерево с табличкой сжимается и светлеет, за ним из точки растёт золотая медаль с маленьким деревом внутри. Это то, что «улетит в лес».',
+  phone(scene({ bg: 'empty', patch: { n: 20, name: 'Не есть сладкое', op: .35 }, ext: 470 }) +
+    `<img src="img/oak-bush.png" class="abs" style="left:147px;top:330px;height:120px;opacity:.35;filter:brightness(1.8) saturate(.6);z-index:12">` +
+    `<div class="medal" style="width:84px;height:84px;left:145px;top:356px"><img src="img/oak-bush.png" style="height:62px;margin-top:6px"></div>` +
+    sparkles([[120, 330, 7], [262, 380, 6], [250, 450, 8, '#FFE27A'], [110, 440, 6, '#FFE27A'], [200, 320, 5]]) + sheet({ top: PEEK, np: 0, status: 'locking' })));
+
+// 10 flight
+const FL = 400, flP = (NORMAL - FL) / (NORMAL - MENU);
+add('10', 'Закрепление · 4. Полёт в «Мой лес»', '2,3–2,95 с. Плашка сама поднимается в меню; медаль летит по дуге к карточке «Мой лес» и уменьшается. Камера на лугу тем временем тихо переезжает к соседней привычке (шапка «Бег»). Звук «вжух».',
+  phone(scene({ bg: 'empty', patch: { n: 10, name: 'Бег', op: .9 }, ext: 470 }) + `<div class="scrim" style="opacity:${flP}"></div>` + sheet({ top: FL, mp: Math.max(0, (flP - .3) / .7), hp: flP }) +
+    `<svg class="abs" style="left:0;top:0;z-index:44" width="375" height="812"><path d="M187 398 Q 120 250 ${70} ${FL + 290}" stroke="#FFE27A" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round" fill="none" opacity=".9"/></svg>` +
+    `<div class="medal" style="width:56px;height:56px;left:110px;top:300px"><img src="img/oak-bush.png" style="height:42px;margin-top:4px"></div>` + sparkles([[170, 360, 5, '#FFE27A'], [150, 330, 4]])));
+
+// 11 landing
+add('11', 'Закрепление · 5. Приземление', '2,95–3,6 с. Медаль ныряет в карточку «Мой лес»: значок подпрыгивает, карточка светится золотом, «+1», подпись «4 дерева». Остаёмся в меню. Тап по «Мой лес» открывает лес и подсвечивает это дерево.',
+  phone(scene({ bg: 'day', patch: { n: 10, name: 'Бег' } }) + `<div class="scrim"></div>` + sheet({ top: MENU, mp: 1, glowForest: true, forestN: '4 дерева' }) + sparkles([[30, 450, 6, '#FFE27A'], [120, 446, 5], [64, 560, 7, '#FFE27A'], [128, 520, 4]])));
+
+// 12 last habit
+add('12', 'Это была последняя привычка', 'Тот же полёт. После приземления позади меню — пустой луг с лункой, «Мой лес» с «+1». Наверху плашки вместо статуса — «Все деревья в лесу» и кнопка «Посадить дерево». Закрыть меню — останется это приглашение и большая лунка (кадр 22).',
+  phone(scene({ bg: 'empty' }) + `<div class="scrim"></div>` + sheet({ top: 812 - (8 + 20 + 150 + 8 + 340 + 34), mp: 1, glowForest: true, forestN: '4 дерева', status: 'allDone' }), {}));
+
+// 13 night thirsty
+add('13', 'Ночь — неполитое дерево светлее', 'Было мрачно: ночная матрица + жажда давали серо-бурое дерево. Теперь у неполитого ночью «лунное пятно» (мягкий свет на дереве и земле), жажда ночью мягче, у пузыря-капли — светящийся ореол.',
+  phone(scene({ bg: 'night', patch: { n: 11, name: 'Не курить', gen: 'Поколение 2 из 2' } }) +
+    `<div class="abs" style="left:40px;top:320px;width:300px;height:250px;border-radius:50%;background:radial-gradient(rgba(201,199,255,.22),rgba(201,199,255,0) 70%);z-index:3"></div>` +
+    `<img class="bgimg" src="img/night.png" style="top:${TOP}px;z-index:4;filter:brightness(1.3) saturate(1.25);-webkit-mask-image:radial-gradient(ellipse 90px 120px at 182px 400px,#000 55%,transparent 100%)">` +
+    `<div class="abs" style="left:203px;top:330px;width:62px;height:62px;border-radius:50%;background:radial-gradient(rgba(201,199,255,.55),rgba(201,199,255,0) 70%);z-index:5"></div>` +
+    sheet({ top: NORMAL, x0: -2 }), { night: true, lightHome: true }));
+
+// 14 night menu
+add('14', 'Ночь — меню', 'Те же формы, ночные токены: плашка #43427A, карточки #6467B3, утопленные плитки #383769, затемнение глубже (50 %).',
+  phone(scene({ bg: 'nightDone', patch: { n: 10, name: 'Бег' } }) + `<div class="scrim"></div>` + sheet({ top: MENU, mp: 1, status: 'done', today: 'todayDone' }), { night: true, lightHome: true }));
+
+// 15 night done (strip fix)
+add('15', 'Полито — «сегодня» больше не теряется', 'Хвост волны 1: после полива карточка «сегодня» теряла рамку и подпись. Теперь рамка и подпись держатся по дате, а не по статусу: до полива — синяя рамка и капля, после — зелёная рамка и росток.',
+  phone(scene({ bg: 'nightDone', patch: { n: 10, name: 'Бег' } }) + sheet({ top: NORMAL, status: 'done', today: 'todayDone' }), { night: true, lightHome: true }));
+
+// 16 / 17: 320×568
+function scene320(withMenu) {
+  const peek = 568 - 92, feet = peek - 38;
+  let s = `<img src="img/empty.png" class="abs" style="left:0;top:0;width:320px">` +
+    `<div class="abs" style="left:56px;width:208px;top:40px;height:80px;background:linear-gradient(#9fe9f9,#a6eaf9);-webkit-mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 16px),transparent)"></div>` +
+    `<div class="abs" style="left:0;right:0;top:392px;bottom:0;background:linear-gradient(#dde198,#ECD39A 50%,#E8C68A);-webkit-mask-image:linear-gradient(transparent,#000 22px)"></div>` +
+    `<div class="hdr" style="top:44px"><div class="cnt">${glyph('rings', 34)}<span class="num" style="font-size:40px;line-height:46px">49</span></div><div class="hname" style="font-size:16px">Читать книгу каждый вечер</div></div>` +
+    `<img src="img/sakura-young.png" class="abs" style="left:250px;top:${352 - 70}px;height:74px;opacity:.95">` +
+    `<img src="img/oak-tree.png" class="abs" style="left:66px;top:${feet - 232}px;height:236px;filter:saturate(.6) sepia(.12)">` +
+    `<div class="abs" style="left:206px;top:${feet - 222}px;width:34px;height:34px;border-radius:17px;background:#fff;box-shadow:0 6px 14px rgba(30,70,100,.22);display:flex;align-items:center;justify-content:center">${glyph('drop', 20)}</div>`;
+  s = `<div class="abs" style="inset:0;overflow:hidden">${s}</div>`;
+  return s;
+}
+add('16', '320×568 — по умолчанию «свёрнута»', 'На маленьких экранах сцена считается от свёрнутой плашки: дерево вдвое крупнее, чем в v0.6, и не прячется. Дни и меню — свайпом вверх.',
+  phone(scene320() + sheet({ top: 568 - 92, np: 0, status: 'thirsty320', w: 320 }), { cls: 's320', noBar: true, noHome: true }), { w: 320 });
+add('17', '320×568 — меню', 'Плашка поднимается до 56 px от верха; что не влезло, прокручивается внутри (низ уходит под мягкую тень). Плитки «скоро» — те же, подписи короче.',
+  phone(scene320() + `<div class="scrim"></div>` + sheet({ top: 56, mp: 1, status: 'thirsty320', w: 320, x0: -30 }) + `<div class="abs" style="left:0;right:0;bottom:0;height:28px;z-index:25;background:linear-gradient(rgba(255,227,190,0),var(--sheet))"></div>`, { cls: 's320', noBar: true, noHome: true }), { w: 320 });
+
+// 18 forest
+function fcard(img, name, glyphName, line, opt = {}) {
+  return `<div class="fcard" style="${opt.glow ? 'box-shadow:0 0 0 3px #FFCF4D,0 0 18px 2px rgba(255,207,77,.6);' : ''}${opt.dim ? 'opacity:.9' : ''}"><div class="fsky">${opt.ground !== false ? '<div style="position:absolute;left:0;right:0;bottom:0;height:22px;background:linear-gradient(#EED8A0,#E8C68A)"></div>' : ''}<img src="img/${img}" style="position:absolute;left:50%;transform:translateX(-50%);bottom:8px;height:${opt.h || 96}px">${opt.plaque ? `<div style="position:absolute;right:16px;bottom:8px">${glyph('plaque', 30)}</div>` : ''}</div><div class="more">${icon('more', 18, '#6E6152')}</div><b>${name}</b><div class="fs">${glyph(glyphName, 16)}${line}</div>${opt.badge ? `<span class="soon" style="top:12px;left:12px;right:auto;background:#FFCF4D;color:#5A3A0E">новое</span>` : ''}</div>`;
+}
+add('18', 'Мой лес — в новой системе', 'Пейзаж в карточке, три счётчика-фишки, деревья разделены: «Растут», «Закреплены», «Память». Пришли из закрепления — карточка этого дерева подсвечена золотом и экран сам к ней прокрутился. Удаление — в меню «⋯» на карточке, а не крестиком.',
+  phone(`<div class="phdr"><div class="back">${icon('chevronLeft', 22, 'var(--text)', 2.6)}</div><h2>Мой лес</h2></div>
+  <div class="body">
+    <div style="height:150px;border-radius:24px;overflow:hidden;position:relative;box-shadow:var(--e1);background:url(img/forest-day.jpg) center 60%/cover">
+      <img src="img/oak-bush.png" style="position:absolute;left:150px;bottom:30px;height:66px"><img src="img/sakura-tree.png" style="position:absolute;left:58px;bottom:22px;height:92px"><img src="img/spruce-young.png" style="position:absolute;left:250px;bottom:34px;height:46px"><div style="position:absolute;left:96px;bottom:22px">${glyph('plaque', 22)}</div><div style="position:absolute;left:186px;bottom:30px">${glyph('plaque', 18)}</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px;justify-content:center"><span class="pill">${glyph('rings', 18)}59 дней</span><span class="pill">${glyph('sprout', 18)}2 растут</span><span class="pill">${glyph('plaque', 18)}2 в лесу</span></div>
+    <div class="sec-t">Закреплены</div>
+    <div style="display:flex;gap:12px">${fcard('oak-bush.png', 'Не есть сладкое', 'plaque', '20 дней · закреплено', { glow: true, plaque: true, badge: true, h: 92 })}${fcard('sakura-tree.png', 'Сакура', 'plaque', '30 дней · закреплено', { plaque: true, h: 100 })}</div>
+    <div class="sec-t">Растут</div>
+    <div style="display:flex;gap:12px">${fcard('spruce-young.png', 'Не курить', 'rings', '11 дней', { h: 84 })}${fcard('sakura-young.png', 'Бег', 'rings', '10 дней', { h: 90 })}</div>
+  </div>`));
+
+// 19 new habit
+function skinTile(img, name, on, h) { return `<div style="flex:1;border-radius:20px;background:var(--card);box-shadow:${on ? '0 0 0 3px var(--accent),' : ''}var(--e1);padding:6px;position:relative;text-align:center"><div style="height:86px;border-radius:14px;background:var(--skyCard);position:relative;overflow:hidden"><div style="position:absolute;left:0;right:0;bottom:0;height:14px;background:#EED8A0"></div><img src="img/${img}" style="position:absolute;left:50%;transform:translateX(-50%);bottom:5px;height:${h}px"></div><div style="font-weight:800;font-size:15px;margin-top:6px">${name}</div>${on ? `<div style="position:absolute;top:-7px;right:-7px">${glyph('check', 24)}</div>` : ''}</div>`; }
+add('19', 'Новая привычка — в новой системе', 'Переключатели с «ползунком» (белая плашка переезжает), значки вместо эмодзи (замок, люди), поле с зелёной рамкой при вводе, карточки видов с галочкой. Кнопка «Посадить» прилипла к низу, над ней мягкий переход.',
+  phone(`<div class="phdr"><div class="back">${icon('chevronLeft', 22, 'var(--text)', 2.6)}</div><h2>Новая привычка</h2></div>
+  <div class="body" style="padding-top:4px">
+    <div class="sec-t">Что делаем</div>
+    <div class="seg"><div class="on">${icon('noSign', 18, 'var(--dangerText)', 2.4)}Бросаю</div><div>${icon('checkCircle', 18, 'currentColor', 2.4)}Делаю</div></div>
+    <div class="hint">Нажимай на дерево в дни, когда удержался</div>
+    <div class="sec-t">Привычка</div>
+    <div class="input focus">Не есть сладкое<span style="width:2px;height:22px;background:var(--accent);margin-left:2px;border-radius:1px"></span></div>
+    <div class="chips"><span class="chip">Не курю</span><span class="chip">Без алкоголя</span><span class="chip">Меньше соцсетей</span></div>
+    <div class="sec-t">Дерево</div>
+    <div style="display:flex;gap:10px">${skinTile('oak-tree.png', 'Дуб', true, 70)}${skinTile('sakura-tree.png', 'Сакура', false, 72)}${skinTile('spruce-tree.png', 'Ёлка', false, 70)}</div>
+    <div class="sec-t">Кто видит</div>
+    <div class="seg"><div class="on">${icon('lock', 18)}Только я</div><div>${icon('people', 18)}Мои друзья</div></div>
+  </div>
+  <div class="abs" style="left:0;right:0;bottom:0;height:130px;background:linear-gradient(rgba(255,240,218,0),var(--page) 30%);padding:34px 16px 0;z-index:12"><div class="btn L pri">${glyph('seed', 22)}Посадить дерево</div></div>`));
+
+// 20 settings
+function trow(ic, bg, label, right) { return `<div class="row"><div class="ic" style="background:${bg}">${icon(ic, 20, '#fff', 2.3)}</div><div class="lb">${label}</div>${right}</div>`; }
+add('20', 'Настройки — в новой системе', 'Группы-карточки, у каждой строки цветной квадратик со значком, свои переключатели. Новое: «Звуки». Удаление данных — красной строкой в отдельной группе. Внизу номер версии.',
+  phone(`<div class="phdr"><div class="back">${icon('chevronLeft', 22, 'var(--text)', 2.6)}</div><h2>Настройки</h2></div>
+  <div class="body" style="padding-top:0">
+    <div class="gcap">Вид</div>
+    <div class="group"><div class="row" style="flex-wrap:wrap;padding-top:12px;padding-bottom:12px"><div class="ic" style="background:#F4B740">${icon('sun', 20, '#fff', 2.3)}</div><div class="lb">Тема</div><div class="seg" style="width:100%;margin-top:4px;height:44px"><div class="on">${icon('auto', 16)}Авто</div><div>${icon('sun', 16)}Светлая</div><div>${icon('moon', 16)}Тёмная</div></div></div>
+      ${trow('sparkles', '#B07CF0', 'Анимации', '<div class="tog on"><i></i></div>')}</div>
+    <div class="gcap">Отклик</div>
+    <div class="group">${trow('speaker', '#FF7A8A', 'Звуки', '<div class="tog on"><i></i></div>')}${trow('vibrate', '#4FB6E8', 'Вибрация', '<div class="tog on"><i></i></div>')}</div>
+    <div class="gcap">Язык</div>
+    <div class="group"><div class="row" style="flex-wrap:wrap;padding-top:12px;padding-bottom:12px"><div class="ic" style="background:#4CC764">${icon('globe', 20, '#fff', 2.3)}</div><div class="lb">Язык</div><div class="seg" style="width:100%;margin-top:4px;height:44px"><div class="on">Авто</div><div>Русский</div><div>English</div></div></div></div>
+    <div class="group" style="margin-top:20px">${trow('trash', '#D24A43', '<span style="color:var(--dangerText)">Удалить все данные</span>', '')}</div>
+    <div style="text-align:center;font-size:12px;color:var(--soft);margin-top:18px">Elevate 0.7</div>
+  </div>`));
+
+// 21 habit view
+add('21', 'Просмотр закреплённого дерева', 'Та же сцена, круглая кнопка «назад», фишка «Только просмотр» с глазом, в шапке — золотая табличка вместо 🏆. Плашка неподвижная (без меню): итог, факты фишками, вся история дней, кнопка «Вернуться в лес».',
+  phone(scene({ bg: 'locked', patch: 'blank' }) +
+    `<div class="abs" style="left:0;right:0;top:0;height:${TOP + 112}px;background:linear-gradient(#bcf0fd,#c2f2fc)"></div>` +
+    `<div class="abs" style="left:16px;top:${TOP + 6}px;width:44px;height:44px;border-radius:22px;background:var(--card);box-shadow:var(--e1);display:flex;align-items:center;justify-content:center;z-index:6">${icon('chevronLeft', 22, 'var(--text)', 2.6)}</div>` +
+    `<div class="abs" style="left:50%;transform:translateX(-50%);top:${TOP + 12}px;z-index:6"><span class="pill">${icon('eye', 16, 'var(--soft)')}Только просмотр</span></div>` +
+    header({ top: TOP + 58, n: 30, name: 'Сакура', glyph: 'plaque' }) +
+    `<div class="sheet" style="top:520px">${handle(0)}<div style="text-align:center;padding:2px 16px 0"><div style="display:flex;justify-content:center;gap:7px;align-items:center;font-weight:900;font-size:18px">${glyph('plaque', 22)}Результат закреплён</div><div style="display:flex;gap:6px;justify-content:center;margin-top:8px;flex-wrap:wrap"><span class="pill" style="height:28px;font-size:12.5px">посажено 28 сен</span><span class="pill" style="height:28px;font-size:12.5px">закреплено 27 окт</span><span class="pill" style="height:28px;font-size:12.5px">${glyph('snowflake', 14)}0</span></div></div>
+    <div class="strip">${[['пт', 23, 'done'], ['сб', 24, 'done'], ['вс', 25, 'done'], ['пн', 26, 'done'], ['вт', 27, 'locked']].map((c, i) => dayCard(-2 + i * 74, c[0], c[1], c[2])).join('')}</div>
+    <div style="padding:6px 16px 0"><div class="btn M sec">${glyph('forest', 22)}Вернуться в лес</div></div></div>`));
+
+// 22 empty
+add('22', 'Пусто — большая лунка', 'Хвост волны 1: лунка стала по размеру сцены (Ø = 42 % ширины экрана, 158 px на 375), семечко крупнее, пунктирное кольцо и свечение под стать. Плашка — приглашение с основной кнопкой.',
+  phone(scene({ bg: 'empty', patch: 'blank', ext: 500 }) + header({ top: 100, n: '', name: '', glyph: 'sparkle' }).replace(/<div class="cnt">.*?<\/div>/, '<div style="font-weight:900;font-size:40px;line-height:46px">Elevate</div>').replace('<div class="hname"></div>', '<div class="hname" style="color:var(--soft);font-size:16px">Вырасти свой лес привычек</div>') +
+    `<svg class="abs" style="left:0;top:0;z-index:6" width="375" height="812"><defs><radialGradient id="hole"><stop offset="0" stop-color="#C99A60"/><stop offset=".75" stop-color="#D9B077"/><stop offset="1" stop-color="#D9B077" stop-opacity="0"/></radialGradient><radialGradient id="gl"><stop offset="0" stop-color="#FFE9A8" stop-opacity=".55"/><stop offset="1" stop-color="#FFE9A8" stop-opacity="0"/></radialGradient></defs>
+      <circle cx="187" cy="524" r="44" fill="url(#gl)"/><ellipse cx="187" cy="540" rx="79" ry="21" fill="url(#hole)"/><ellipse cx="187" cy="540" rx="34" ry="9" fill="#9A6B43" opacity=".55"/>
+      <ellipse cx="187" cy="540" rx="101" ry="27" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="6 9" opacity=".85"/>
+      <g transform="translate(187 535) rotate(-20) scale(1.6)"><ellipse cx="0" cy="0" rx="8" ry="5" fill="#8A5A30"/><ellipse cx="-2" cy="-1.5" rx="3.5" ry="1.8" fill="#C08A55" opacity=".8"/><path d="M6 -1 Q 9 -6 13 -7" stroke="#7DB24A" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>
+      <path transform="translate(220 500) scale(7)" d="M0 -1 Q .16 -.16 1 0 Q .16 .16 0 1 Q -.16 .16 -1 0 Q -.16 -.16 0 -1Z" fill="#FFF6C2"/></svg>` +
+    sheet({ top: 812 - 230, status: 'empty' })));
+
+// 23 icon sheet
+const glyphNames = ['rings', 'drop', 'check', 'sprout', 'stageUp', 'snowflake', 'tombstone', 'plaque', 'seed', 'heart', 'heartEmpty', 'coin', 'sparkle', 'forest', 'newHabit', 'settings', 'friends', 'leaders', 'tasks', 'profile', 'shop'];
+const iconNames = Object.keys(I);
+add('23', 'Лист значков', 'Две семьи. Цветные «глифы» (смысл: полив, рост, стадия, табличка, разделы меню) — в стиле годичных колец: заливка + тёмная обводка того же цвета 1,2–1,4 + белый блик. Одноцветные «иконки» (управление) — линия 2,2, круглые концы, цвет из темы. Пути — в этом файле, объекты G и I.',
+  phone(`<div class="abs" style="inset:0;padding:${TOP + 8}px 16px 16px">
+    <div style="font-weight:900;font-size:20px">Глифы <span style="font-size:13px;color:var(--soft)">36 · 20</span></div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:8px">${glyphNames.map(n => `<div style="background:var(--card);border-radius:14px;box-shadow:var(--e1);padding:7px 2px 5px;text-align:center"><div style="display:flex;justify-content:center;align-items:flex-end;gap:6px;height:36px">${glyph(n, 36)}${glyph(n, 20)}</div><div class="lbl">${n}</div></div>`).join('')}</div>
+    <div style="font-weight:900;font-size:20px;margin-top:14px">Иконки <span style="font-size:13px;color:var(--soft)">24, линия 2,2</span></div>
+    <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin-top:8px">${iconNames.map(n => `<div style="text-align:center"><div style="height:38px;border-radius:12px;background:var(--card);box-shadow:var(--e1);display:flex;align-items:center;justify-content:center">${icon(n, 22, '#1E1B16')}</div><div class="lbl" style="font-size:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${n}</div></div>`).join('')}</div>
+    <div style="display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px;margin-top:10px;background:#43427A;border-radius:14px;padding:8px">${iconNames.map(n => `<div style="display:flex;justify-content:center">${icon(n, 20, '#fff')}</div>`).join('')}</div>
+  </div>`, { noHome: true }));
+
+// 24 components
+add('24', 'Кнопки, переключатели, карточки дней', 'Объёмные кнопки с «губой» 4 px: при нажатии опускаются на 3 px за 60 мс. Размеры L 56 / M 48 / S 36. Переключатель, сегменты с ползунком, все состояния карточки дня (новые значки).',
+  phone(`<div class="abs" style="inset:0;padding:${TOP + 8}px 16px 16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 10px">
+      <div class="btn L pri">Основная</div><div class="btn L pri pressed">Нажата</div>
+      <div class="btn M sec">Вторичная</div><div class="btn M gold">${glyph('plaque', 20)}Золотая</div>
+      <div class="btn M dan">Опасная</div><div class="btn M dis">Недоступна</div>
+      <div class="btn S sec" style="justify-self:start">Маленькая S</div><div class="btn M txt">Текстовая</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;margin-top:16px"><div class="tog on"><i></i></div><div class="tog"><i></i></div><div class="seg" style="flex:1;height:40px"><div class="on">Светлая</div><div>Тёмная</div></div></div>
+    <div style="font-weight:900;font-size:16px;margin-top:16px">Карточки дня</div>
+    <div style="position:relative;height:200px;margin-top:4px">
+      ${[['вс', 25, 'done'], ['сегодня', 26, 'todayThirsty'], ['сегодня', 27, 'todayDone'], ['ср', 28, 'stage']].map((c, i) => dayCard(i * 74 + 22, c[0], c[1], c[2])).join('')}
+      <div style="position:absolute;top:96px;left:0;right:0;height:100px">${[['пн', 26, 'frozen'], ['вт', 27, 'missed'], ['ср', 28, 'died'], ['чт', 29, 'locked']].map((c, i) => dayCard(i * 74 + 22, c[0], c[1], c[2])).join('')}</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:11px;color:var(--soft);margin-top:-6px">выросло · сегодня ждёт · сегодня полито · день стадии · заморожен · пропущен · погибло · закреплено</div>
+    <div style="font-weight:900;font-size:16px;margin-top:14px">Плитки меню</div>
+    <div class="wrow" style="margin-top:8px"><div class="wt"><div class="gc" style="background:var(--tint-forest)">${glyph('forest', 34)}</div><b>Обычная</b></div><div class="wt" style="transform:translateY(2px) scale(.97);box-shadow:0 1px 0 var(--cardLip)"><div class="gc" style="background:var(--tint-forest)">${glyph('forest', 34)}</div><b>Нажата</b></div><div class="st small" style="height:100px;padding-top:24px">${glyph('shop', 30)}<b>«Скоро»</b><span class="soon">скоро</span></div></div>
+  </div>`, { noHome: true }));
+
+// 25 tokens
+const sw = (c, n) => `<div><div class="swatch" style="background:${c}"></div><div class="lbl" style="font-size:9.5px;text-align:left">${n}<br>${c}</div></div>`;
+add('25', 'Токены: цвет, шрифт, отступы', 'Слева — день, справа — ночь. Шрифт один — Nunito (700/800/900), шкала из 10 ступеней. Отступы кратны 4, радиусы 8/12/16/20/28/32.',
+  phone(`<div class="abs" style="inset:0;padding:${TOP + 4}px 16px 16px;font-size:12px">
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+      ${sw('#FFF0DA', 'page')}${sw('#FFE3BE', 'sheet')}${sw('#FFFFFF', 'card')}${sw('#F7D5A6', 'sunken')}${sw('#1E1B16', 'text')}${sw('#6E6152', 'soft')}
+      ${sw('#2E2D63', 'page')}${sw('#43427A', 'sheet')}${sw('#6467B3', 'card')}${sw('#383769', 'sunken')}${sw('#FFFFFF', 'text')}${sw('#C9C8EE', 'soft')}
+      ${sw('#4CC764', 'accent')}${sw('#34A64D', 'accentLip')}${sw('#3FA2DE', 'water')}${sw('#FFCF4D', 'gold')}${sw('#D99A1E', 'goldLip')}${sw('#D24A43', 'danger')}
+    </div>
+    <div style="margin-top:12px;line-height:1.05">
+      <div style="font-weight:900;font-size:40px">Elevate <span style="font-size:11px;color:#6E6152">display 40/46 900</span></div>
+      <div style="font-weight:900;font-size:46px;display:flex;align-items:center;gap:6px">${glyph('rings', 36)}128 <span style="font-size:11px;color:#6E6152">counter 46/52 900</span></div>
+      <div style="font-weight:900;font-size:28px;margin-top:4px">Мой лес <span style="font-size:11px;color:#6E6152">title1 28/34 900</span></div>
+      <div style="font-weight:900;font-size:22px;margin-top:6px">Закрепить навсегда? <span style="font-size:11px;color:#6E6152">title2 22/28</span></div>
+      <div style="font-weight:800;font-size:18px;margin-top:6px">Дерево ждёт полива <span style="font-size:11px;color:#6E6152">title3 18/24 800</span></div>
+      <div style="font-weight:800;font-size:16px;margin-top:6px">Строка, кнопка M <span style="font-size:11px;color:#6E6152">bodyStrong 16/22 800</span></div>
+      <div style="font-weight:700;font-size:16px;margin-top:6px">Обычный текст абзаца <span style="font-size:11px;color:#6E6152">body 16/22 700</span></div>
+      <div style="font-weight:700;font-size:14px;margin-top:6px;color:#6E6152">Пояснение, прогноз — small 14/20 700</div>
+      <div style="font-weight:800;font-size:12px;margin-top:6px;color:#6E6152">Подпись, день недели — caption 12/16 800</div>
+      <div style="font-weight:900;font-size:10px;letter-spacing:.6px;margin-top:6px;color:#6E6152">СКОРО · НОВАЯ СТАДИЯ — MICRO 10/12 900</div>
+    </div>
+    <div style="font-weight:900;font-size:14px;margin-top:12px">Отступы</div>
+    <div style="display:flex;align-items:flex-end;gap:8px;margin-top:4px">${[4, 8, 12, 16, 20, 24, 32, 40, 48].map(v => `<div style="text-align:center"><div style="width:${v / 1.6}px;height:${v}px;background:#4CC764;border-radius:2px;margin:0 auto"></div><div class="lbl" style="font-size:9.5px">${v}</div></div>`).join('')}</div>
+    <div style="font-weight:900;font-size:14px;margin-top:10px">Радиусы и тени</div>
+    <div style="display:flex;gap:10px;margin-top:6px">${[[8, 'xs'], [12, 'sm'], [16, 'md'], [20, 'lg'], [28, 'xl']].map(([r, n], i) => `<div style="text-align:center"><div style="width:52px;height:44px;border-radius:${r}px;background:#fff;box-shadow:${['none', 'var(--e1)', 'var(--e1)', 'var(--e2)', 'var(--e3)'][i]}"></div><div class="lbl" style="font-size:9.5px">${n} ${r}</div></div>`).join('')}</div>
+  </div>`, { noHome: true }));
+
+// ============ Render ============
+const q = new URLSearchParams(location.search);
+const list = document.getElementById('list');
+if (q.get('f')) {
+  document.body.classList.add('single');
+  document.getElementById('intro').remove();
+  const f = F.find(x => x.id === q.get('f'));
+  list.style.padding = '0'; list.innerHTML = f.html;
+} else {
+  list.innerHTML = F.map(f => `<div class="cell ${f.opts.w === 320 ? 'w320' : ''}">${f.html}<div class="cap"><b>${f.id} · ${f.title}</b><span>${f.text}</span></div></div>`).join('');
+}
+window.FRAMES = F.map(f => ({ id: f.id, title: f.title, w: f.opts.w || 375, h: f.opts.w === 320 ? 568 : 812 }));
+</script>
+</body>
+</html>

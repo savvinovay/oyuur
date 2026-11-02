@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <!--
+      The page around the web version (OYUUR-17). The app is exported as one page
+      (web.output "single"), so Expo takes this file as the template; +html.tsx is
+      only read for static rendering. Icons and launch screens: scripts/web-icons.py.
+    -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- viewport-fit=cover: the app draws under the notch and the home bar and keeps clear of them with safe-area insets.
+         maximum-scale=1: iOS must not zoom into a text field when it gets focus. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <meta name="description" content="Oyuur — a tree for every habit. Grow your forest with friends." />
+
+    <!-- Add to Home Screen: opens full screen, like an app. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#9FE1F5" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Oyuur" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+
+    <!-- Launch screens, one per iPhone screen (portrait). -->
+    <link rel="apple-touch-startup-image" media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)" href="/icons/launch-320x568@2x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="/icons/launch-375x667@2x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-414x736@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-375x812@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2)" href="/icons/launch-414x896@2x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-414x896@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-390x844@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-428x926@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-393x852@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-430x932@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-402x874@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-420x912@3x.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3)" href="/icons/launch-440x956@3x.png" />
+
+    <!-- The `react-native-web` recommended style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+        /* An app, not a page: no rubber-band scrolling. */
+        overscroll-behavior: none;
+      }
+      body {
+        overflow: hidden;
+        /* The day sky, so nothing flashes white before the app draws. */
+        background-color: #c9f0fa;
+        /* No grey flash on tap, no long-press menu (text fields keep theirs, below). */
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-text-size-adjust: 100%;
+      }
+      input,
+      textarea {
+        -webkit-touch-callout: default;
+      }
+      /* From the Home Screen the clock and battery are always white (iOS reads the status bar
+         style once, at launch), so a soft shade under them keeps them readable on the day sky. */
+      @media (display-mode: standalone) {
+        body::after {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: calc(env(safe-area-inset-top) + 10px);
+          background: linear-gradient(rgba(16, 40, 64, 0.3), rgba(16, 40, 64, 0));
+          pointer-events: none;
+          z-index: 9999;
+        }
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+      /* The loading screen (OYUUR-35): the sky, the tree and the name while the app and the 8 MB
+         drawing engine load. The app fades it out once it has drawn its first screen (_layout.tsx). */
+      #boot {
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        background: linear-gradient(#9fe1f5, #c9f0fa 60%, #eafbff);
+        color: #1d4f5e;
+        font: 800 30px/1 ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+        letter-spacing: 0.5px;
+        transition: opacity 0.35s ease-out;
+        animation: boot-in 0.4s ease-out both;
+      }
+      .night #boot {
+        background: linear-gradient(#191e5e, #2b2f7a 60%, #5357a8);
+        color: #f2f3ff;
+      }
+      .night body {
+        background-color: #191e5e;
+      }
+      #boot img {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        box-shadow: 0 10px 28px rgba(16, 60, 80, 0.22);
+        animation: boot-breathe 1.8s ease-in-out infinite;
+      }
+      .night #boot img {
+        box-shadow: 0 10px 28px rgba(0, 0, 20, 0.45);
+      }
+      #boot p {
+        position: absolute;
+        bottom: calc(env(safe-area-inset-bottom) + 48px);
+        left: 24px;
+        right: 24px;
+        margin: 0;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.4;
+        text-align: center;
+        letter-spacing: 0;
+        opacity: 0.8;
+      }
+      #boot.failed img {
+        animation: none;
+      }
+      #boot.gone {
+        opacity: 0;
+        pointer-events: none;
+      }
+      @keyframes boot-in {
+        from {
+          opacity: 0;
+        }
+      }
+      @keyframes boot-breathe {
+        50% {
+          transform: scale(1.06);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #boot,
+        #boot img {
+          animation: none;
+          transition: none;
+        }
+      }
+    </style>
+    <!-- Night on the loading screen as in the app: the theme the person chose, or the clock (20:00–6:00). -->
+    <script>
+      (function () {
+        var theme = 'auto';
+        try {
+          theme = (JSON.parse(localStorage.getItem('elevate/v1') || '{}').settings || {}).theme || 'auto';
+        } catch (e) {}
+        var hour = new Date().getHours();
+        if (theme === 'dark' || (theme !== 'light' && (hour >= 20 || hour < 6))) {
+          document.documentElement.className += ' night';
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#191E5E');
+        }
+      })();
+    </script>
+  </head>
+
+  <body>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <div id="boot" role="status"><img src="/icons/icon-192.png" alt="" width="96" height="96" />Oyuur<p hidden></p></div>
+    <!-- On a very slow line say that it is still loading; if loading broke (index.web.ts), say so. -->
+    <script>
+      (function () {
+        var ru = /^ru/i.test(navigator.language || '');
+        window.oyuurBoot = function (failed) {
+          var boot = document.getElementById('boot');
+          if (!boot) return;
+          var note = boot.querySelector('p');
+          if (failed) boot.className += ' failed';
+          note.textContent = failed
+            ? ru ? 'Не удалось загрузить. Проверьте интернет и обновите страницу.' : 'Could not load. Check the internet and reload the page.'
+            : ru ? 'Ещё загружается… Если долго — проверьте интернет и обновите страницу.' : 'Still loading… If it takes long, check the internet and reload the page.';
+          note.hidden = false;
+        };
+        setTimeout(function () {
+          window.oyuurBoot(false);
+        }, 25000);
+      })();
+    </script>
+    <div id="root"></div>
+  </body>
+</html>

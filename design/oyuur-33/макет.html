@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Время полива — OYUUR-33</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens: the numbers of app/src/ui/ds/tokens.ts. Nothing new except --wait (see спец/ответ). ===== */
+.ph {
+  --page:#FFF0DA; --sheet:#FFE3BE; --card:#FFFFFF; --sunken:#F7D5A6;
+  --text:#1E1B16; --soft:#6E6152; --muted:#A08E78; --outline:#3A2E22; --divider:rgba(58,46,34,.12);
+  --accent:#4CC764; --accentLip:#34A64D; --accentSoft:#DDF5DF; --accentInk:#2E7D3E;
+  --water:#3FA2DE; --gold:#FFCF4D; --goldLip:#D99A1E; --goldInk:#5A3A0E; --goldSoft:#FFF4D6; --goldEdge:rgba(217,154,30,.45);
+  --sec:#F5D3A0; --secLip:#DDB47A; --tintQuests:#FFF0C2;
+  --scrim:rgba(36,24,8,.34);
+  --e1:0 2px 6px rgba(90,58,18,.14); --e2:0 6px 14px rgba(90,58,18,.16); --e3:0 14px 32px rgba(90,58,18,.24);
+  --sheetShadow:0 -6px 24px rgba(90,58,18,.12); --shine:rgba(255,255,255,.55);
+  --bubble:#FFFFFF; --toast:#1E1B16;
+  /* Waiting (new, = textMuted): the frame of today's card and the dot ring. */
+  --wait:#A08E78; --ring:rgba(30,27,22,.55);
+  --dotBg:#91E5F9;
+  --chipBg:#FFFFFF; --chipInk:#1E1B16; --actInk:#2E7D3E;
+  --tag:rgba(30,27,22,.07);
+  --mutedFace:#DDF5DF; --mutedLip:#B5E3BD; --mutedInk:#2E7D3E;
+}
+.ph.night {
+  --page:#2E2D63; --sheet:#43427A; --card:#6467B3; --sunken:#383769;
+  --text:#FFFFFF; --soft:#C9C8EE; --muted:#9C9BD0; --outline:#15142E; --divider:rgba(255,255,255,.12);
+  --accentSoft:#2E5E55; --accentInk:#FFFFFF; --goldSoft:#57538F; --goldEdge:rgba(255,207,77,.45);
+  --sec:#6467B3; --secLip:#4B4E96; --tintQuests:#5B5A9A;
+  --scrim:rgba(6,6,26,.5);
+  --e1:0 2px 6px rgba(5,4,26,.40); --e2:0 6px 14px rgba(5,4,26,.45); --e3:0 14px 32px rgba(5,4,26,.55);
+  --sheetShadow:0 -6px 24px rgba(5,4,26,.35); --shine:rgba(255,255,255,.10);
+  --bubble:#E9E8FF; --toast:#15142E;
+  --wait:#9C9BD0; --ring:rgba(255,255,255,.55);
+  --dotBg:#1A2065;
+  --chipBg:#43427A; --chipInk:#FFFFFF; --actInk:#8BE39B;
+  --tag:rgba(255,255,255,.16);
+  --mutedFace:#2E5E55; --mutedLip:#1F4540; --mutedInk:#8BE39B;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#EFE3CF; font-family:'Nunito',system-ui,sans-serif; font-weight:700; color:#1E1B16; }
+.intro { max-width:960px; margin:32px auto 8px; padding:0 16px; }
+.intro h1 { font-weight:900; font-size:30px; }
+.intro p { color:#6E6152; margin-top:6px; line-height:1.45; }
+.group { max-width:1700px; margin:28px auto 0; padding:0 16px; font-weight:900; font-size:20px; color:#5A3A0E; }
+.list { display:flex; flex-wrap:wrap; gap:36px 28px; justify-content:center; padding:20px 16px 40px; }
+.cell { width:375px; }
+.cap { margin-top:10px; }
+.cap b { font-weight:900; font-size:17px; display:block; }
+.cap span { color:#6E6152; font-size:13.5px; line-height:1.4; display:block; margin-top:3px; }
+.ph { position:relative; overflow:hidden; width:375px; height:812px; border-radius:40px; box-shadow:0 18px 40px rgba(60,40,10,.18),0 0 0 1px rgba(0,0,0,.06); background:var(--page); color:var(--text); }
+body.single { background:transparent; }
+body.single .ph { border-radius:0; box-shadow:none; }
+.abs { position:absolute; }
+.slice { position:absolute; left:0; width:375px; background-size:375px auto; background-repeat:no-repeat; }
+.scrim { position:absolute; inset:0; background:var(--scrim); }
+.note { position:absolute; z-index:60; background:#5A3A0E; color:#FFF3C4; font-weight:800; font-size:11px; line-height:14px; padding:3px 7px; border-radius:6px; white-space:nowrap; }
+svg { display:block; flex:none; }
+
+/* ===== Text styles (type in tokens.ts) ===== */
+.t-title2 { font-weight:900; font-size:22px; line-height:28px; }
+.t-title3 { font-weight:900; font-size:18px; line-height:24px; }
+.t-bodyStrong { font-weight:800; font-size:16px; line-height:22px; }
+.t-body { font-weight:700; font-size:16px; line-height:22px; }
+.t-small { font-weight:700; font-size:14px; line-height:20px; }
+.t-caption { font-weight:800; font-size:12px; line-height:16px; }
+.soft { color:var(--soft); } .muted { color:var(--muted); }
+
+/* ===== Status lines of the home sheet (SheetStatus) ===== */
+.status { position:absolute; left:0; right:0; top:621px; display:flex; flex-direction:column; align-items:center; gap:2px; }
+.srow { display:flex; align-items:center; gap:8px; white-space:nowrap; }
+.statusCover { position:absolute; left:12px; right:12px; top:604px; height:66px; background:var(--sheet); }
+
+/* ===== Day card (DayStrip) ===== */
+.day { position:absolute; width:64px; height:80px; border-radius:16px; background:var(--card); box-shadow:var(--e1); display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:2px; }
+.day .lbl { font-weight:800; font-size:13px; line-height:16px; }
+.day .num { font-weight:900; font-size:22px; line-height:26px; }
+.day .mk { height:20px; display:flex; align-items:center; gap:3px; }
+.day .mk span { font-weight:800; font-size:11px; line-height:14px; color:var(--soft); font-variant-numeric:tabular-nums; }
+
+/* ===== Pills over the crown (AlreadyChip) ===== */
+.chip { position:absolute; left:50%; transform:translateX(-50%); background:var(--chipBg); color:var(--chipInk); border-radius:16px; padding:6px 12px 6px 8px; display:flex; align-items:center; gap:6px; font-weight:800; font-size:13px; line-height:18px; white-space:nowrap; box-shadow:0 4px 10px rgba(30,40,60,.18); z-index:6; }
+.chip.two { flex-direction:column; align-items:flex-start; gap:2px; border-radius:18px; padding:8px 14px 8px 10px; }
+.chip.act { padding:0 4px 0 10px; height:36px; border-radius:18px; gap:6px; }
+.chip .act { margin-left:6px; height:28px; padding:0 10px; border-radius:14px; display:flex; align-items:center; font-weight:900; font-size:13px; color:var(--actInk); }
+.night .chip { border:1.5px solid var(--outline); }
+
+/* ===== Sheets ===== */
+.sheet { position:absolute; left:0; right:0; bottom:0; background:var(--sheet); border:1.5px solid var(--outline); border-bottom:0; border-radius:32px 32px 0 0; box-shadow:var(--sheetShadow); padding:8px 16px 20px; z-index:20; }
+.sheet::before { content:''; position:absolute; top:1px; left:32px; right:32px; height:1px; background:var(--shine); }
+.grab { height:20px; display:flex; align-items:center; justify-content:center; }
+.grab i { width:19px; height:5px; border-radius:3px; background:var(--card); }
+.grab i + i { margin-left:-2px; }
+.shead { display:flex; align-items:center; gap:12px; margin-top:4px; }
+.thumb { width:48px; height:48px; border-radius:12px; overflow:hidden; flex:none; }
+.thumb img { width:100%; height:100%; display:block; transform:scale(1.04); }
+.card { background:var(--card); border-radius:20px; box-shadow:var(--e1); overflow:hidden; }
+.opt { height:52px; display:flex; align-items:center; gap:12px; padding:0 16px; position:relative; }
+.opt + .opt::before { content:''; position:absolute; top:0; left:60px; right:0; height:1.5px; background:var(--divider); }
+.opt .sq { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; }
+.opt .lab { flex:1; display:flex; align-items:center; gap:8px; min-width:0; }
+.opt .val { font-weight:700; font-size:15px; line-height:20px; color:var(--soft); font-variant-numeric:tabular-nums; }
+.opt.link .lab { color:var(--accentInk); }
+.night .opt.link .lab { color:#8BE39B; }
+.opt.on { background:linear-gradient(90deg, rgba(76,199,100,.10), rgba(76,199,100,.04)); }
+.now { font-weight:800; font-size:11px; line-height:14px; padding:2px 7px; border-radius:8px; background:var(--tag); color:var(--soft); }
+.note2 { margin-top:10px; padding:0 4px; }
+.radio { width:24px; height:24px; border-radius:12px; border:2px solid var(--muted); opacity:.7; flex:none; }
+.info { margin-top:12px; display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; background:var(--sunken); }
+.warn { margin-top:10px; display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border-radius:14px; background:var(--goldSoft); border:1.5px solid var(--goldEdge); }
+.btns { margin-top:16px; display:flex; gap:8px; }
+.btn { height:56px; border-radius:16px; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; font-size:18px; white-space:nowrap; position:relative; }
+.btn.pri { background:var(--accent); color:#fff; box-shadow:0 4px 0 var(--accentLip); }
+.btn.sec { background:var(--sec); color:var(--text); box-shadow:0 4px 0 var(--secLip); }
+.btn.m { height:48px; border-radius:14px; font-size:16px; }
+.btn.wait { background:var(--mutedFace); color:var(--mutedInk); box-shadow:0 4px 0 var(--mutedLip); }
+.btn.txt { height:44px; background:none; box-shadow:none; color:var(--soft); font-size:16px; }
+.btn.down { transform:translateY(3px); box-shadow:0 1px 0 var(--accentLip); }
+
+/* ===== Planting: the "When to water" row ===== */
+.pick { height:56px; border-radius:16px; background:var(--card); box-shadow:var(--e1); display:flex; align-items:center; gap:10px; padding:0 14px; border:2px solid transparent; }
+.pick.focus { border-color:var(--accent); }
+
+/* ===== Wheel ===== */
+.wheel { position:relative; height:220px; margin-top:14px; overflow:hidden; }
+.wheel .band { position:absolute; left:0; right:0; top:88px; height:44px; border-radius:12px; background:var(--card); box-shadow:var(--e1); }
+.wheel .h { position:absolute; left:0; right:0; height:44px; display:flex; align-items:center; justify-content:center; font-variant-numeric:tabular-nums; }
+.wheel .pre { font-weight:800; font-size:18px; color:var(--soft); margin-right:6px; }
+.wheel .pre.hid { visibility:hidden; }
+.wheel .fade { position:absolute; left:0; right:0; height:56px; pointer-events:none; }
+
+/* ===== Forest card ===== */
+.fchips { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+.fchip { height:28px; border-radius:14px; background:var(--card); box-shadow:var(--e1); display:flex; align-items:center; gap:6px; padding:0 12px 0 8px; font-weight:800; font-size:14px; line-height:18px; white-space:nowrap; }
+.tgl { width:52px; height:32px; border-radius:16px; background:var(--accent); position:relative; flex:none; }
+.tgl i { position:absolute; top:3px; left:23px; width:26px; height:26px; border-radius:13px; background:#fff; box-shadow:var(--e1); }
+.tgl.off { background:var(--sunken); box-shadow:inset 0 2px 3px rgba(90,58,18,.18); }
+.tgl.off i { left:3px; }
+.lrow { height:64px; display:flex; align-items:center; gap:12px; padding:0 14px; position:relative; }
+.lrow + .lrow::before { content:''; position:absolute; top:0; left:66px; right:0; height:1.5px; background:var(--divider); }
+.lrow .thumb { width:40px; height:40px; border-radius:10px; }
+</style>
+</head>
+<body>
+<div class="intro" id="intro">
+  <h1>Время полива — OYUUR-33</h1>
+  <p>Кадры 375×812, каждый днём и ночью. Фон кадров — снимок настоящего приложения (веб-сборка, Playwright, 2×); поверх нарисовано новое: секция «Когда поливать», плашки, строка состояния, точки, карточка «сегодня», всплывашки, карточка леса. Плашки и карточка леса нарисованы целиком. <code>?f=06d</code> — один кадр без рамки. Спецификация — <b>спец.md</b> рядом.</p>
+</div>
+<div id="root"></div>
+
+<script>
+// ===== New glyphs and icons (viewBox 24). Copy into ds/glyphs.tsx (G.clock, G.evening) and ds/icons.tsx (I.sunrise, I.sunset). =====
+const G = {
+  // Gold clock: "waiting". Rim gold #FFCF4D / #D99A1E, face #FFF8E6, hands goldInk #5A3A0E.
+  clock: `<circle cx="12" cy="12" r="10.5" fill="#FFCF4D" stroke="#D99A1E" stroke-width="1.3"/>
+    <circle cx="12" cy="12" r="7.3" fill="#FFF8E6"/>
+    <path d="M3.6 8.9 A9 9 0 0 1 7.5 4.2" stroke="#FFF3C4" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".9"/>
+    <circle cx="12" cy="6.2" r=".85" fill="#E3B04A"/><circle cx="17.8" cy="12" r=".85" fill="#E3B04A"/><circle cx="12" cy="17.8" r=".85" fill="#E3B04A"/><circle cx="6.2" cy="12" r=".85" fill="#E3B04A"/>
+    <path d="M12 7.9 V12 L14.9 13.7" stroke="#5A3A0E" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="12" cy="12" r="1.25" fill="#5A3A0E"/>`,
+  // Evening over a hill: the picture of the "Honest — in the evening" sheet.
+  evening: `<defs><clipPath id="evc"><circle cx="12" cy="12" r="10.6"/></clipPath></defs>
+    <circle cx="12" cy="12" r="10.6" fill="#FFB46B"/>
+    <g clip-path="url(#evc)">
+      <rect x="0" y="0" width="24" height="9" fill="#FF9A6B"/>
+      <circle cx="12" cy="15.2" r="5.6" fill="#FFCF4D" stroke="#E5873A" stroke-width="1.2"/>
+      <path d="M0 15.6 Q6 12.4 12 15.4 T24 14.6 V24 H0Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M0 19 Q7 16.6 13 18.6 T24 18 V24 H0Z" fill="#6FAE3A"/>
+    </g>
+    <circle cx="12" cy="12" r="10.6" fill="none" stroke="#E5873A" stroke-width="1.3"/>
+    <path d="M17.6 5.2 L18.1 6.3 L19.2 6.8 L18.1 7.3 L17.6 8.4 L17.1 7.3 L16 6.8 L17.1 6.3Z" fill="#FFF6C2"/>`,
+  // Existing glyphs (copied from ds/glyphs.tsx).
+  drop: `<path d="M12 2.5 C12 2.5 4.5 11 4.5 15 A7.5 7.5 0 0 0 19.5 15 C19.5 11 12 2.5 12 2.5Z" fill="#3FA2DE" stroke="#2A80BC" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.6 15.2 A3.6 3.6 0 0 0 11.4 18.6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".85"/>`,
+  check: `<circle cx="12" cy="12" r="10.5" fill="#4CC764" stroke="#34A64D" stroke-width="1.3"/><path d="M7.2 12.4 L10.4 15.5 L16.8 8.9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  rings: `<circle cx="12" cy="12" r="11" fill="#7A4E26"/><circle cx="12" cy="12" r="9.2" fill="#F3CF92"/><circle cx="11.6" cy="12.3" r="6.4" fill="none" stroke="#B57A3E" stroke-width="1.8"/><circle cx="11.35" cy="12.45" r="3.4" fill="none" stroke="#B57A3E" stroke-width="1.8"/><circle cx="11" cy="12.7" r="1.2" fill="#9A6230"/>`,
+};
+const I = {
+  // New: half sun on the horizon, arrow up / down.
+  sunrise: `<path d="M3 18.5 H21"/><path d="M7 18.5 A5 5 0 0 1 17 18.5"/><path d="M12 3 V9.2 M9.4 5.6 L12 3 L14.6 5.6"/><path d="M4.4 12.9 L5.9 14.2 M19.6 12.9 L18.1 14.2"/>`,
+  sunset: `<path d="M3 18.5 H21"/><path d="M7 18.5 A5 5 0 0 1 17 18.5"/><path d="M12 3 V9.2 M9.4 6.6 L12 9.2 L14.6 6.6"/><path d="M4.4 12.9 L5.9 14.2 M19.6 12.9 L18.1 14.2"/>`,
+  // New: "any time" — a ring with 24 inside (not a clock: the clock means "wait").
+  allDay: `<circle cx="12" cy="12" r="9"/><text x="12" y="15.4" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="9.5" fill="currentColor" stroke="none">24</text>`,
+  // Existing (ds/icons.tsx).
+  clock: `<circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15.5 14.2"/>`,
+  sun: `<circle cx="12" cy="12" r="4.2"/><path d="M12 2.8 V4.6 M12 19.4 V21.2 M2.8 12 H4.6 M19.4 12 H21.2 M5.5 5.5 L6.8 6.8 M17.2 17.2 L18.5 18.5 M5.5 18.5 L6.8 17.2 M17.2 6.8 L18.5 5.5"/>`,
+  moon: `<path d="M19.5 14.6 A8 8 0 1 1 9.4 4.5 A6.3 6.3 0 0 0 19.5 14.6 Z"/>`,
+  chevronDown: `<path d="M5 9 L12 16 L19 9"/>`,
+  chevronRight: `<path d="M9 5 L16 12 L9 19"/>`,
+  chevronLeft: `<path d="M15 5 L8 12 L15 19"/>`,
+  close: `<path d="M6 6 L18 18 M18 6 L6 18"/>`,
+  info: `<circle cx="12" cy="12" r="9"/><path d="M12 11 V16.5"/><circle cx="12" cy="7.8" r="1.2" fill="currentColor" stroke="none"/>`,
+  lock: `<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8.5 10.5 V7.5 A3.5 3.5 0 0 1 15.5 7.5 V10.5"/><circle cx="12" cy="15.5" r="1.1" fill="currentColor" stroke="none"/>`,
+  move: `<path d="M12 3 V21 M3 12 H21"/><path d="M9.5 5.5 L12 3 L14.5 5.5 M9.5 18.5 L12 21 L14.5 18.5 M5.5 9.5 L3 12 L5.5 14.5 M18.5 9.5 L21 12 L18.5 14.5"/>`,
+};
+const glyph = (n, s) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24">${G[n]}</svg>`;
+const icon = (n, s, color = 'currentColor', w = 2.2) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" style="color:${color}"><g fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${I[n]}</g></svg>`;
+// HabitDots: a waiting habit is a 10 px ring with two tiny hands (instead of the 8 px ring).
+const dotClock = (x, y) => `<div class="abs" style="left:${x - 8}px;top:${y - 8}px;width:16px;height:16px;border-radius:8px;background:var(--dotBg)"></div>
+  <svg class="abs" style="left:${x - 5}px;top:${y - 5}px" width="10" height="10" viewBox="0 0 10 10"><g fill="none" stroke="var(--ring)" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="5" r="4.2" stroke-width="1.6"/><path d="M5 2.9 V5 L6.4 5.9" stroke-width="1.2"/></g></svg>`;
+const radioOn = () => `<svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#4CC764"/><path d="M7.4 12.3 L10.6 15.4 L16.6 9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// ===== Texts (RU, exactly as in спец.md) =====
+const OPTS = [
+  { k: 'any', label: 'В любое время', val: '', icon: 'allDay', tint: '#C4A574' },
+  { k: 6, label: 'Утром', val: 'с 6:00', icon: 'sunrise', tint: '#F6B26B' },
+  { k: 12, label: 'Днём', val: 'с 12:00', icon: 'sun', tint: '#F2C94C' },
+  { k: 18, label: 'Вечером', val: 'с 18:00', icon: 'sunset', tint: '#F2994A' },
+  { k: 21, label: 'Поздно', val: 'с 21:00', icon: 'moon', tint: '#6C63C7' },
+];
+
+// ===== Pieces =====
+const img = (night, name) => `img/${name.replace('{t}', night ? 'n' : 'd')}`;
+const slice = (src, sy, dy, h) => `<div class="slice" style="top:${dy}px;height:${h}px;background-image:url('${src}');background-position:0 ${-sy}px"></div>`;
+
+function options(sel, now) {
+  const rows = OPTS.map((o) => `<div class="opt ${o.k === sel ? 'on' : ''}">
+      <div class="sq" style="background:${o.tint}">${icon(o.icon, 20, '#FFFFFF', 2.3)}</div>
+      <div class="lab"><span class="t-bodyStrong">${o.label}</span>${o.k === now ? '<span class="now">сегодня</span>' : ''}</div>
+      ${o.val ? `<span class="val">${o.val}</span>` : ''}
+      ${o.k === sel ? radioOn() : '<div class="radio"></div>'}
+    </div>`).join('');
+  const other = sel === 'other'
+    ? `<div class="opt on"><div class="sq" style="background:#A08E78">${icon('clock', 20, '#FFFFFF', 2.3)}</div><div class="lab"><span class="t-bodyStrong">Другое время…</span></div><span class="val">с 19:00</span>${radioOn()}</div>`
+    : `<div class="opt link"><div style="width:32px"></div><div class="lab"><span class="t-bodyStrong">Другое время…</span></div>${icon('chevronRight', 18, 'var(--muted)', 2.6)}</div>`;
+  return `<div class="card" style="margin-top:14px">${rows}${other}</div>`;
+}
+const warn = () => `<div class="t-small soft note2">Для «Бросаю» чаще выбирают вечер: утром день ещё впереди</div>`;
+// The early-tap pill: text + a text button, like Gmail's "Undo". Lives 3 s; a new tap restarts it.
+const earlyChip = (top) => `<div class="chip act" style="top:${top}px;padding-left:14px"><span>Рано: можно через 3 ч 20 мин</span><span class="act">Сменить время</span></div>`;
+const grab = `<div class="grab"><i></i><i></i></div>`;
+
+// Home: calm (= the watered look) or thirsty. Over the calm tree the counter comes from the thirsty shot (24, not 25).
+function home(night, o = {}) {
+  const t = night ? 'n' : 'd';
+  let h = o.thirsty
+    ? slice(`img/h-${t}-thirsty.jpg`, 0, 0, 812)
+    : slice(`img/h-${t}-thirsty.jpg`, 0, 0, 150) + slice(`img/h-${t}-calm.jpg`, 150, 150, 662);
+  if (o.blend) h += `<div style="opacity:${o.blend}">${slice(`img/h-${t}-thirsty.jpg`, 150, 150, 662)}</div>`;
+  if (o.dots !== false && !o.thirsty) h += dotClock(232, 29.5);
+  if (o.status) h += `<div class="statusCover"></div><div class="status">${o.status}</div>`;
+  if (o.today) h += `<div class="abs" style="left:150px;top:676px;width:76px;height:92px;background:var(--sheet)"></div>${o.today}`;
+  return h + (o.extra || '');
+}
+const line1 = (g, text, o = {}) => `<div class="srow" style="${o.style || ''}">${glyph(g, 20)}<span class="t-bodyStrong" style="color:${o.color || 'var(--text)'}">${text}</span>${o.chev ? icon('chevronDown', 16, 'var(--soft)', 2.6) : ''}</div>`;
+const line2 = (text = 'Дерево через 26 дней · пн 23') => `<div class="srow">${glyph('rings', 16)}<span class="t-small soft">${text}</span></div>`;
+const todayWait = (o = {}) => `<div class="day" style="left:155.5px;top:681px;border:3px solid var(--wait);${o.style || ''}"><span class="lbl">сегодня</span><span class="num">29</span><span class="mk">${icon('clock', 12, 'var(--soft)', 2.6)}<span>18:00</span></span></div>`;
+const todayDrop = (o = {}) => `<div class="day" style="left:155.5px;top:681px;border:3px solid var(--water);${o.style || ''}"><span class="lbl">сегодня</span><span class="num">29</span><span class="mk">${glyph('drop', 16)}</span></div>`;
+
+// The planting screen scrolled to its end: the header (0..60) stays, the page moved up by 236; the new
+// compact row "Поливать: вечером, с 18:00 ›" is the last section, right before the sticky "Plant" button.
+// In content coordinates: "Кто видит" hint ends at 838, the new section is 858..932.
+const SCROLL = 236;
+function planting(night, o = {}) {
+  const t = night ? 'n' : 'd';
+  return slice(`img/new-${t}-tall.jpg`, 60 + SCROLL, 60, 656) +
+    slice(`img/new-${t}.jpg`, 0, 0, 60) +
+    `<div class="abs" style="left:16px;right:16px;top:${858 - SCROLL}px">
+       <div class="pick ${o.focus ? 'focus' : ''}" style="height:48px;border-radius:14px;padding:0 10px 0 12px">
+         <div style="width:28px;height:28px;border-radius:9px;background:#F2994A;display:flex;align-items:center;justify-content:center;flex:none">${icon('sunset', 18, '#FFFFFF', 2.4)}</div>
+         <span class="t-bodyStrong" style="flex:1"><span class="soft" style="font-weight:700">Поливать:</span> вечером, с 18:00</span>${icon('chevronRight', 18, 'var(--soft)', 2.6)}</div>
+       <div class="t-small soft" style="margin-top:6px;padding-left:4px">Сегодня — день посадки, можно полить сразу</div>
+     </div>
+     <div class="abs" style="left:0;right:0;top:716px;height:24px;background:linear-gradient(to bottom, transparent, var(--page))"></div>
+     ${slice(`img/new-${t}.jpg`, 740, 740, 72)}`;
+}
+
+// ===== Frames =====
+const frames = [];
+const F = (id, title, text, build, group, file) => {
+  frames.push({ id: id + 'd', theme: 'day', title, text, build: () => build(false), group, file: `${id}-день-${file}` });
+  frames.push({ id: id + 'n', theme: 'night', title: title + ' — ночь', text: '', build: () => build(true), group, file: `${id}-ночь-${file}` });
+};
+
+// --- Planting ---
+F('01', 'Посадка: «Поливать: вечером, с 18:00»',
+  'Экран прокручен до конца. Последняя секция, сразу над кнопкой «Посадить» (кнопка закреплена и не двигается): строка 48, радиус 14, тень e1 — квадрат 28 цвета вечера с закатом, «Поливать:» textSoft + «вечером, с 18:00» ExtraBold, стрелка ›. Ниже одна строка 14/20 textSoft. Страница длиннее на 94 (20 + 48 + 6 + 20).',
+  (n) => planting(n), 'Посадка', 'посадка-когда-поливать');
+F('02', 'Посадка: плашка выбора',
+  'Плашка снизу (ModalSheet), затемнение scrim, высота 440 — та же, что у колеса (03), ничего не прыгает. Заголовок title3 + пояснение. Карточка вариантов: строка 52, цветной квадрат 32/10 с белым значком (цвета неба: «в любое время» — песочный #C4A574 с «24», утро #F6B26B, день #F2C94C, вечер #F2994A, поздно #6C63C7), слово 16 ExtraBold, справа время 15 textSoft и радиокнопка 24. Кнопки «Готово» нет: тап по строке выбирает и закрывает плашку (240 мс). «Другое время…» → колесо.',
+  (n) => planting(n, { focus: true }) + `<div class="scrim"></div>
+    <div class="sheet" style="height:440px">${grab}
+      <div class="t-title3" style="margin-top:4px">Когда поливать</div>
+      <div class="t-small soft" style="margin-top:2px">С какого часа дерево можно полить</div>
+      ${options(18)}
+    </div>`, 'Посадка', 'посадка-плашка-выбора');
+F('03', 'Посадка: колесо «Другое время»',
+  'Та же плашка той же высоты (440), содержимое сменилось сдвигом (240 мс): «назад» 36 + заголовок. Колесо: 5 строк по 44, выбранная — на белой полосе, «с» 18 ExtraBold textSoft вплотную (6 px) к числу 22/28 Black, справа на полосе зелёная галка 24. Тап по полосе выбирает и закрывает плашку; кнопки «Готово» нет. Подпись 13/18 ExtraBold textSoft. Щелчок select на каждом часе.',
+  (n) => {
+    const hrs = [17, 18, 19, 20, 21].map((h, i) => {
+      const d = Math.abs(i - 2);
+      const st = d === 0 ? 'font-weight:900;font-size:22px;color:var(--text)' : d === 1 ? 'font-weight:800;font-size:18px;color:var(--soft);opacity:.8' : 'font-weight:800;font-size:16px;color:var(--muted);opacity:.45';
+      return `<div class="h" style="top:${i * 44}px;${st}"><span class="pre ${d ? 'hid' : ''}">с</span>${h}:00</div>`;
+    }).join('');
+    return planting(n, { focus: true }) + `<div class="scrim"></div>
+    <div class="sheet" style="height:440px">${grab}
+      <div class="shead" style="margin-top:4px"><div style="width:36px;height:36px;border-radius:18px;background:var(--sec);display:flex;align-items:center;justify-content:center">${icon('chevronLeft', 18, 'var(--text)', 2.6)}</div>
+        <div><div class="t-title3">Другое время</div><div class="t-small soft">С какого часа дерево можно полить</div></div></div>
+      <div class="wheel" style="margin-top:40px"><div class="band"></div><div class="abs" style="right:12px;top:98px">${radioOn()}</div>${hrs}
+        <div class="fade" style="top:0;background:linear-gradient(var(--sheet),transparent)"></div><div class="fade" style="bottom:0;background:linear-gradient(transparent,var(--sheet))"></div></div>
+      <div class="soft" style="text-align:center;margin-top:24px;font-weight:800;font-size:13px;line-height:18px">Только целые часы: с 1:00 до 22:00</div>
+    </div>`;
+  }, 'Посадка', 'посадка-колесо-часов');
+
+// --- Change on a growing tree ---
+F('04', 'Смена времени у растущего дерева',
+  'Тап по строке «Полить можно с 18:00» → эта плашка. Шапка как у окна имени: картинка дерева 48 + «Когда поливать» + «Дубок · Не курить». Плашка-сведение на sunken: «Новое время — с завтра. Сегодня — с 18:00». У действующего варианта серая метка «сегодня». Для «Бросаю» раньше 12:00 — обычный серый текст под списком (14/20 textSoft, без рамки и значка), не запрет. «Готово» здесь остаётся.',
+  (n) => home(n, { status: line1('clock', 'Полить можно с 18:00', { chev: true }) + line2(), today: todayWait() }) + `<div class="scrim"></div>
+    <div class="sheet">${grab}
+      <div class="shead"><div class="thumb"><img src="${img(n, 'th-oak-{t}.png')}"></div><div><div class="t-title3">Когда поливать</div><div class="t-small soft">Дубок · Не курить</div></div></div>
+      <div class="info">${icon('clock', 18, 'var(--soft)', 2.2)}<span class="t-small"><b style="font-weight:800">Новое время — с завтра.</b><br><span class="soft">Сегодня — с&nbsp;18:00</span></span></div>
+      ${options(6, 18)}
+      ${warn()}
+      <div class="btns"><div class="btn pri" style="flex:1">Готово</div></div>
+    </div>`, 'Смена времени', 'смена-времени-плашка');
+F('05', 'После смены: «Сегодня с 18:00, завтра — с 12:00»',
+  'Плашка ушла (240 мс), над кроной на 1,4 с — всплывашка «Готово: с завтра поливать с 12:00» (как «Сегодня уже полито»: появляется 180 мс, тает 220 мс; ночью — цвета плашки), отклик select. Строка состояния — до конца дня.',
+  (n) => home(n, { status: line1('clock', 'Сегодня с 18:00, завтра — с 12:00', { chev: true }) + line2(), today: todayWait(),
+    extra: `<div class="chip" style="top:301px">${glyph('check', 16)}<span>Готово: с завтра поливать с 12:00</span></div>` }), 'Смена времени', 'после-смены');
+
+// --- Before the time ---
+F('06', 'Ждёт: полить ещё нельзя',
+  'Дерево спокойное (вид «полито», без пузыря-капли, лунка влажная). Строка состояния: золотые часы 20 + «Полить можно с 18:00» + стрелка 16 — нажимается. Вторая строка — прогноз, как у неполитого. Точка «Без сладкого» — кольцо 10 с часиками. Карточка «сегодня»: рамка 3 цвета textMuted, часы 12 + «18:00».',
+  (n) => home(n, { status: line1('clock', 'Полить можно с 18:00', { chev: true }) + line2(), today: todayWait() }), 'До времени полива', 'ждёт-полить-можно-с-18');
+F('06b', 'Ждёт, меньше часа: обратный отсчёт',
+  'За 60 минут до времени текст меняется на «через N мин» и обновляется раз в минуту (раз в 30 с проверка). Цифры — табличные, чтобы строка не дрожала.',
+  (n) => home(n, { status: line1('clock', 'Полить можно через 42 мин', { chev: true }) + line2(), today: todayWait() }), 'До времени полива', 'ждёт-через-42-мин');
+F('07', 'Нажал раньше времени',
+  'Не ошибка: дерево качнулось ±2° за 500 мс, звук already, вибрация light. Над кроной — всплывашка 36 (днём белая, ночью цвета плашки с обводкой): «Рано: можно через 3 ч 20 мин» 13 ExtraBold и справа текстовая кнопка «Сменить время» 13 Black цветом accentInk (ночью #8BE39B) — открывает плашку смены. С первого нажатия; живёт 3 с.',
+  (n) => home(n, { status: line1('clock', 'Полить можно с 18:00', { chev: true }) + line2(), today: todayWait(),
+    extra: earlyChip(298) + `
+      <svg class="abs" style="left:96px;top:360px" width="183" height="120" viewBox="0 0 183 120"><g fill="none" stroke="var(--ring)" stroke-width="2.4" stroke-linecap="round" opacity=".55"><path d="M14 24 Q4 56 14 88"/><path d="M4 36 Q-2 56 4 76" opacity=".6"/><path d="M169 24 Q179 56 169 88"/><path d="M179 36 Q185 56 179 76" opacity=".6"/></g></svg>
+      <div class="note" style="left:20px;top:420px">качание ±2°, 500 мс</div>` }), 'До времени полива', 'раньше-времени-подсказка');
+F('07b', 'Третье нажатие за 10 с',
+  'Та же всплывашка (перезапускается). Дополнительно пульсирует только стрелка у строки состояния: масштаб 1 → 1,35 → 1 дважды (2 × 300 мс), цвет textSoft → text — подсказка, что время меняется там. Без подложки и второй строки.',
+  (n) => home(n, { status: `<div class="srow">${glyph('clock', 20)}<span class="t-bodyStrong">Полить можно с 18:00</span><span style="display:inline-flex;transform:scale(1.35);transform-origin:center">${icon('chevronDown', 16, 'var(--text)', 2.8)}</span></div>` + line2(), today: todayWait(),
+    extra: earlyChip(298) + `<div class="note" style="left:270px;top:600px">пульс ×2</div>` }), 'До времени полива', 'раньше-третье-нажатие');
+
+// --- The time came ---
+F('10a', 'Время пришло: 0 мс',
+  'Последняя минута ожидания. В 18:00 (экран открыт) начинается переход.',
+  (n) => home(n, { status: line1('clock', 'Полить можно через 1 мин', { chev: true }) + line2(), today: todayWait() }), 'Время пришло (приложение открыто)', 'время-пришло-0мс');
+F('10b', 'Время пришло: 300 мс',
+  'В коде — один рисунок, меняется thirst 0 → 1 (0,6 с, ease inOut): листва бледнеет, листья опускаются. В кадре — тот же рисунок без изменений: честно показать середину перехода по снимку нельзя, две кроны не накладываем. Строка: старая ушла вверх на 4 px и растаяла (0–180 мс), новая «Дерево ждёт полива — нажми» проявляется снизу (120–360 мс). Карточка «сегодня»: рамка → синяя, часы → капля (240 мс). С кроны падает одна капля (450 мс, ease in).',
+  (n) => home(n, { dots: true,
+    status: line1('drop', 'Дерево ждёт полива — нажми', { style: 'opacity:.6;transform:translateY(2px)' }) + line2(),
+    today: todayDrop().replace('<span class="mk">', '<span class="mk" style="opacity:.6">'),
+    extra: `<div class="abs" style="left:178px;top:460px">${glyph('drop', 20)}</div><div class="note" style="left:206px;top:466px">капля, 450 мс</div>
+      <div class="note" style="left:16px;top:200px">в коде — один рисунок, меняется thirst 0→1</div>` }), 'Время пришло (приложение открыто)', 'время-пришло-300мс');
+F('10c', 'Время пришло: 900 мс',
+  'Дерево «хочет пить», капля ударилась в лунку (круг 0 → 28 px, тает 300 мс), пузырь-капля всплывает как обычно. Без звука. Точка «Без сладкого» — обычное пустое кольцо.',
+  (n) => home(n, { thirsty: true,
+    extra: `<svg class="abs" style="left:160px;top:538px" width="56" height="20" viewBox="0 0 56 20"><ellipse cx="28" cy="10" rx="24" ry="7" fill="none" stroke="#7FC8F0" stroke-width="2" opacity=".8"/><ellipse cx="28" cy="10" rx="13" ry="4" fill="none" stroke="#3FA2DE" stroke-width="2" opacity=".6"/></svg>` }), 'Время пришло (приложение открыто)', 'время-пришло-900мс');
+
+// --- Old trees ---
+function oldTrees(n, many) {
+  const row = (thumb, title, sub) => `<div class="lrow"><div class="thumb"><img src="${img(n, thumb)}"></div><div style="flex:1;min-width:0"><div class="t-bodyStrong">${title}</div><div class="t-small soft">${sub}</div></div><div class="tgl"><i></i></div></div>`;
+  return slice(`img/h-${n ? 'n' : 'd'}-calm.jpg`, 0, 0, 812) + `<div class="scrim"></div>
+    <div class="sheet" style="text-align:center">${grab}
+      <div style="width:72px;height:72px;border-radius:36px;background:var(--tintQuests);display:flex;align-items:center;justify-content:center;margin:8px auto 0">${glyph('evening', 48)}</div>
+      <div class="t-title2" style="margin-top:12px">Отмечать вечером?</div>
+      <div class="t-body soft" style="margin:6px 8px 0">${many ? 'Такие привычки удобнее отмечать, когда день почти прошёл. Поливать с&nbsp;18:00?' : '«Не курить» удобнее отмечать, когда день почти прошёл. Поливать с 18:00?'}</div>
+      <div class="card" style="margin-top:16px;text-align:left">
+        ${row('th-oak-{t}.png', 'Не курить', 'Дубок · в любое время')}
+        ${many ? row('th-spruce-{t}.png', 'Без сладкого', 'в любое время') : ''}
+      </div>
+      <div class="btns" style="flex-direction:column;gap:4px"><div class="btn pri">Да, с завтра</div><div class="btn txt">Оставить как есть</div></div>
+    </div>`;
+}
+F('08', 'Старые деревья: «Отмечать вечером?»',
+  'Один раз за всё время, после первого полива дерева «Бросаю» (когда отыграл праздник и нет пузыря имени). Картинка «вечер» 48 в круге 72 (tintQuests). Несколько деревьев — общий текст. Список — карточка, строка 64: картинка 40, привычка, ниже одинаково «имя · в любое время» (без имени — «в любое время»), переключатель (все включены). Кнопки друг под другом: главная «Да, с завтра» на всю ширину, под ней текстовая «Оставить как есть» (44, textSoft).',
+  (n) => oldTrees(n, true), 'Старые деревья', 'старые-деревья-честнее-вечером');
+F('08b', 'Старые деревья: одно дерево',
+  'Текст с названием привычки: «„Не курить“ удобнее отмечать, когда день почти прошёл. Поливать с 18:00?»',
+  (n) => oldTrees(n, false), 'Старые деревья', 'старые-деревья-одно-дерево');
+
+// --- Forest ---
+F('09', 'Мой лес: карточка дерева',
+  'Статус ждущего: часы + «Ждёт вечера · 24 дня» (без времени). Новая фишка «Полив с 18:00 ›» — нажимается (= «⋯ → Время полива»), стоит второй строкой; под ней мелко «завтра — с 12:00», если есть смена. Справа отступ 16. Кнопка «Полить с 18:00» — объёмная, с кромкой, приглушённо-зелёная (днём #DDF5DF / кромка #B5E3BD / текст #2E7D3E, ночью #2E5E55 / #1F4540 / #8BE39B); нажатие = всплывашка из кадра 07.',
+  (n) => {
+    const t = n ? 'n' : 'd';
+    return slice(`img/forest-${t}.jpg`, 0, 0, 812) + `
+    <div class="sheet" style="padding:8px 16px 16px;top:${595 - 52}px">${grab}
+      <div style="display:flex;gap:14px;margin-top:6px">
+        <div class="thumb" style="width:76px;height:76px;border-radius:18px"><img src="img/th-oak-${t}.png"></div>
+        <div style="flex:1;min-width:0">
+          <div class="t-title3" style="font-size:20px;line-height:24px">Дубок</div>
+          <div class="t-small soft" style="font-weight:800">Не курить</div>
+          <div class="srow" style="margin-top:2px;gap:6px">${glyph('clock', 16)}<span class="t-small soft" style="font-weight:800">Ждёт вечера · 24 дня</span></div>
+          <div class="fchips">
+            <div class="fchip">${glyph('rings', 18)}24 дня</div>
+            <div class="fchip">${icon('lock', 16, 'var(--text)', 2.2)}Только я</div>
+            <div class="fchip" style="padding-right:8px">${glyph('clock', 18)}Полив с 18:00${icon('chevronRight', 14, 'var(--soft)', 2.8)}</div>
+          </div>
+          <div class="t-caption soft" style="margin:4px 0 0 4px">завтра — с 12:00</div>
+        </div>
+        <div style="width:32px;height:32px;border-radius:16px;background:var(--sec);display:flex;align-items:center;justify-content:center;flex:none">${icon('close', 14, 'var(--text)', 2.6)}</div>
+      </div>
+      <div class="btns" style="margin-top:14px">
+        <div class="btn m wait" style="flex:1;font-size:15px;padding:0 10px">Полить с 18:00</div>
+        <div class="btn m sec" style="flex:1;font-size:15px;gap:6px;padding:0 10px">${icon('move', 18, 'var(--text)', 2.4)}Переставить</div>
+        <div class="btn m sec" style="width:48px;font-size:20px;letter-spacing:1px">•••</div>
+      </div>
+    </div>`;
+  }, 'Мой лес', 'лес-карточка-полив-с-18');
+
+// ===== Render =====
+const params = new URLSearchParams(location.search);
+const only = params.get('f');
+const root = document.getElementById('root');
+const phone = (f) => `<div class="ph ${f.theme === 'night' ? 'night' : ''}">${f.build()}</div>`;
+if (only) {
+  document.body.classList.add('single');
+  document.getElementById('intro').remove();
+  // `?f=06` is the day frame, `?f=06n` the night one.
+  root.innerHTML = phone(frames.find((x) => x.id === only) || frames.find((x) => x.id === only + 'd'));
+} else {
+  let html = '', group = null, list = '';
+  for (const f of frames) {
+    if (f.group !== group) { if (list) html += `<div class="list">${list}</div>`; list = ''; group = f.group; html += `<div class="group">${group}</div>`; }
+    list += `<div class="cell">${phone(f)}<div class="cap"><b>${f.id} · ${f.title}</b><span>${f.text}</span></div></div>`;
+  }
+  root.innerHTML = html + `<div class="list">${list}</div>`;
+}
+window.FRAMES = frames.map((f) => ({ id: f.id, file: f.file }));
+</script>
+</body>
+</html>

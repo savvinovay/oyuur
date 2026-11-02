@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Живой главный экран</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #EFE3CF; --ink: #1E1B16; --soft: #6E6152;
+    --sheet: #FFE3BE; --sheetBorder: #3A2E22; --button: #F5D3A0; --accent: #4CC764;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--page); font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; color: var(--ink); }
+  .intro { max-width: 760px; margin: 32px auto 8px; padding: 0 16px; }
+  .intro h1 { font-weight: 900; font-size: 30px; }
+  .intro p { color: var(--soft); margin-top: 6px; line-height: 1.45; }
+  .list { display: flex; flex-wrap: wrap; gap: 32px 28px; justify-content: center; padding: 24px 16px 64px; }
+  .cell { width: 375px; }
+  .cap { margin-top: 10px; }
+  .cap b { font-weight: 900; font-size: 17px; display: block; }
+  .cap span { color: var(--soft); font-size: 13.5px; line-height: 1.4; display: block; margin-top: 3px; }
+  .phone { position: relative; width: 375px; height: 812px; overflow: hidden; border-radius: 34px; box-shadow: 0 18px 40px rgba(60,40,10,.18), 0 0 0 1px rgba(0,0,0,.06); background: #9FE1F5; }
+  body.single { background: transparent; }
+  body.single .phone { border-radius: 0; box-shadow: none; }
+  .L { position: absolute; left: 0; top: 0; width: 375px; height: 812px; }
+  svg.L { overflow: visible; }
+  .tree { position: absolute; transform-origin: 50% 100%; }
+  /* Top bar */
+  .dots { position: absolute; top: 70px; left: 0; right: 0; display: flex; justify-content: center; gap: 7px; align-items: center; }
+  .dot { width: 8px; height: 8px; border-radius: 4px; }
+  .pill { position: absolute; top: 58px; right: 16px; height: 30px; padding: 0 10px; border-radius: 15px; background: #58D46A; display: flex; gap: 3px; align-items: center; box-shadow: 0 3px 8px rgba(30,60,20,.18); }
+  .header { position: absolute; top: 96px; left: 0; right: 0; text-align: center; }
+  .counter { display: inline-flex; align-items: center; gap: 6px; }
+  .num { font-weight: 900; font-size: 46px; line-height: 54px; text-shadow: 0 1px 0 rgba(255,255,255,.55), 0 2px 8px rgba(255,255,255,.35); }
+  .name { font-weight: 800; font-size: 18px; opacity: .85; }
+  .plus { position:absolute; font-weight: 900; font-size: 15px; color: #fff; background: #4CC764; border-radius: 12px; padding: 1px 8px; box-shadow: 0 3px 8px rgba(30,90,40,.3); }
+  /* Sheet */
+  .sheet { position: absolute; left: 0; right: 0; top: 545px; bottom: 0; background: var(--sheet); border: 1.5px solid var(--sheetBorder); border-bottom: 0; border-radius: 34px 34px 0 0; padding-top: 8px; }
+  .grab { width: 44px; height: 6px; border-radius: 3px; background: #fff; margin: 0 auto; }
+  .status { text-align: center; font-weight: 800; font-size: 15px; margin-top: 8px; padding: 0 20px; display: flex; justify-content: center; align-items: center; gap: 6px; }
+  .forecast { text-align: center; color: var(--soft); font-size: 13.5px; margin-top: 3px; display: flex; gap: 5px; justify-content: center; align-items: center; }
+  .strip { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+  .day { width: 62px; height: 70px; border-radius: 14px; background: #fff; text-align: center; padding-top: 7px; font-size: 12px; }
+  .day b { display: block; font-weight: 900; font-size: 21px; line-height: 26px; }
+  .day.today { border: 2.5px solid #4CC764; }
+  .day.future { background: rgba(255,255,255,.5); color: #9A8B78; }
+  .lock { text-align: center; color: var(--soft); font-size: 13.5px; margin-top: 9px; }
+  .menu { display: flex; gap: 8px; padding: 9px 16px 0; }
+  .menu div { flex: 1; height: 46px; border-radius: 14px; background: var(--button); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 15px; }
+  .menu div.wide { flex: 1.4; }
+  .night .sheet { background: #43427A; border-color: #15142E; color: #fff; }
+  .night .grab { background: #6467B3; }
+  .night .day { background: #6467B3; color: #fff; }
+  .night .day.future { background: rgba(100,103,179,.45); color: #A9A8DA; }
+  .night .forecast, .night .lock { color: #C9C8EE; }
+  .night .menu div { background: #6467B3; color: #fff; }
+  .night .header { color: #fff; }
+  .night .num { text-shadow: 0 2px 10px rgba(10,10,40,.45); }
+  .btnAccent { display:block; margin: 12px 20px 0; height: 50px; border-radius: 16px; background: #4CC764; color: #fff; font-weight: 900; font-size: 17px; text-align:center; line-height: 50px; box-shadow: 0 4px 0 #3AA552; }
+  /* Banner */
+  .banner { position: absolute; left: 0; right: 0; text-align: center; }
+  .chip { position: absolute; display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,.94); border-radius: 18px; padding: 7px 13px; font-weight: 800; font-size: 14px; box-shadow: 0 6px 16px rgba(40,60,80,.18); white-space: nowrap; }
+  /* Live demo (first frame in the list view only) */
+  .live .cloudA { animation: drift 70s linear infinite; }
+  .live .cloudB { animation: drift 45s linear infinite; }
+  .live .rays { animation: spin 60s linear infinite; transform-origin: 44px 77px; }
+  .live .glow { animation: pulse 4s ease-in-out infinite; transform-origin: 44px 77px; }
+  .live .sway { animation: sway 2.8s ease-in-out infinite; }
+  .live .bob { animation: bob 2.2s ease-in-out infinite; }
+  .live .birds { animation: fly 9s linear infinite; }
+  @keyframes drift { from { transform: translateX(-60px); } to { transform: translateX(420px); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 50% { transform: scale(1.08); } }
+  @keyframes sway { 0%,100% { transform: skewX(-1.2deg); } 50% { transform: skewX(1.6deg); } }
+  @keyframes bob { 50% { transform: translateY(-4px); } }
+  @keyframes fly { from { transform: translateX(-80px); } to { transform: translateX(460px); } }
+  .sheetTitle { max-width: 1100px; margin: 0 auto; padding: 20px 16px 0; }
+  body.grid .list { gap: 18px 18px; max-width: 1100px; margin: 0 auto; padding-top: 14px; }
+  body.grid .cell { width: 196px; }
+  body.grid .phone { transform: scale(.5227); transform-origin: 0 0; margin-bottom: -387px; border-radius: 44px; }
+  body.grid .cap b { font-size: 14px; }
+  body.grid .cap span { font-size: 11.5px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// ---------- helpers ----------
+const W = 375, SH = 545;                 // scene: from screen top to the top of the bottom sheet
+const HORIZON = Math.round(SH * 0.66);   // 360 — where the meadow meets the hills
+const FEET = SH - 38;                    // 507 — front tree stands here
+const BACK = HORIZON + 30;               // 390 — neighbours one step away stand here
+function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+const lerp = (a, b, t) => a + (b - a) * t;
+function interp(x, xs, ys) { if (x <= xs[0]) return ys[0]; for (let i = 1; i < xs.length; i++) if (x <= xs[i]) return lerp(ys[i-1], ys[i], (x - xs[i-1]) / (xs[i] - xs[i-1])); return ys[ys.length-1]; }
+// The single source of truth for where a tree stands when it is `d` habits away from the camera.
+function slot(d) {
+  const a = Math.min(Math.abs(d), 3), s = Math.sign(d);
+  return {
+    x: W / 2 + s * W * interp(a, [0, 1, 2, 3], [0, 0.34, 0.47, 0.56]),
+    feet: interp(a, [0, 1, 2, 3], [FEET, BACK, HORIZON + 16, HORIZON + 8]),
+    scale: interp(a, [0, 1, 2, 3], [1, 0.36, 0.26, 0.2]),
+    opacity: interp(a, [0, 1, 2, 2.6, 3], [1, 1, 0.9, 0.5, 0]),
+    haze: interp(a, [0, 1, 2, 3], [0, 0.16, 0.28, 0.4]),
+  };
+}
+const SPR = { // sprite sizes (img/*.png) and the on-screen height of that tree in the front slot
+  'oak-bush': [164, 247, 235], 'oak-seedling': [165, 198, 150], 'sakura-tree': [255, 262, 290], 'spruce-tree': [140, 262, 300],
+  'sakura-young': [159, 209, 230], 'dead': [199, 227, 210], 'oak-tree': [300, 311, 300],
+};
+function treeImg(name, d, opt = {}) {
+  const [sw, sh, fh] = SPR[name]; const p = slot(d);
+  let h = fh * p.scale * (opt.grow || 1); h = Math.max(h, 28);
+  const w = h * sw / sh;
+  const night = opt.night ? ' brightness(.74) saturate(.85) hue-rotate(-6deg)' : '';
+  const dry = opt.dry ? ' saturate(.6) sepia(.24) hue-rotate(-10deg) brightness(.99)' : '';
+  const glow = opt.glow ? ` drop-shadow(0 0 ${opt.glow}px rgba(255,240,170,.95))` : '';
+  const haze = p.haze > 0 ? ` contrast(${1 - p.haze * .5}) brightness(${1 + p.haze * (opt.night ? -.15 : .25)})` : '';
+  const tf = opt.tf || '';
+  return `<img class="tree ${opt.cls || ''}" src="img/${name}.png" style="left:${p.x - w / 2}px;top:${p.feet - h + 4}px;width:${w}px;height:${h}px;opacity:${p.opacity * (opt.op ?? 1)};filter:${(night + dry + glow + haze) || 'none'};transform:${tf}">`;
+}
+
+// ---------- icons ----------
+const rings = (s = 40) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#7A4E26"/><circle cx="12" cy="12" r="9.2" fill="#F3CF92"/>${[7,4.8,2.6].map((r,i)=>`<circle cx="${11.6-i*.25}" cy="${12.3+i*.15}" r="${r}" fill="none" stroke="#B57A3E" stroke-width="1.1"/>`).join('')}<circle cx="11" cy="12.7" r=".9" fill="#9A6230"/><path d="M13.6 9.4 L17.8 5.6" stroke="#9A6230" stroke-width="1.1" stroke-linecap="round"/></svg>`;
+const heart = (f) => `<svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 21 C 5 15, 2 12, 2 8 A 5 5 0 0 1 12 6 A 5 5 0 0 1 22 8 C 22 12, 19 15, 12 21 Z" fill="${f ? '#C2384D' : 'none'}" stroke="#C2384D" stroke-width="2.2"/></svg>`;
+const drop = (s = 18, c = '#3FA2DE') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><path d="M12 2.5 C 12 2.5 5 10.5 5 15 A 7 7 0 0 0 19 15 C 19 10.5 12 2.5 12 2.5 Z" fill="${c}"/><ellipse cx="9.4" cy="14.6" rx="1.6" ry="2.6" fill="#fff" opacity=".7"/></svg>`;
+const check = (s = 16, c = '#3AA552') => `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="${c}"/><path d="M7 12.5 L10.5 16 L17 8.5" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+// ---------- sky ----------
+function cloud(x, y, s, op, night, cls = '') {
+  const top = night ? '#5A5EB0' : '#FFFFFF', bot = night ? '#2F3378' : '#DDF1FA';
+  const id = 'cg' + Math.round(x * 7 + y * 13 + s * 100);
+  return `<g class="${cls}"><g transform="translate(${x} ${y}) scale(${s})" opacity="${op}">
+    <defs><linearGradient id="${id}" x1="0" y1="-30" x2="0" y2="14" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs>
+    <ellipse cx="2" cy="16" rx="44" ry="4" fill="${night ? '#151845' : '#8CCBE0'}" opacity=".18"/>
+    <g fill="url(#${id})"><circle cx="-24" cy="2" r="12"/><circle cx="-6" cy="-8" r="18"/><circle cx="16" cy="-4" r="15"/><circle cx="32" cy="4" r="9"/><rect x="-36" y="2" width="70" height="12" rx="6"/></g>
+    <path d="M-20 -6 A 12 12 0 0 1 -8 -22" stroke="${night ? '#8E91E0' : '#fff'}" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".7"/>
+  </g></g>`;
+}
+function sun(phase = 0) {
+  const rays = Array.from({ length: 12 }, (_, i) => { const a = (i / 12) * Math.PI * 2 + phase; return `<line x1="${44 + Math.cos(a) * 26}" y1="${77 + Math.sin(a) * 26}" x2="${44 + Math.cos(a) * 35}" y2="${77 + Math.sin(a) * 35}"/>`; }).join('');
+  return `<defs><radialGradient id="sglow"><stop offset="0" stop-color="#FFF6C2" stop-opacity=".85"/><stop offset=".45" stop-color="#FFF1A8" stop-opacity=".35"/><stop offset="1" stop-color="#FFF1A8" stop-opacity="0"/></radialGradient>
+    <radialGradient id="sdisc" cx=".4" cy=".38"><stop offset="0" stop-color="#FFF6BE"/><stop offset=".55" stop-color="#FBD84E"/><stop offset="1" stop-color="#F4BE34"/></radialGradient></defs>
+    <circle class="glow" cx="44" cy="77" r="66" fill="url(#sglow)"/>
+    <g class="rays" stroke="#F9D548" stroke-width="4" stroke-linecap="round" opacity=".9">${rays}</g>
+    <circle cx="44" cy="77" r="19" fill="url(#sdisc)"/>`;
+}
+function moon() {
+  return `<defs><radialGradient id="mglow"><stop offset="0" stop-color="#C9C7FF" stop-opacity=".55"/><stop offset="1" stop-color="#C9C7FF" stop-opacity="0"/></radialGradient></defs>
+  <circle cx="44" cy="77" r="62" fill="url(#mglow)"/><circle cx="44" cy="77" r="18" fill="#EEEDFB"/><circle cx="38" cy="72" r="4" fill="#D4D1EE"/><circle cx="50" cy="83" r="3" fill="#D4D1EE"/><circle cx="49" cy="70" r="1.8" fill="#D4D1EE"/>`;
+}
+function stars(seed = 5) {
+  const r = rng(seed); let s = '';
+  for (let i = 0; i < 46; i++) { const x = r() * W, y = 30 + r() * (HORIZON - 70); s += `<circle cx="${x}" cy="${y}" r="${0.7 + r() * 1}" fill="#fff" opacity="${0.35 + r() * 0.6}"/>`; }
+  for (let i = 0; i < 14; i++) { const x = 10 + r() * (W - 20), y = 40 + r() * (HORIZON - 110), k = 2.4 + r() * 3.2; s += `<path transform="translate(${x} ${y})" d="M0 ${-k*1.6} Q ${k*.25} ${-k*.25} ${k*1.6} 0 Q ${k*.25} ${k*.25} 0 ${k*1.6} Q ${-k*.25} ${k*.25} ${-k*1.6} 0 Q ${-k*.25} ${-k*.25} 0 ${-k*1.6} Z" fill="#FFE39A" opacity="${0.55 + r() * 0.45}"/>`; }
+  return s;
+}
+function birds(x, y) {
+  const b = (dx, dy, k, up) => `<path transform="translate(${x + dx} ${y + dy}) scale(${k})" d="${up ? 'M-7 -2 Q -3.5 -6 0 0 Q 3.5 -6 7 -2' : 'M-7 2 Q -3.5 -1 0 0 Q 3.5 -1 7 2'}" stroke="#4E5F70" stroke-width="1.8" fill="none" stroke-linecap="round" opacity=".7"/>`;
+  return `<g class="birds">${b(0,0,1,true)}${b(16,6,.85,false)}${b(-14,9,.8,false)}${b(30,14,.7,true)}</g>`;
+}
+
+// ---------- land ----------
+function ridge(seed, base, amps, periods, cam, factor, color1, color2, id) {
+  const r = rng(seed); const ph = periods.map(() => r() * 6.28);
+  let d = `M -20 ${SH + 300} L -20 ${base}`;
+  for (let x = -20; x <= W + 20; x += 5) {
+    const wx = x + cam * W * factor;
+    let y = base; periods.forEach((p, i) => { y -= amps[i] * (0.5 + 0.5 * Math.sin(wx / p * 6.283 + ph[i])); });
+    d += ` L ${x} ${y.toFixed(1)}`;
+  }
+  d += ` L ${W + 20} ${SH + 300} Z`;
+  return `<defs><linearGradient id="${id}" x1="0" y1="${base - 90}" x2="0" y2="${base + 10}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${color1}"/><stop offset="1" stop-color="${color2}"/></linearGradient></defs><path d="${d}" fill="url(#${id})"/>`;
+}
+function treeline(cam, night) {
+  let d = `M -20 ${HORIZON + 4}`; const r = rng(9);
+  for (let x = -20; x <= W + 30; x += 7) { const wx = x + cam * W * 0.11; const h = 5 + 4 * Math.abs(Math.sin(wx * 0.07)) + r() * 2; d += ` L ${x} ${HORIZON - 1} L ${x + 3.5} ${HORIZON - h} L ${x + 7} ${HORIZON - 1}`; }
+  d += ` L ${W + 30} ${HORIZON + 4} Z`;
+  return `<path d="${d}" fill="${night ? '#2A3B66' : '#93C9A6'}" opacity=".95"/>`;
+}
+function bushes(cam, night) { // decorative wild bushes along the far meadow edge
+  const r = rng(21); let s = '';
+  for (let i = 0; i < 7; i++) { const x = ((i * 97 + r() * 40 - cam * W * 0.14) % 700 + 700) % 700 - 60; const k = 0.7 + r() * 0.6; const c = night ? '#2D4766' : '#8DC58F';
+    s += `<g transform="translate(${x} ${HORIZON + 6}) scale(${k})" opacity=".9"><circle cx="-7" cy="-5" r="7" fill="${c}"/><circle cx="3" cy="-8" r="9" fill="${c}"/><circle cx="12" cy="-4" r="6" fill="${c}"/></g>`; }
+  return s;
+}
+function meadow(cam, night, flowers = true) {
+  const g = night ? ['#3D4C86', '#45507A', '#594B4A', '#4A3A2E'] : ['#CBE5A1', '#DCE3A0', '#EED8A0', '#E8C68A'];
+  let s = `<defs><linearGradient id="mg${night?1:0}" x1="0" y1="${HORIZON}" x2="0" y2="${812}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${g[0]}"/><stop offset=".22" stop-color="${g[1]}"/><stop offset=".5" stop-color="${g[2]}"/><stop offset="1" stop-color="${g[3]}"/></linearGradient>
+    <linearGradient id="haze${night?1:0}" x1="0" y1="${HORIZON-6}" x2="0" y2="${HORIZON+26}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="${night ? '#5357A8' : '#F2FCFF'}" stop-opacity=".55"/><stop offset="1" stop-color="${night ? '#5357A8' : '#F2FCFF'}" stop-opacity="0"/></linearGradient></defs>
+    <rect x="0" y="${HORIZON}" width="${W}" height="${812 - HORIZON}" fill="url(#mg${night?1:0})"/>
+    <rect x="0" y="${HORIZON - 6}" width="${W}" height="32" fill="url(#haze${night?1:0})"/>`;
+  // three bands of grass: back (small, slow), middle, front (big, fast)
+  const bands = [
+    { y0: HORIZON + 8, y1: HORIZON + 46, h: [3, 5], n: 26, f: 0.14, op: .55 },
+    { y0: HORIZON + 46, y1: HORIZON + 110, h: [5, 9], n: 22, f: 0.25, op: .75 },
+    { y0: HORIZON + 110, y1: SH + 6, h: [9, 15], n: 16, f: 0.42, op: .95 },
+  ];
+  const col = night ? ['#3E6440', '#2F5233'] : ['#9CCB5E', '#7DB24A'];
+  const fl = night ? ['#C9C2F0', '#E8E2FF'] : ['#FFFFFF', '#FFD84D', '#FF9FB8', '#B7A6FF'];
+  bands.forEach((b, bi) => {
+    const r = rng(40 + bi);
+    for (let i = 0; i < b.n; i++) {
+      let x = r() * 760 - cam * W * b.f; x = ((x % 760) + 760) % 760 - 190; if (x < -20 || x > W + 20) { r(); r(); r(); continue; }
+      const y = lerp(b.y0, b.y1, r()); const h = lerp(b.h[0], b.h[1], r()); const c = col[i % 2];
+      s += `<path d="M${x - h*.35} ${y} Q ${x - h*.3} ${y - h*.6} ${x - h*.5} ${y - h} Q ${x - h*.05} ${y - h*.5} ${x} ${y - h*1.1} Q ${x + h*.08} ${y - h*.5} ${x + h*.5} ${y - h*.9} Q ${x + h*.3} ${y - h*.5} ${x + h*.35} ${y} Z" fill="${c}" opacity="${b.op}"/>`;
+      if (flowers && r() < (bi === 2 ? .45 : .25)) { const fr = bi === 2 ? 3 : bi === 1 ? 2 : 1.3; s += `<circle cx="${x + h*.7}" cy="${y - 1.5}" r="${fr}" fill="${fl[Math.floor(r() * fl.length)]}" opacity="${night ? .55 : .95}"/><circle cx="${x + h*.7}" cy="${y - 1.5}" r="${fr*.38}" fill="#FFF3B0"/>`; } else r();
+    }
+  });
+  return s;
+}
+function soil(cx, w, state, night) { // under the front tree: dry / wet / half / neutral
+  const h = w * 0.17, y = FEET + 1;
+  const dryC = night ? '#7A5A3E' : '#D9B077', dryE = night ? '#654A33' : '#C99A60';
+  const wetC = night ? '#3B281B' : '#7A5233', wetE = night ? '#4F3624' : '#9A6B43';
+  let s = `<defs><radialGradient id="sd${cx|0}${state}"><stop offset="0" stop-color="${dryC}"/><stop offset="1" stop-color="${dryE}"/></radialGradient>
+    <radialGradient id="sw${cx|0}${state}"><stop offset="0" stop-color="${wetC}"/><stop offset=".75" stop-color="${wetE}"/><stop offset="1" stop-color="${wetE}" stop-opacity="0"/></radialGradient></defs>`;
+  s += `<ellipse cx="${cx}" cy="${y}" rx="${w/2}" ry="${h/2}" fill="url(#sd${cx|0}${state})"/>`;
+  if (state === 'dry') s += `<g stroke="${night ? '#4E3826' : '#A97E4B'}" stroke-width="1.3" fill="none" opacity=".7" stroke-linecap="round"><path d="M${cx-w*.32} ${y-1} l8 -2 l5 3 l7 -1"/><path d="M${cx+w*.12} ${y+3} l6 -3 l6 2"/><path d="M${cx+w*.28} ${y-2} l-5 3"/></g>`;
+  if (state === 'wet' || state === 'half') { const k = state === 'half' ? .55 : 1; s += `<ellipse cx="${cx}" cy="${y}" rx="${w/2*k*1.04}" ry="${h/2*k*1.08}" fill="url(#sw${cx|0}${state})"/>`; if (state === 'wet') s += `<ellipse cx="${cx - w*.12}" cy="${y - h*.18}" rx="${w*.16}" ry="${h*.12}" fill="#fff" opacity="${night ? .08 : .16}"/>`; }
+  return s;
+}
+function fallenLeaves(cx) { return `<g opacity=".9"><ellipse cx="${cx-38}" cy="${FEET+3}" rx="4.5" ry="2" fill="#C9B25A" transform="rotate(-20 ${cx-38} ${FEET+3})"/><ellipse cx="${cx+30}" cy="${FEET+5}" rx="4" ry="1.8" fill="#B89F4A" transform="rotate(25 ${cx+30} ${FEET+5})"/></g>`; }
+
+// ---------- effects ----------
+function can(x, y, tilt, s = 1, op = 1) { // (x, y) = tip of the spout
+  return `<g transform="translate(${x} ${y}) rotate(${tilt}) scale(${s})" opacity="${op}">
+    <path d="M0 0 L 34 20" stroke="#2F86BE" stroke-width="6" stroke-linecap="round"/>
+    <path d="M0 0 L 34 20" stroke="#5BB8E8" stroke-width="3.2" stroke-linecap="round"/>
+    <ellipse cx="0" cy="0" rx="7" ry="4.5" transform="rotate(30)" fill="#2F86BE"/>
+    <path d="M40 46 Q 58 2 82 14" stroke="#2F86BE" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M30 14 L 84 14 Q 90 14 89 20 L 85 48 Q 84 54 78 54 L 38 54 Q 32 54 31 48 L 27 20 Q 26 14 30 14 Z" fill="#5BB8E8"/>
+    <path d="M62 16 L 84 16 Q 88 16 87 21 L 83 48 Q 82 52 78 52 L 66 52 Z" fill="#3F9FD4" opacity=".75"/>
+    <path d="M34 20 L 38 46" stroke="#C9ECFB" stroke-width="4" stroke-linecap="round" opacity=".85"/>
+    <rect x="27" y="12" width="63" height="5" rx="2.5" fill="#2F86BE"/>
+  </g>`;
+}
+function dropShape(x, y, k = 1, op = 1) { return `<path transform="translate(${x} ${y}) scale(${k})" d="M0 -6 C 0 -6 -3.6 -1 -3.6 1.6 A 3.6 3.6 0 0 0 3.6 1.6 C 3.6 -1 0 -6 0 -6 Z" fill="#6EC6F2" opacity="${op}"/><circle cx="${x - 1.1*k}" cy="${y + .8*k}" r="${.9*k}" fill="#fff" opacity="${.8*op}"/>`; }
+function sparkle(x, y, k, c = '#FFFFFF', op = 1) { return `<path transform="translate(${x} ${y})" d="M0 ${-k} Q ${k*.18} ${-k*.18} ${k} 0 Q ${k*.18} ${k*.18} 0 ${k} Q ${-k*.18} ${k*.18} ${-k} 0 Q ${-k*.18} ${-k*.18} 0 ${-k} Z" fill="${c}" opacity="${op}"/>`; }
+function token(x, y, s = 1, op = 1) { // "+1" ring token flying to the counter
+  return `<g transform="translate(${x} ${y}) scale(${s})" opacity="${op}"><circle r="16" fill="#4CC764"/><circle r="16" fill="none" stroke="#fff" stroke-width="2.5"/><text y="5.5" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="15" fill="#fff">+1</text></g>`;
+}
+function leafConfetti(cx, cy, n, spread, seed, colors, op = 1, fall = 0) {
+  const r = rng(seed); let s = '';
+  for (let i = 0; i < n; i++) { const a = r() * Math.PI * 2, d = spread * (0.45 + r() * 0.55); const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d * .8 + fall * (0.5 + r()); const rot = r() * 360; const k = 0.8 + r() * 0.7; const c = colors[i % colors.length];
+    s += `<path transform="translate(${x} ${y}) rotate(${rot}) scale(${k})" d="M0 -6 Q 5 -1 0 6 Q -5 -1 0 -6 Z" fill="${c}" opacity="${op * (0.7 + r() * 0.3)}"/>`; }
+  return s;
+}
+function motes(cx, cy, n, rad, seed) { const r = rng(seed); let s = ''; for (let i = 0; i < n; i++) { const a = r() * 6.28, d = rad * (0.35 + r() * 0.65); const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d; s += `<circle cx="${x}" cy="${y}" r="${1.4 + r() * 2}" fill="#FFF3B0" opacity="${0.5 + r() * 0.5}"/><circle cx="${x}" cy="${y}" r="${5 + r() * 3}" fill="#FFF3B0" opacity=".14"/>`; } return s; }
+function raysBehind(cx, cy, op, rot) {
+  let s = `<defs><radialGradient id="rayfade" cx="${cx}" cy="${cy}" r="260" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFF3C4" stop-opacity="1"/><stop offset=".55" stop-color="#FFE7A0" stop-opacity=".55"/><stop offset="1" stop-color="#FFE7A0" stop-opacity="0"/></radialGradient></defs><g opacity="${op}" transform="rotate(${rot} ${cx} ${cy})">`;
+  for (let i = 0; i < 12; i++) { const a0 = (i / 12) * 6.283, a1 = a0 + 0.2; s += `<path d="M${cx} ${cy} L ${cx + Math.cos(a0) * 300} ${cy + Math.sin(a0) * 300} L ${cx + Math.cos(a1) * 300} ${cy + Math.sin(a1) * 300} Z" fill="url(#rayfade)"/>`; }
+  return s + `<circle cx="${cx}" cy="${cy}" r="70" fill="url(#rayfade)" opacity=".8"/></g>`;
+}
+function ribbon(y, op = 1, dy = 0, scale = 1, title = 'Деревце', sub = '21 день роста') {
+  return `<div class="banner" style="top:${y + dy}px;opacity:${op};transform:scale(${scale})">
+    <svg width="300" height="96" viewBox="0 0 300 96" style="display:block;margin:0 auto">
+      <defs><linearGradient id="rb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD866"/><stop offset="1" stop-color="#F0B53A"/></linearGradient></defs>
+      <path d="M8 34 L 46 34 L 46 74 L 8 74 L 22 54 Z" fill="#D9962A"/><path d="M292 34 L 254 34 L 254 74 L 292 74 L 278 54 Z" fill="#D9962A"/>
+      <path d="M46 74 L 60 84 L 60 74 Z" fill="#9C6516"/><path d="M254 74 L 240 84 L 240 74 Z" fill="#9C6516"/>
+      <rect x="40" y="24" width="220" height="60" rx="12" fill="url(#rb)"/>
+      <rect x="40" y="24" width="220" height="60" rx="12" fill="none" stroke="#B9801E" stroke-width="2"/>
+      <rect x="48" y="30" width="204" height="8" rx="4" fill="#fff" opacity=".35"/>
+      <text x="150" y="16" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="12.5" letter-spacing="2" fill="#FFF7E0">НОВАЯ СТАДИЯ</text>
+      <text x="150" y="65" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="30" fill="#5A3A0E">${title}</text>
+    </svg>
+    <div style="margin-top:4px;display:inline-flex;gap:6px;align-items:center;color:#FFF7E0;font-weight:800;font-size:15px;text-shadow:0 1px 4px rgba(0,0,0,.35)">${rings(18)} ${sub}</div>
+  </div>`;
+}
+
+// ---------- the screen ----------
+function screen(o) {
+  const night = !!o.night, cam = o.cam ?? 1;
+  const habits = o.habits || [
+    { s: 'sakura-tree', watered: true }, { s: 'oak-bush', live: true }, { s: 'spruce-tree', watered: false }, { s: 'sakura-young', watered: true },
+  ];
+  const cur = o.focus ?? 1;
+  let sky = night
+    ? `<defs><linearGradient id="skyN" x1="0" y1="0" x2="0" y2="${HORIZON}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#191E5E"/><stop offset=".6" stop-color="#2B2F7A"/><stop offset="1" stop-color="#5357A8"/></linearGradient></defs><rect width="${W}" height="812" fill="url(#skyN)"/>${stars()}${moon()}`
+    : `<defs><linearGradient id="skyD" x1="0" y1="0" x2="0" y2="${HORIZON}" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#9FE1F5"/><stop offset=".6" stop-color="#C9F0FA"/><stop offset="1" stop-color="#EAFBFF"/></linearGradient></defs><rect width="${W}" height="812" fill="url(#skyD)"/>${sun(o.sunPhase || 0)}`;
+  const cshift = -(cam - 1) * W;
+  sky += cloud(250 + cshift * .03, 190, .55, night ? .45 : .6, night, 'cloudA') + cloud(70 + cshift * .03, 248, .45, night ? .4 : .55, night, 'cloudA')
+       + cloud(330 + cshift * .07, 268, .8, night ? .6 : .85, night, 'cloudB') + cloud(150 + cshift * .1, 214, 1.0, night ? .7 : .95, night, 'cloudB');
+  if (!night && o.birds !== false) sky += birds(262, 232);
+  // hills
+  const far = night ? ['#3B3F8C', '#4A4F9E'] : ['#B7DCE0', '#CFEAEA'];
+  const mid = night ? ['#2C3A6E', '#34477A'] : ['#A3D3B7', '#B9E0C2'];
+  let land = ridge(3, HORIZON - 8, [58, 26, 12], [260, 120, 55], cam, 0.04, far[0], far[1], 'far' + (night ? 1 : 0))
+           + ridge(7, HORIZON + 2, [30, 14, 6], [170, 80, 33], cam, 0.08, mid[0], mid[1], 'mid' + (night ? 1 : 0))
+           + treeline(cam, night) + bushes(cam, night) + meadow(cam, night, o.flowers !== false);
+  if (night) { const r = rng(77); for (let i = 0; i < 8; i++) { const x = 20 + r() * 335, y = HORIZON + 30 + r() * 140; land += `<circle cx="${x}" cy="${y}" r="7" fill="#E9FF8A" opacity=".18"/><circle cx="${x}" cy="${y}" r="2" fill="#F4FFB8" opacity="${.6 + r() * .4}"/>`; } }
+
+  // trees: neighbours (pictures) far → near, then the live tree
+  const main = habits[cur];
+  let trees = '';
+  const order = habits.map((h, i) => ({ h, i, d: i - cam })).filter((t) => t.i !== cur || !o.hideLive).sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+  for (const t of order) {
+    if (Math.abs(t.d) > 2.9) continue;
+    if (t.i === cur && !o.noLive) continue;
+    trees += treeImg(t.h.s, t.d, { night, dry: !t.h.watered && !t.h.dead && t.i !== cur, cls: 'sway' });
+  }
+  // front soil + live tree
+  const live = o.live || {};
+  const d0 = cur - cam, p0 = slot(d0);
+  let front = '';
+  if (!o.noLive && !o.empty) {
+    const [sw, sh, fh] = SPR[live.s || main.s];
+    const w = fh * p0.scale * sw / sh;
+    front += `<svg class="L" viewBox="0 0 375 812">${Math.abs(d0) < 0.05 ? soil(p0.x, Math.max(80, w * 0.95), live.soil || 'dry', night) + (live.soil === 'dry' && live.dry ? fallenLeaves(p0.x) : '') : ''}${live.behind || ''}</svg>`;
+    front += treeImg(live.s || main.s, d0, { night, dry: live.dry, glow: live.glow, tf: live.tf || '', cls: live.cls || 'sway', grow: live.grow, op: live.op });
+    if (live.s2) front += treeImg(live.s2, d0, { night, glow: live.glow2, tf: live.tf2 || '', grow: live.grow2, op: live.op2 });
+  }
+  // top bar
+  const dots = habits.map((h, i) => {
+    const active = i === cur; const c = night ? '#FFFFFF' : '#1E1B16';
+    if (active) return `<div class="dot" style="width:18px;background:${c};opacity:.9"></div>`;
+    return h.watered || h.dead ? `<div class="dot" style="background:${c};opacity:.38"></div>` : `<div class="dot" style="border:1.6px solid ${c};opacity:.55"></div>`;
+  }).join('');
+  const hearts = `<div class="pill">${heart(1)}${heart(1)}${heart(o.hearts === 2 ? 0 : 1)}</div>`;
+  const hdr = o.empty ? `<div class="header" style="top:104px"><div class="num" style="font-size:40px">Elevate</div><div class="name" style="color:${night ? '#C9C8EE' : '#6E6152'};opacity:1">Сделай жизнь лучше</div></div>`
+    : `<div class="header" style="opacity:${o.hdrOp ?? 1};transform:translateX(${o.hdrX || 0}px)"><div class="counter" style="position:relative">${o.dead ? tomb() : `<span style="display:inline-block;transform:scale(${o.ringPop || 1});filter:${o.ringGlow ? 'drop-shadow(0 0 8px #FFE27A)' : 'none'}">${rings(40)}</span>`}<span class="num">${o.count ?? 12}</span>${o.plus ? `<span class="plus" style="right:-34px;top:${o.plusY ?? 6}px;opacity:${o.plusOp ?? 1}">+1</span>` : ''}</div><div class="name" style="opacity:${o.hdrName ?? .85}">${o.name || 'Без сладкого'}</div></div>`;
+  return `<div class="phone ${night ? 'night' : ''} ${o.liveDemo ? 'live' : ''}">
+    <svg class="L" viewBox="0 0 375 812">${sky}${land}</svg>
+    ${trees}
+    ${o.dim ? `<div class="L" style="height:${SH + 30}px;background:radial-gradient(circle at ${W/2}px ${o.dimY || 400}px, rgba(24,18,52,${o.dim * .25}) 0, rgba(24,18,52,${o.dim}) 230px)"></div>` : ''}
+    ${front}
+    <svg class="L" viewBox="0 0 375 812">${o.fx || ''}</svg>
+    <div class="dots">${o.empty ? '' : dots}</div>${o.empty || o.dead ? '' : hearts}
+    ${hdr}
+    ${o.chip || ''}
+    ${o.banner || ''}
+    ${sheet(o)}
+    <svg class="L" viewBox="0 0 375 812" style="pointer-events:none">${o.fxTop || ''}</svg>
+  </div>`;
+}
+function tomb() { return `<svg width="40" height="40" viewBox="0 0 24 24"><path d="M6 21 L6 10 A6 6 0 0 1 18 10 L18 21 Z" fill="#B9BCC4" stroke="#6F7380" stroke-width="1.5"/><path d="M9.5 11 H14.5 M9.5 14 H14.5 M9.5 17 H13" stroke="#6F7380" stroke-width="1.4" stroke-linecap="round"/></svg>`; }
+function sheet(o) {
+  if (o.empty) return `<div class="sheet"><div class="grab"></div><div class="status" style="font-size:22px;font-weight:900;margin-top:14px">Посади первое дерево</div><div class="forecast" style="padding:0 30px;line-height:1.4;margin-top:6px">Выбери привычку. Каждый день, когда держишься, поливай дерево — и оно вырастет.</div><div class="btnAccent">Посадить дерево</div></div>`;
+  if (o.dead) return `<div class="sheet"><div class="grab"></div><div class="status" style="font-size:18px;font-weight:900">Дерево погибло</div><div class="forecast" style="padding:0 30px;line-height:1.4">Оно росло 34 дня и останется в лесу. Из его семени можно вырастить новое.</div><div class="btnAccent" style="margin:12px 70px 0;height:44px;line-height:44px;font-size:15px">Посадить семя</div><div class="menu" style="padding-top:22px"><div>Лес</div><div class="wide">+ Новая привычка</div><div>Настройки</div></div></div>`;
+  const done = o.done;
+  return `<div class="sheet"><div class="grab"></div>
+    <div class="status" style="color:${done ? '#2E9A48' : 'inherit'}">${done ? check(17) + ' Сегодня полито' : drop(17) + ' Дерево ждёт полива — нажми на него'}</div>
+    <div class="forecast">${rings(17)} ${o.forecast || 'Дерево через 37 дней · пн 3'}</div>
+    <div class="strip"><div class="day">вс<b>25</b></div><div class="day">пн<b>26</b></div><div class="day today">сегодня<b>27</b></div><div class="day future">ср<b>28</b></div><div class="day future">чт<b>29</b></div></div>
+    <div class="lock">Закрепить результат</div>
+    <div class="menu"><div>Лес</div><div class="wide">+ Новая привычка</div><div>Настройки</div></div></div>`;
+}
+
+// ---------- the key frames ----------
+const TX = W / 2; // front tree x
+const bubble = (x, y, op = 1, s = 1) => `<div style="position:absolute;left:${x - 19}px;top:${y - 19}px;width:38px;height:38px;border-radius:19px;background:rgba(255,255,255,.95);box-shadow:0 6px 14px rgba(30,70,100,.22);display:flex;align-items:center;justify-content:center;opacity:${op};transform:scale(${s})" class="bob">${drop(20)}<div style="position:absolute;bottom:-5px;left:9px;width:10px;height:10px;background:rgba(255,255,255,.95);transform:rotate(45deg);border-radius:2px"></div></div>`;
+const crownTop = FEET - 235; // 272 for the young oak
+
+const frames = [
+  { id: '01-день-не-полито', t: 'День · не полито', d: 'Дерево поникло и выцвело, земля у корней сухая и в трещинах, над кроной покачивается пузырь с каплей. Точки сверху: пустое кольцо — эту привычку сегодня ещё не поливали (ёлка справа тоже сухая).',
+    o: { live: { dry: true, soil: 'dry', tf: 'scaleY(.955) scaleX(1.02) rotate(-1.5deg)' }, chip: bubble(TX + 62, crownTop + 6), liveDemo: true } },
+  { id: '02-полив-1-лейка', t: 'Полив · 0,3 с', d: 'Нажатие: дерево чуть приседает, пузырь лопается, справа выплывает лейка. Лёгкая вибрация.',
+    o: { live: { dry: true, soil: 'dry', tf: 'scaleY(.94) scaleX(1.03)' }, chip: bubble(TX + 62, crownTop + 6, .35, 1.25), fx: can(TX + 40, FEET - 96, -8, .92, .9) } },
+  { id: '03-полив-2-вода', t: 'Полив · 0,9 с', d: 'Лейка наклонилась, льётся струйка капель, брызги у корней, тёмное мокрое пятно расползается от ствола.',
+    o: { live: { dry: true, soil: 'half', tf: 'scaleY(.96)' }, fx: can(TX + 40, FEET - 96, -34) + [0, 1, 2, 3, 4, 5].map((i) => dropShape(TX + 30 - i * 2, FEET - 82 + i * 13, 1, .95)).join('') + [[-14, 0], [-6, -6], [6, -5], [14, 1]].map(([dx, dy]) => dropShape(TX + 18 + dx, FEET - 4 + dy, .55, .8)).join('') + `<ellipse cx="${TX + 18}" cy="${FEET + 1}" rx="14" ry="3" fill="none" stroke="#BFE8FA" stroke-width="1.5" opacity=".8"/>` } },
+  { id: '04-полив-3-ожило', t: 'Полив · 1,4 с', d: 'Дерево распрямляется с пружинкой и наливается цветом, на кроне вспыхивают блёстки. Жетон «+1» летит по дуге к счётчику. Вибрация «успех».',
+    o: { live: { soil: 'wet', tf: 'scaleY(1.02) scaleX(.99)', glow: 6 }, fx: can(TX + 46, FEET - 100, -6, .9, .45) + sparkle(TX - 40, crownTop + 40, 7) + sparkle(TX + 30, crownTop + 22, 9) + sparkle(TX - 6, crownTop + 70, 5) + sparkle(TX + 52, crownTop + 80, 6, '#FFF6C2'),
+         fxTop: `<path d="M${TX} ${crownTop - 4} Q ${TX + 70} ${crownTop - 90} ${TX + 46} 128" stroke="#4CC764" stroke-width="2" stroke-dasharray="2 6" fill="none" stroke-linecap="round" opacity=".55"/>` + token(TX + 52, crownTop - 66, .85) } },
+  { id: '05-день-полито', t: 'День · полито', d: 'Спокойный вид: дерево сочное, крона мягко качается на ветру, земля тёмная и влажная до конца дня. Счётчик 13, у него на секунду «+1». Точка привычки стала сплошной.',
+    o: { count: 13, plus: true, done: true, ringGlow: true, habits: [{ s: 'sakura-tree', watered: true }, { s: 'oak-bush', live: true, watered: true }, { s: 'spruce-tree', watered: false }, { s: 'sakura-young', watered: true }], live: { soil: 'wet' } } },
+  { id: '06-повторное-нажатие', t: 'Уже полито', d: 'Нажатие второй раз за день: дерево весело покачивается, пара листиков вспархивает, над ним мягкая подсказка. Без лейки и без вибрации «успех».',
+    o: { count: 13, done: true, habits: [{ s: 'sakura-tree', watered: true }, { s: 'oak-bush', live: true, watered: true }, { s: 'spruce-tree', watered: false }, { s: 'sakura-young', watered: true }], live: { soil: 'wet', tf: 'rotate(2.2deg)' },
+         chip: `<div class="chip" style="left:${TX - 98}px;top:${crownTop - 44}px">${check(16)} Сегодня уже полито</div>`, fx: leafConfetti(TX + 10, crownTop + 30, 3, 70, 3, ['#8BC34A', '#B9DE6C']) } },
+  { id: '07-стадия-1-сбор', t: 'Новая стадия · 0,3 с', d: 'После полива сцена темнеет, к дереву по спирали стекаются огоньки, кустик дрожит всё сильнее. Три нарастающих толчка вибрации.',
+    o: { count: 20, done: true, dim: .42, dimY: FEET - 70, live: { s: 'oak-seedling', soil: 'wet', glow: 10, tf: 'rotate(-1.5deg)' }, fx: motes(TX, FEET - 70, 22, 150, 4) } },
+  { id: '08-стадия-2-вспышка', t: 'Новая стадия · 0,6 с', d: 'Сильный толчок. Вспышка тёплого света, из-за дерева поднимаются лучи, кустик превращается в деревце, вылетает облако листьев.',
+    o: { count: 20, done: true, dim: .5, dimY: FEET - 100, live: { s: 'oak-bush', soil: 'wet', glow: 18, tf: 'scale(1.08)', behind: raysBehind(TX, FEET - 110, .75, 0) + `<circle cx="${TX}" cy="${FEET - 100}" r="120" fill="#FFFBE6" opacity=".55"/>` },
+         fx: leafConfetti(TX, FEET - 120, 22, 140, 8, ['#8BC34A', '#B9DE6C', '#5E9A2C', '#FFE27A']) + sparkle(TX - 90, FEET - 200, 9, '#FFF6C2') + sparkle(TX + 96, FEET - 160, 7, '#FFF6C2') } },
+  { id: '09-стадия-3-подпись', t: 'Новая стадия · 1,4 с', d: 'Золотая лента «Новая стадия — Деревце» выпрыгивает под счётчиком; лучи медленно вращаются, листья плавно падают. Тап по экрану — пропустить.',
+    o: { count: 20, done: true, hdrName: .35, dim: .5, dimY: FEET - 100, banner: ribbon(194), live: { s: 'oak-bush', soil: 'wet', glow: 8, behind: raysBehind(TX, FEET - 110, .6, 9) },
+         fx: leafConfetti(TX, FEET - 60, 18, 175, 11, ['#8BC34A', '#B9DE6C', '#5E9A2C', '#FFE27A'], .9, 40) } },
+  { id: '10-стадия-4-итог', t: 'Новая стадия · 2,5 с', d: 'Лента уплывает вверх и тает, свет гаснет, жетон «+1» влетает в счётчик — 21. Дальше обычный спокойный вид.',
+    o: { count: 21, ringPop: 1.25, ringGlow: true, done: true, forecast: 'Дерево через 29 дней · ср 26', dim: .18, dimY: FEET - 100, banner: ribbon(170, .3, 0, .96), live: { s: 'oak-bush', soil: 'wet', behind: raysBehind(TX, FEET - 110, .18, 14) },
+         fx: leafConfetti(TX, FEET - 10, 10, 170, 12, ['#8BC34A', '#B9DE6C', '#5E9A2C'], .6, 30), fxTop: token(158, 122, .6, .75) } },
+  { id: '11-проезд-камеры', t: 'Проезд к соседнему дереву', d: 'Середина свайпа влево: дуб уходит назад и влево, ёлка выходит вперёд по дуге. Холмы сдвинулись чуть-чуть, трава — сильнее. Шапка гаснет и сменится на имя ёлки.',
+    o: { cam: 1.4, hdrOp: .25, hdrX: -16, live: { dry: true, soil: 'dry' } } },
+  { id: '12-ночь', t: 'Ночь · полито', d: 'Луна с мягким ореолом, мерцающие звёзды, тёмные облака с подсвеченным краем, над травой светлячки. Земля у корней мокрая.',
+    o: { night: true, count: 13, done: true, habits: [{ s: 'sakura-tree', watered: true }, { s: 'oak-bush', live: true, watered: true }, { s: 'spruce-tree', watered: false }, { s: 'sakura-young', watered: true }], live: { soil: 'wet' } } },
+  { id: '13-погибло', t: 'Погибшее дерево', d: 'Нет ветра, нет полива и пузыря. Сухой ствол стоит на обычной земле, соседи на месте. Внизу — посадить семя.',
+    o: { dead: true, count: 34, hearts: 2, habits: [{ s: 'sakura-tree', watered: true }, { s: 'dead', live: true, dead: true }, { s: 'spruce-tree', watered: false }, { s: 'sakura-young', watered: true }], live: { soil: 'neutral', cls: '' } } },
+  { id: '14-пусто', t: 'Нет привычек', d: 'Пустой луг, в центре — лунка с семечком, которое тихо мерцает. Нажатие на лунку или кнопку — посадить дерево.',
+    o: { empty: true, habits: [], noLive: true, focus: 0, cam: 0,
+         fx: soil(TX, 96, 'dry', false).replace(/A97E4B/g, 'transparent') + `<ellipse cx="${TX}" cy="${FEET - 2}" rx="16" ry="5" fill="#8A5E33"/><ellipse cx="${TX}" cy="${FEET - 6}" rx="6" ry="4.5" fill="#B07A3E"/><ellipse cx="${TX - 1.5}" cy="${FEET - 7.5}" rx="2" ry="1.3" fill="#E7C08A"/><circle cx="${TX}" cy="${FEET - 6}" r="26" fill="#FFF3B0" opacity=".25"/>` + sparkle(TX + 16, FEET - 26, 6, '#FFFFFF') + sparkle(TX - 18, FEET - 18, 4, '#FFFFFF', .8) + `<ellipse cx="${TX}" cy="${FEET}" rx="58" ry="14" fill="none" stroke="#fff" stroke-width="2" stroke-dasharray="3 7" opacity=".7"/>` } },
+];
+
+// ---------- render ----------
+const q = new URLSearchParams(location.search);
+const root = document.getElementById('root');
+if (q.get('f')) {
+  document.body.classList.add('single');
+  const f = frames.find((x) => x.id.startsWith(q.get('f')));
+  root.innerHTML = screen({ ...f.o, liveDemo: false });
+} else {
+  const grid = q.has('grid');
+  if (grid) document.body.classList.add('grid');
+  root.innerHTML = (grid
+    ? `<div class="sheetTitle"><h1 style="font-weight:900;font-size:26px">Волна 1 · Живой главный экран</h1><p style="color:#6E6152;margin-top:4px">Ключевые кадры: небо, луг с соседними деревьями, полив, новая стадия, проезд камеры, ночь, особые состояния</p></div>`
+    : `<div class="intro"><h1>Волна 1 · Живой главный экран</h1><p>Ключевые кадры анимаций и состояний. Первый кадр слегка «живой»: облака плывут, лучи солнца вращаются, дерево качается. Подробности, числа и тайминги — в спец.md рядом.</p></div>`)
+    + `<div class="list">${frames.map((f, i) => `<div class="cell">${screen({ ...f.o, liveDemo: !grid && f.o.liveDemo })}<div class="cap"><b>${i + 1}. ${f.t}</b><span>${f.d}</span></div></div>`).join('')}</div>`;
+}
+</script>
+</body>
+</html>

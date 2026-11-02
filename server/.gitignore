@@ -1,0 +1,4 @@
+.deploy/
+dev*.db*
+dev.db*
+apk/

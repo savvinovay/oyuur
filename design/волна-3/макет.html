@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Мой лес — волна 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== Tokens: the same numbers as tokens.ts (wave 2) + new ones of wave 3 (спец.md, раздел 6) ===== */
+.ph {
+  --page:#FFF0DA; --sheet:#FFE3BE; --card:#FFFFFF; --sunken:#F7D5A6; --header:#F4C98E;
+  --text:#1E1B16; --soft:#6E6152; --muted:#A08E78; --outline:#3A2E22; --divider:rgba(58,46,34,.12);
+  --accent:#4CC764; --accentLip:#34A64D; --accentSoft:#DDF5DF; --water:#3FA2DE; --waterSoft:#DCEFFB;
+  --gold:#FFCF4D; --goldLip:#D99A1E; --goldInk:#5A3A0E; --danger:#D24A43; --dangerText:#B23A3A;
+  --sec:#F5D3A0; --secLip:#DDB47A; --cardLip:#E9D3B0; --skyCard:#DDF5FB; --chipBg:rgba(255,255,255,.7);
+  --e1:0 2px 6px rgba(90,58,18,.14); --e2:0 6px 14px rgba(90,58,18,.16); --e3:0 14px 32px rgba(90,58,18,.24);
+  --sheetShadow:0 -6px 24px rgba(90,58,18,.12);
+  /* new in wave 3 */
+  --glass:rgba(255,255,255,.92); --toast:#1E1B16; --toastAction:#FFCF4D;
+}
+.ph.night {
+  --page:#2E2D63; --sheet:#43427A; --card:#6467B3; --sunken:#383769; --header:#34336A;
+  --text:#FFFFFF; --soft:#C9C8EE; --muted:#9C9BD0; --outline:#15142E; --divider:rgba(255,255,255,.12);
+  --accentSoft:#2E5E55; --waterSoft:#34508A; --sec:#6467B3; --secLip:#4B4E96; --cardLip:#4B4E96;
+  --skyCard:#2C2D6A; --chipBg:rgba(255,255,255,.14);
+  --e1:0 2px 6px rgba(5,4,26,.40); --e2:0 6px 14px rgba(5,4,26,.45); --e3:0 14px 32px rgba(5,4,26,.55);
+  --sheetShadow:0 -6px 24px rgba(5,4,26,.35);
+  --glass:rgba(67,66,122,.92); --toast:#15142E;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#EFE3CF; font-family:'Nunito',system-ui,sans-serif; font-weight:700; color:#1E1B16; }
+.intro { max-width:860px; margin:32px auto 8px; padding:0 16px; }
+.intro h1 { font-weight:900; font-size:30px; }
+.intro p { color:#6E6152; margin-top:6px; line-height:1.45; }
+.list { display:flex; flex-wrap:wrap; gap:36px 28px; justify-content:center; padding:24px 16px 64px; }
+.cell { width:375px; } .cell.w320 { width:320px; } .cell.w430 { width:430px; }
+.cap { margin-top:10px; }
+.cap b { font-weight:900; font-size:17px; display:block; }
+.cap span { color:#6E6152; font-size:13.5px; line-height:1.4; display:block; margin-top:3px; }
+.ph { position:relative; overflow:hidden; border-radius:40px; box-shadow:0 18px 40px rgba(60,40,10,.18),0 0 0 1px rgba(0,0,0,.06); background:var(--page); color:var(--text); }
+body.single { background:transparent; }
+body.single .ph { border-radius:0; box-shadow:none; }
+.abs { position:absolute; }
+.sbar { position:absolute; top:0; left:0; right:0; height:47px; display:flex; justify-content:space-between; align-items:center; padding:0 30px 0 36px; font-weight:800; font-size:15px; z-index:50; }
+.home { position:absolute; bottom:8px; left:50%; width:134px; height:5px; margin-left:-67px; border-radius:3px; background:#1E1B16; opacity:.85; z-index:60; }
+.night .home { background:#fff; }
+/* map */
+.map { position:absolute; inset:0; overflow:hidden; }
+.tree { position:absolute; pointer-events:none; }
+.bubble { position:absolute; width:26px; height:26px; border-radius:13px; background:var(--card); box-shadow:var(--e2); display:flex; align-items:center; justify-content:center; z-index:4; }
+.newtag { position:absolute; z-index:5; background:var(--gold); color:var(--goldInk); font-size:10px; font-weight:900; letter-spacing:.6px; text-transform:uppercase; padding:2px 7px; border-radius:8px; box-shadow:0 2px 0 var(--goldLip), var(--e1); white-space:nowrap; }
+/* floating header */
+.fh { position:absolute; left:0; right:0; z-index:30; display:flex; align-items:center; justify-content:space-between; padding:0 16px; }
+.cbtn { width:44px; height:44px; border-radius:22px; background:var(--glass); box-shadow:var(--e1); display:flex; align-items:center; justify-content:center; color:var(--text); flex:none; }
+.cap2 { height:44px; border-radius:22px; background:var(--glass); box-shadow:var(--e1); display:flex; align-items:center; gap:8px; padding:0 18px; font-weight:900; font-size:18px; line-height:24px; white-space:nowrap; overflow:hidden; }
+.cap2 small { font-weight:800; font-size:13px; color:var(--soft); }
+.banner { height:44px; border-radius:22px; background:var(--glass); box-shadow:var(--e2); display:flex; align-items:center; gap:8px; padding:0 6px 0 14px; font-weight:800; font-size:15px; flex:1; margin:0 8px 0 0; white-space:nowrap; overflow:hidden; }
+.banner span { flex:1; overflow:hidden; text-overflow:ellipsis; }
+.banner .x { width:32px; height:32px; border-radius:16px; background:var(--sunken); display:flex; align-items:center; justify-content:center; flex:none; }
+.topfade { position:absolute; left:0; right:0; top:0; z-index:20; pointer-events:none; }
+/* sheet */
+.sheet { position:absolute; left:0; right:0; height:1200px; background:var(--sheet); border:1.5px solid var(--outline); border-bottom:0; border-radius:32px 32px 0 0; box-shadow:var(--sheetShadow), inset 0 1px 0 rgba(255,255,255,.55); z-index:40; padding-top:8px; }
+.night .sheet { box-shadow:var(--sheetShadow), inset 0 1px 0 rgba(255,255,255,.10); }
+.handle { height:20px; position:relative; }
+.handle i { position:absolute; top:6px; width:19px; height:5px; border-radius:3px; background:var(--card); box-shadow:0 1px 1px rgba(0,0,0,.08); }
+.pills { display:flex; justify-content:center; gap:8px; margin-top:4px; padding:0 12px; }
+.pill { display:inline-flex; align-items:center; gap:6px; padding:0 12px; height:32px; border-radius:16px; background:var(--card); box-shadow:var(--e1); font-size:13px; font-weight:800; white-space:nowrap; }
+.pill.s { height:24px; padding:0 9px; font-size:12px; gap:4px; border-radius:12px; }
+.pill.cmp { padding:0 9px; gap:4px; font-size:12px; }
+.btn { display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; border-radius:14px; position:relative; height:48px; font-size:16px; white-space:nowrap; }
+.btn.L { height:56px; font-size:18px; border-radius:16px; }
+.btn.pri { background:var(--accent); color:#fff; box-shadow:0 4px 0 var(--accentLip); }
+.btn.sec { background:var(--sec); color:var(--text); box-shadow:0 4px 0 var(--secLip); }
+.btn.gold { background:var(--gold); color:var(--goldInk); box-shadow:0 4px 0 var(--goldLip); }
+.card2 { display:flex; gap:14px; padding:0 16px; position:relative; }
+.thumbBox { width:76px; height:76px; border-radius:16px; background:var(--skyCard); position:relative; overflow:hidden; flex:none; }
+.thumbBox .gr { position:absolute; left:0; right:0; bottom:0; height:16px; }
+.thumbBox img { position:absolute; left:50%; transform:translateX(-50%); bottom:7px; }
+.cname { font-weight:900; font-size:18px; line-height:24px; }
+.cline { display:flex; align-items:center; gap:5px; font-size:14px; color:var(--soft); margin-top:2px; line-height:20px; }
+.chips { display:flex; gap:6px; margin-top:7px; flex-wrap:nowrap; overflow:hidden; }
+.xbtn { position:absolute; right:16px; top:-2px; width:32px; height:32px; border-radius:16px; background:var(--sunken); display:flex; align-items:center; justify-content:center; }
+.brow { display:flex; gap:8px; padding:0 16px; margin-top:14px; }
+.toast { position:absolute; left:16px; right:16px; height:48px; border-radius:24px; background:var(--toast); color:#fff; z-index:45; display:flex; align-items:center; gap:10px; padding:0 8px 0 14px; font-size:14px; font-weight:800; box-shadow:0 10px 24px rgba(20,10,0,.25); }
+.toast span { flex:1; }
+.toast b { color:var(--toastAction); font-weight:900; padding:0 12px; height:40px; display:flex; align-items:center; gap:6px; }
+/* list */
+.search { margin:12px 16px 0; height:44px; border-radius:14px; background:var(--sunken); display:flex; align-items:center; gap:8px; padding:0 14px; color:var(--soft); font-size:15px; }
+.fchips { display:flex; gap:8px; padding:12px 16px 0; overflow:hidden; white-space:nowrap; }
+.fchip { height:34px; border-radius:17px; padding:0 14px; display:flex; align-items:center; gap:6px; background:var(--sunken); font-size:14px; font-weight:800; flex:none; }
+.fchip.on { background:var(--accent); color:#fff; }
+.fchip i { font-style:normal; opacity:.7; }
+.lcap { font-size:12px; font-weight:900; letter-spacing:.8px; text-transform:uppercase; color:var(--soft); padding:18px 22px 6px; }
+.lrow { display:flex; align-items:center; gap:12px; height:64px; padding:0 16px; }
+.lrow .lt { width:48px; height:48px; border-radius:12px; background:var(--skyCard); position:relative; overflow:hidden; flex:none; }
+.lrow .lt img { position:absolute; left:50%; transform:translateX(-50%); bottom:4px; }
+.lrow .lt .gr { position:absolute; left:0; right:0; bottom:0; height:10px; }
+.lrow .ln { flex:1; min-width:0; }
+.lrow .ln b { display:block; font-weight:800; font-size:16px; line-height:21px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lrow .ln span { display:flex; align-items:center; gap:4px; font-size:13px; color:var(--soft); line-height:18px; }
+.ldiv { height:1px; background:var(--divider); margin-left:76px; margin-right:16px; }
+/* annotations */
+.finger { position:absolute; width:46px; height:46px; border-radius:23px; background:rgba(255,255,255,.55); border:2px solid rgba(30,27,22,.35); z-index:70; box-shadow:0 4px 14px rgba(0,0,0,.18); }
+.note { position:absolute; z-index:80; background:#1E1B16; color:#fff; font-size:12px; font-weight:800; padding:5px 9px; border-radius:10px; line-height:1.3; }
+.night .note { background:#fff; color:#1E1B16; }
+.lbl { font-size:11px; color:#6E6152; font-weight:800; }
+</style>
+</head>
+<body>
+<div class="intro" id="intro">
+  <h1>Волна 3 · «Мой лес — свой участок»</h1>
+  <p>Лес становится картой: огороженный газон-участок на лугу, вид сверху-сбоку (изометрия). Листается пальцем во все стороны, щипком приближается, деревья переставляются долгим нажатием или кнопкой «Переставить». Внизу — та же плашка, что на главном: свёрнута — факты, тап по дереву — карточка, вверх — список всех деревьев. Деревья в кадрах — снимки настоящих рисунков приложения; земля, забор, трава и всё поверх — новое. Числа — в <b>спец.md</b>. Режимы: <code>?f=01</code> — один кадр, без параметров — все.</p>
+</div>
+<div class="list" id="list"></div>
+<script>
+// ============ Glyphs: colored brand icons, viewBox 24 (copy these paths into ui/ds/glyphs.tsx) ============
+const GEAR = 'M19.95 9.97 L22.50 10.52 L22.50 13.48 L19.95 14.03 L19.05 16.18 L20.47 18.38 L18.38 20.47 L16.18 19.05 L14.03 19.95 L13.48 22.50 L10.52 22.50 L9.97 19.95 L7.82 19.05 L5.62 20.47 L3.53 18.38 L4.95 16.18 L4.05 14.03 L1.50 13.48 L1.50 10.52 L4.05 9.97 L4.95 7.82 L3.53 5.62 L5.62 3.53 L7.82 4.95 L9.97 4.05 L10.52 1.50 L13.48 1.50 L14.03 4.05 L16.18 4.95 L18.38 3.53 L20.47 5.62 L19.05 7.82 Z';
+const SPROUT = `<path d="M12 20.5 V12.5" stroke="#5E9A2C" stroke-width="2" stroke-linecap="round"/><path d="M12 13.5 C7.2 13.6 4.4 10.8 4.2 6.6 C8.6 6.4 11.8 9 12 13.5Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.3" stroke-linejoin="round"/><path d="M12 11.6 C12.2 7.4 15.2 4.4 19.8 4.3 C19.8 8.8 16.8 11.6 12 11.6Z" fill="#B9DE6C" stroke="#4E8A2A" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.8 8.4 C8.3 9 9.6 10.2 10.6 12" stroke="#4E8A2A" stroke-width=".9" fill="none" stroke-linecap="round" opacity=".55"/>`;
+const G = {
+  rings: `<circle cx="12" cy="12" r="11" fill="#7A4E26"/><circle cx="12" cy="12" r="9.2" fill="#F3CF92"/><circle cx="11.6" cy="12.3" r="6.4" fill="none" stroke="#B57A3E" stroke-width="1.8"/><circle cx="11.35" cy="12.45" r="3.4" fill="none" stroke="#B57A3E" stroke-width="1.8"/><circle cx="11" cy="12.7" r="1.2" fill="#9A6230"/>`,
+  drop: `<path d="M12 2.5 C12 2.5 4.5 11 4.5 15 A7.5 7.5 0 0 0 19.5 15 C19.5 11 12 2.5 12 2.5Z" fill="#3FA2DE" stroke="#2A80BC" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.6 15.2 A3.6 3.6 0 0 0 11.4 18.6" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none" opacity=".85"/>`,
+  check: `<circle cx="12" cy="12" r="10.5" fill="#4CC764" stroke="#34A64D" stroke-width="1.3"/><path d="M7.2 12.4 L10.4 15.5 L16.8 8.9" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`,
+  sprout: `<ellipse cx="12" cy="20.8" rx="6.5" ry="1.9" fill="#C99A60"/>` + SPROUT,
+  stageUp: `<ellipse cx="11" cy="21" rx="6" ry="1.7" fill="#C99A60"/><path d="M11 21 V13" stroke="#8A6A3B" stroke-width="2.2" stroke-linecap="round"/><circle cx="11" cy="10.5" r="6.3" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.3"/><circle cx="8.8" cy="8.6" r="2" fill="#B9DE6C"/><path d="M19 1.8 Q19.5 4.5 22.2 5 Q19.5 5.5 19 8.2 Q18.5 5.5 15.8 5 Q18.5 4.5 19 1.8Z" fill="#FFCF4D" stroke="#D99A1E" stroke-width=".9" stroke-linejoin="round"/>`,
+  snowflake: `<g stroke="#2F86BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M12 3 V21 M4.2 7.5 L19.8 16.5 M4.2 16.5 L19.8 7.5"/><path d="M9.6 4.6 L12 6.6 L14.4 4.6 M9.6 19.4 L12 17.4 L14.4 19.4"/></g><circle cx="12" cy="12" r="1.8" fill="#2F86BE"/>`,
+  tombstone: `<path d="M6 21 V10 A6 6 0 0 1 18 10 V21Z" fill="#C3C6CE" stroke="#6F7380" stroke-width="1.4" stroke-linejoin="round"/><path d="M8.2 10.6 A4 4 0 0 1 11 7.2" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".7"/><path d="M9.5 12 H14.5 M9.5 15 H14.5 M9.5 18 H13" stroke="#6F7380" stroke-width="1.4" stroke-linecap="round"/><path d="M3 21.3 H21" stroke="#5E9A2C" stroke-width="2.4" stroke-linecap="round"/>`,
+  plaque: `<path d="M12 14 V22" stroke="#8A6A3B" stroke-width="2.4" stroke-linecap="round"/><rect x="3.5" y="3.5" width="17" height="11.5" rx="2.6" fill="#FFCF4D" stroke="#B9801E" stroke-width="1.4"/><path d="M12 5.6 L13.25 8.2 L16 8.5 L13.95 10.35 L14.5 13.1 L12 11.75 L9.5 13.1 L10.05 10.35 L8 8.5 L10.75 8.2Z" fill="#FFF7E0" stroke="#D99A1E" stroke-width=".8" stroke-linejoin="round"/>`,
+  seed: `<ellipse cx="12" cy="20.6" rx="7" ry="2" fill="#C99A60"/><ellipse cx="10.6" cy="15.6" rx="5.2" ry="3.6" transform="rotate(-20 10.6 15.6)" fill="#9A6634" stroke="#6B4320" stroke-width="1.2"/><ellipse cx="9.2" cy="14.6" rx="2" ry="1" transform="rotate(-20 9.2 14.6)" fill="#C99060"/><path d="M14.4 13 C15.2 9.8 17 8 19.8 7.4" stroke="#5E9A2C" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M17.4 8.2 C17.2 5.8 18.6 4.2 20.8 4 C21 6.4 19.6 7.8 17.4 8.2Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1"/>`,
+  heart: `<path d="M12 20.5 C5.2 15.2 2.5 12 2.5 8.3 A4.8 4.8 0 0 1 12 6.2 A4.8 4.8 0 0 1 21.5 8.3 C21.5 12 18.8 15.2 12 20.5Z" fill="#E0485F" stroke="#A82A3F" stroke-width="1.3" stroke-linejoin="round"/><path d="M6.2 8.4 A2.4 2.4 0 0 1 8.6 6.1" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".7"/>`,
+  heartEmpty: `<path d="M12 20.5 C5.2 15.2 2.5 12 2.5 8.3 A4.8 4.8 0 0 1 12 6.2 A4.8 4.8 0 0 1 21.5 8.3 C21.5 12 18.8 15.2 12 20.5Z" fill="rgba(255,255,255,.35)" stroke="#A82A3F" stroke-width="1.6" stroke-linejoin="round"/>`,
+  coin: `<circle cx="12" cy="12" r="10" fill="#FFCF4D" stroke="#C98A16" stroke-width="1.4"/><circle cx="12" cy="12" r="7" fill="none" stroke="#F0B53A" stroke-width="1.4"/><path d="M12 7.6 C9.4 9.5 9.2 13.4 12 16.3 C14.8 13.4 14.6 9.5 12 7.6Z" fill="#E59E1E"/><path d="M12 9 V15.6" stroke="#FFE7A0" stroke-width=".9"/>`,
+  forest: `<ellipse cx="12" cy="20.8" rx="10.5" ry="1.9" fill="#B9DE6C" opacity=".8"/><path d="M5.6 15 V19.6" stroke="#8A6A3B" stroke-width="1.6" stroke-linecap="round"/><path d="M5.6 4.8 L9.6 15.2 H1.6Z" fill="#3E8E4A" stroke="#2A6A36" stroke-width="1.1" stroke-linejoin="round"/><path d="M18.2 13.4 V19.6" stroke="#8A6A3B" stroke-width="1.6" stroke-linecap="round"/><circle cx="18.2" cy="9.6" r="4.3" fill="#F4A6C6" stroke="#C9779C" stroke-width="1.1"/><path d="M12 21 V13" stroke="#8A6A3B" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="9.8" r="5.6" fill="#8BC34A" stroke="#4E8A2A" stroke-width="1.2"/><circle cx="10" cy="8" r="1.8" fill="#B9DE6C"/>`,
+  newHabit: `<g transform="translate(-2 0)">${SPROUT}</g><circle cx="18" cy="18" r="5" fill="#fff" stroke="#34A64D" stroke-width="1.3"/><path d="M18 15.4 V20.6 M15.4 18 H20.6" stroke="#34A64D" stroke-width="2" stroke-linecap="round"/>`,
+  settings: `<path d="${GEAR}" fill="#CDBB9E" stroke="#8A7458" stroke-width="1.3" stroke-linejoin="round"/><circle cx="12" cy="12" r="4.6" fill="#E8DAC4" stroke="#8A7458" stroke-width="1.2"/><circle cx="12" cy="12" r="2" fill="#8A7458"/>`,
+  friends: `<circle cx="16.2" cy="7.6" r="3.2" fill="#BFE6FA" stroke="#2F86BE" stroke-width="1.2"/><path d="M10.6 19.6 C11 15.4 13.2 12.6 16.2 12.6 C19.6 12.6 22 15.2 22 19.6Z" fill="#7FC8F0" stroke="#2F86BE" stroke-width="1.2" stroke-linejoin="round"/><circle cx="8.5" cy="8.6" r="3.6" fill="#FFD3A8" stroke="#C47F3E" stroke-width="1.2"/><path d="M2 20.2 C2 15.8 4.8 13.6 8.5 13.6 C12.2 13.6 15 15.8 15 20.2Z" fill="#FF9E5E" stroke="#C4652A" stroke-width="1.2" stroke-linejoin="round"/>`,
+  leaders: `<rect x="2" y="13" width="6.5" height="8" rx="1.2" fill="#E7E9EE" stroke="#8D93A1" stroke-width="1.2"/><rect x="15.5" y="15" width="6.5" height="6" rx="1.2" fill="#F2B98A" stroke="#B97A4A" stroke-width="1.2"/><rect x="8.5" y="9" width="7" height="12" rx="1.2" fill="#FFCF4D" stroke="#B9801E" stroke-width="1.2"/><path d="M9 7 L9.6 2.8 L12 5 L14.4 2.8 L15 7Z" fill="#FFCF4D" stroke="#B9801E" stroke-width="1.1" stroke-linejoin="round"/><circle cx="12" cy="14" r="1.6" fill="#FFF7E0"/>`,
+  tasks: `<rect x="4" y="4" width="16" height="18" rx="3" fill="#FFFFFF" stroke="#B48A55" stroke-width="1.3"/><rect x="8.5" y="2.4" width="7" height="3.6" rx="1.4" fill="#F4C98E" stroke="#B48A55" stroke-width="1.1"/><path d="M7.4 11.2 L8.8 12.6 L11 10.2 M7.4 16.4 L8.8 17.8 L11 15.4" stroke="#4CC764" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 11.4 H16.6 M13 16.6 H16.6" stroke="#D8C3A3" stroke-width="1.7" stroke-linecap="round"/>`,
+  profile: `<circle cx="12" cy="12" r="10.3" fill="#B7A6FF" stroke="#7B66D6" stroke-width="1.3"/><circle cx="12" cy="10" r="3.6" fill="#fff"/><path d="M5.6 18.4 C7 15.6 9.2 14.4 12 14.4 C14.8 14.4 17 15.6 18.4 18.4 A10.3 10.3 0 0 1 5.6 18.4Z" fill="#fff"/>`,
+  shop: `<rect x="4" y="10" width="16" height="11" rx="1.6" fill="#FFF1DC" stroke="#B48A55" stroke-width="1.3"/><rect x="9.5" y="14" width="5" height="7" rx="1" fill="#F4C98E" stroke="#B48A55" stroke-width="1.1"/><path d="M3 10 L4.6 3.6 H19.4 L21 10Z" fill="#FF8A80" stroke="#C4554C" stroke-width="1.3" stroke-linejoin="round"/><path d="M8.3 3.8 L7.6 10 M12 3.8 V10 M15.7 3.8 L16.4 10" stroke="#fff" stroke-width="1.8"/><path d="M3 10 A2.25 2.25 0 0 0 7.5 10 A2.25 2.25 0 0 0 12 10 A2.25 2.25 0 0 0 16.5 10 A2.25 2.25 0 0 0 21 10" fill="#FF8A80" stroke="#C4554C" stroke-width="1.3" stroke-linejoin="round"/>`,
+  sparkle: `<path d="M12 2 Q13.2 10.8 22 12 Q13.2 13.2 12 22 Q10.8 13.2 2 12 Q10.8 10.8 12 2Z" fill="#FFE27A" stroke="#D99A1E" stroke-width="1" stroke-linejoin="round"/>`,
+};
+function glyph(name, size = 24, style = '') { return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="flex:none;${style}" class="g">${G[name]}</svg>`; }
+
+// ============ Mono icons: one stroke 2.2, round caps, color from the theme ============
+const I = {
+  chevronLeft: `<path d="M15 5 L8 12 L15 19"/>`, chevronRight: `<path d="M9 5 L16 12 L9 19"/>`,
+  chevronDown: `<path d="M5 9 L12 16 L19 9"/>`, chevronUp: `<path d="M5 15 L12 8 L19 15"/>`,
+  close: `<path d="M6 6 L18 18 M18 6 L6 18"/>`, check: `<path d="M5 12.5 L10 17 L19 7.5"/>`, plus: `<path d="M12 5 V19 M5 12 H19"/>`,
+  more: `<circle cx="6" cy="12" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="18" cy="12" r="1.6" fill="currentColor"/>`,
+  lock: `<rect x="5" y="10.5" width="14" height="10" rx="2.6"/><path d="M8 10.5 V8 A4 4 0 0 1 16 8 V10.5"/><circle cx="12" cy="15.5" r="1.3" fill="currentColor"/>`,
+  people: `<circle cx="9" cy="8.5" r="3.2"/><path d="M3 19.5 C3 15.8 5.6 13.8 9 13.8 C12.4 13.8 15 15.8 15 19.5"/><circle cx="16.6" cy="7.6" r="2.6"/><path d="M17.2 12.8 C19.6 13 21 15 21 18"/>`,
+  sun: `<circle cx="12" cy="12" r="4"/><path d="M12 2.5 V4.5 M12 19.5 V21.5 M2.5 12 H4.5 M19.5 12 H21.5 M5.3 5.3 L6.7 6.7 M17.3 17.3 L18.7 18.7 M5.3 18.7 L6.7 17.3 M17.3 6.7 L18.7 5.3"/>`,
+  moon: `<path d="M19.5 14.6 A8 8 0 1 1 9.4 4.5 A6.4 6.4 0 0 0 19.5 14.6Z"/>`,
+  auto: `<circle cx="12" cy="12" r="8"/><path d="M12 4 A8 8 0 0 0 12 20Z" fill="currentColor"/>`,
+  sparkles: `<path d="M10 3 Q11 9 17 10 Q11 11 10 17 Q9 11 3 10 Q9 9 10 3Z"/><path d="M18 14 Q18.4 16.6 21 17 Q18.4 17.4 18 20 Q17.6 17.4 15 17 Q17.6 16.6 18 14Z"/>`,
+  speaker: `<path d="M4 9.5 H7.5 L12 5.5 V18.5 L7.5 14.5 H4Z"/><path d="M15.5 9 A4.2 4.2 0 0 1 15.5 15 M18.2 6.4 A8 8 0 0 1 18.2 17.6"/>`,
+  speakerOff: `<path d="M4 9.5 H7.5 L12 5.5 V18.5 L7.5 14.5 H4Z"/><path d="M16 9.5 L21 14.5 M21 9.5 L16 14.5"/>`,
+  vibrate: `<rect x="8" y="4" width="8" height="16" rx="2"/><path d="M4.5 9 V15 M19.5 9 V15 M2 10.5 V13.5 M22 10.5 V13.5"/>`,
+  globe: `<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="3.8" ry="9"/><path d="M3 12 H21"/>`,
+  trash: `<path d="M4.5 7 H19.5 M9.5 7 V4.8 H14.5 V7 M6.6 7 L7.4 19.2 A1.6 1.6 0 0 0 9 20.7 H15 A1.6 1.6 0 0 0 16.6 19.2 L17.4 7 M10.2 10.5 V17 M13.8 10.5 V17"/>`,
+  eye: `<path d="M2.5 12 C5 7.5 8.3 5.5 12 5.5 C15.7 5.5 19 7.5 21.5 12 C19 16.5 15.7 18.5 12 18.5 C8.3 18.5 5 16.5 2.5 12Z"/><circle cx="12" cy="12" r="3"/>`,
+  info: `<circle cx="12" cy="12" r="9"/><path d="M12 11 V16.5"/><circle cx="12" cy="7.8" r="1.2" fill="currentColor" stroke="none"/>`,
+  noSign: `<circle cx="12" cy="12" r="8.5"/><path d="M6 6 L18 18"/>`,
+  checkCircle: `<circle cx="12" cy="12" r="8.5"/><path d="M8 12.3 L10.8 15 L16.2 9.4"/>`,
+};
+function icon(name, size = 24, color = 'currentColor', sw = 2.2) { return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:${color}">${I[name]}</svg>`; }
+
+// ============ New glyph and icons of wave 3 (copy into ui/ds/glyphs.tsx and icons.tsx) ============
+Object.assign(G, {
+  stump: `<ellipse cx="12" cy="20.4" rx="9" ry="2.2" fill="#B9DE6C" opacity=".8"/><path d="M5.5 11 V18.3 C5.5 19.9 8.4 21 12 21 C15.6 21 18.5 19.9 18.5 18.3 V11Z" fill="#A87644" stroke="#6B4320" stroke-width="1.3" stroke-linejoin="round"/><path d="M8 13.5 V18.6 M12 14 V19.8 M16 13.5 V18.6" stroke="#8A5A2E" stroke-width="1" stroke-linecap="round" opacity=".7"/><ellipse cx="12" cy="11" rx="6.5" ry="2.9" fill="#F3CF92" stroke="#6B4320" stroke-width="1.3"/><ellipse cx="12" cy="11" rx="3.6" ry="1.5" fill="none" stroke="#B57A3E" stroke-width="1"/><path d="M18.4 12.4 C20.6 11.2 21.6 9.4 21.4 7.4 C19.4 7.6 18.2 9 18.4 12.4Z" fill="#8BC34A" stroke="#4E8A2A" stroke-width=".9"/>`,
+  plot: `<path d="M12 6 L22 11.5 L12 17 L2 11.5Z" fill="#A9D46C" stroke="#4E8A2A" stroke-width="1.2" stroke-linejoin="round"/><path d="M2 11.5 V13.8 L12 19.3 V17Z" fill="#C08F58" stroke="#8A5E33" stroke-width="1.1" stroke-linejoin="round"/><path d="M22 11.5 V13.8 L12 19.3 V17Z" fill="#A4733F" stroke="#8A5E33" stroke-width="1.1" stroke-linejoin="round"/><path d="M7 8.8 L17 14.3 M9.5 7.4 L19.5 12.9" stroke="#B4DC78" stroke-width="1.4"/><path d="M12 6 V3.2 M2 11.5 V8.7 M22 11.5 V8.7" stroke="#9B7342" stroke-width="1.6" stroke-linecap="round"/>`,
+});
+Object.assign(I, {
+  move: `<path d="M12 3.5 V20.5 M3.5 12 H20.5"/><path d="M9.2 6.3 L12 3.5 L14.8 6.3 M9.2 17.7 L12 20.5 L14.8 17.7 M6.3 9.2 L3.5 12 L6.3 14.8 M17.7 9.2 L20.5 12 L17.7 14.8"/>`,
+  frame: `<path d="M4 9 V5.6 A1.6 1.6 0 0 1 5.6 4 H9 M15 4 H18.4 A1.6 1.6 0 0 1 20 5.6 V9 M20 15 V18.4 A1.6 1.6 0 0 1 18.4 20 H15 M9 20 H5.6 A1.6 1.6 0 0 1 4 18.4 V15"/><path d="M12 8.2 L16.6 11.8 L12 15.4 L7.4 11.8Z"/>`,
+  search: `<circle cx="10.5" cy="10.5" r="6.2"/><path d="M15.2 15.2 L20 20"/>`,
+  locate: `<circle cx="12" cy="12" r="6.6"/><circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"/><path d="M12 2.5 V5.4 M12 18.6 V21.5 M2.5 12 H5.4 M18.6 12 H21.5"/>`,
+  undo: `<path d="M8.5 6.5 L4.5 10.5 L8.5 14.5"/><path d="M4.8 10.5 H14 A5.5 5.5 0 0 1 14 21.5 H10.5"/>`,
+});
+
+// ============ Scene colors of the plot (ui/forest/colors.ts) ============
+const PC = {
+  day: {
+    meadow: '#CDE7A4', tuftA: '#8EBF55', tuftB: '#A7D068', flowers: ['#FFFFFF', '#FFD84D', '#FF9FB8', '#B7A6FF'],
+    bush: '#8DC58F', bushTop: '#A9D7A2', bushShadow: 'rgba(60,90,30,.18)', stone: '#E2DACB', stoneSide: '#C4B9A4',
+    lawnA: '#ACD96C', lawnB: '#9FD05E', lip: '#D6EEA9', bankL: '#C08F58', bankR: '#A4733F', bankLine: '#8A5E33',
+    post: '#D7A86A', postSide: '#A57A45', rail: '#C79A60', cap: '#ECC88E',
+    shadow: 'rgba(52,78,22,.22)', lunka: 'rgba(160,116,72,.55)', plotShadow: 'rgba(70,90,30,.28)',
+    cloud: 'rgba(40,70,20,.10)', vignette: 'rgba(80,90,30,.16)', topFade: 'rgba(255,248,232,.70)',
+    stumpBody: '#A87644', stumpTop: '#E9C48A', stumpLine: '#6B4320',
+  },
+  night: {
+    meadow: '#36477C', tuftA: '#4A6890', tuftB: '#41608A', flowers: ['#C9C2F0', '#E8E2FF', '#C9C2F0', '#E8E2FF'],
+    bush: '#3B5A80', bushTop: '#4A6A90', bushShadow: 'rgba(5,5,25,.3)', stone: '#55598E', stoneSide: '#43467A',
+    lawnA: '#47775A', lawnB: '#416F53', lip: '#5C9470', bankL: '#6B5340', bankR: '#55402F', bankLine: '#3E2E22',
+    post: '#86694F', postSide: '#5E4836', rail: '#76604A', cap: '#9C8166',
+    shadow: 'rgba(8,8,34,.38)', lunka: 'rgba(40,28,20,.6)', plotShadow: 'rgba(5,5,30,.45)',
+    cloud: 'rgba(0,0,0,0)', vignette: 'rgba(6,6,30,.28)', topFade: 'rgba(30,32,80,.70)',
+    stumpBody: '#7A5A3E', stumpTop: '#B89870', stumpLine: '#3E2E22',
+    moon: 'rgba(201,199,255,.16)', firefly: '#F4FFB8',
+  },
+};
+
+// ============ Geometry (ui/forest/iso.ts) ============
+const CW = 80, CH = 40, BANK = 9;     // cell 80×40 at zoom 1, bank 9 px
+const wx = (c, r) => (c - r) * CW / 2, wy = (c, r) => (c + r) * CH / 2;
+const HT = { sprout: 30, seedling: 46, bush: 62, young: 82, tree: 108, grand: 124, dead: 72 };
+const AR = { 'oak-sprout': .625, 'oak-seedling': .833, 'oak-bush': .664, 'oak-young': .862, 'oak-tree': .965, 'oak-grand': .94, 'sakura-young': .761, 'sakura-tree': .973, 'sakura-grand': .939, 'spruce-bush': .654, 'spruce-young': .486, 'spruce-tree': .534, dead: .877 };
+const IMG = {
+  oak: { sprout: 'oak-sprout', seedling: 'oak-seedling', bush: 'oak-bush', young: 'oak-young', tree: 'oak-tree', grand: 'oak-tree' },
+  sakura: { sprout: 'oak-sprout', seedling: 'oak-seedling', bush: 'sakura-young', young: 'sakura-young', tree: 'sakura-tree', grand: 'sakura-grand' },
+  spruce: { sprout: 'oak-sprout', seedling: 'spruce-bush', bush: 'spruce-bush', young: 'spruce-young', tree: 'spruce-tree', grand: 'spruce-tree' },
+};
+function imgOf(t) { if (t.dead) return 'dead'; if (t.locked && t.s === 'oak' && t.st === 'grand') return 'oak-grand'; return IMG[t.s][t.st]; }
+function treeBox(t) { const k = imgOf(t); const h = HT[t.dead ? 'dead' : t.st]; return { k, h, w: h * AR[k] }; }
+
+let seedN = 1; const rnd = () => (seedN = (seedN * 9301 + 49297) % 233280) / 233280;
+
+// screen point of a world point
+function S(cam, vp) { return (X, Y) => [vp.w / 2 + (X - cam.x) * cam.z, vp.cy + (Y - cam.y) * cam.z]; }
+const pts = a => a.map(p => p.map(v => v.toFixed(1)).join(',')).join(' ');
+
+function diamond(N, p, inset = 0) { // plot corners, screen
+  const a = -.5 + inset, b = N - .5 - inset;
+  return [p(wx(a, a), wy(a, a)), p(wx(b, a), wy(b, a)), p(wx(b, b), wy(b, b)), p(wx(a, b), wy(a, b))];
+}
+function cellPoly(c, r, p, k = 1) { const h = k / 2; return [p(wx(c - h, r - h), wy(c - h, r - h)), p(wx(c + h, r - h), wy(c + h, r - h)), p(wx(c + h, r + h), wy(c + h, r + h)), p(wx(c - h, r + h), wy(c - h, r + h))]; }
+
+function tuft(x, y, s, col) { return `<path d="M${x - 3 * s} ${y} Q${x - 3.5 * s} ${y - 6 * s} ${x - 5 * s} ${y - 9 * s} Q${x - 1.5 * s} ${y - 5 * s} ${x} ${y} Q${x + .4 * s} ${y - 8 * s} ${x + 1 * s} ${y - 11 * s} Q${x + 2 * s} ${y - 6 * s} ${x + 2.4 * s} ${y} Q${x + 4 * s} ${y - 6 * s} ${x + 6 * s} ${y - 8 * s} Q${x + 4 * s} ${y - 3 * s} ${x + 4 * s} ${y}Z" fill="${col}"/>`; }
+function stump(x, y, z, C) { const w = 9 * z, h = 6 * z; return `<g><ellipse cx="${x + 1.5 * z}" cy="${y + 1 * z}" rx="${w * .8}" ry="${w * .3}" fill="${C.shadow}"/><path d="M${x - w / 2} ${y - h} V${y} A${w / 2} ${w * .22} 0 0 0 ${x + w / 2} ${y} V${y - h}Z" fill="${C.stumpBody}" stroke="${C.stumpLine}" stroke-width="${.9 * z}"/><ellipse cx="${x}" cy="${y - h}" rx="${w / 2}" ry="${w * .22}" fill="${C.stumpTop}" stroke="${C.stumpLine}" stroke-width="${.9 * z}"/><ellipse cx="${x}" cy="${y - h}" rx="${w * .22}" ry="${w * .09}" fill="none" stroke="${C.stumpLine}" stroke-width="${.6 * z}" opacity=".6"/></g>`; }
+
+/*
+ * The forest map. o = {
+ *   vp: {w, h, cy}, night, N, cam: {x, y, z}, trees: [{id, c, r, s, st, dead, locked, thirsty, past, name}],
+ *   free: true (dashed free cells), target: {c, r, kind: 'free'|'swap'}, lift: {id, x, y} (screen point of the feet),
+ *   ring: {id, kind: 'sel'|'gold'}, newIds: [], hide: [], dust: {c, r}, fence: N2 (fence on its way out to N2, share p), grow: {id, k}
+ * }
+ */
+function forestMap(o) {
+  const { vp, N, cam } = o; const z = cam.z;
+  const C = o.night ? PC.night : PC.day; const p = S(cam, vp);
+  seedN = 7;
+  let g = `<svg class="abs" style="left:0;top:0" width="${vp.w}" height="${vp.h}" viewBox="0 0 ${vp.w} ${vp.h}">`;
+  g += `<defs><filter id="bl12"><feGaussianBlur stdDeviation="12"/></filter><filter id="bl6"><feGaussianBlur stdDeviation="6"/></filter><filter id="bl3"><feGaussianBlur stdDeviation="2.5"/></filter>
+    <radialGradient id="vig" cx="50%" cy="48%" r="75%"><stop offset="55%" stop-color="${C.vignette}" stop-opacity="0"/><stop offset="100%" stop-color="${C.vignette}"/></radialGradient>
+    <radialGradient id="moon" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#C9C7FF" stop-opacity=".22"/><stop offset="1" stop-color="#C9C7FF" stop-opacity="0"/></radialGradient>
+    <radialGradient id="ff" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E9FF8A" stop-opacity=".55"/><stop offset="1" stop-color="#E9FF8A" stop-opacity="0"/></radialGradient>
+    <radialGradient id="goldglow" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#FFE7A0" stop-opacity=".75"/><stop offset="1" stop-color="#FFE7A0" stop-opacity="0"/></radialGradient></defs>`;
+  g += `<rect width="${vp.w}" height="${vp.h}" fill="${C.meadow}"/>`;
+  const Nf = o.fence || N; // the plot as drawn (bigger while it grows)
+  const inside = (X, Y, m) => { const c = (X / (CW / 2) + Y / (CH / 2)) / 2, r = (Y / (CH / 2) - X / (CW / 2)) / 2; return c > -.5 - m && r > -.5 - m && c < Nf - .5 + m && r < Nf - .5 + m; };
+  // wild meadow: tufts, flowers, bushes, stones (world-anchored)
+  for (let i = 0; i < 900; i++) {
+    const X = (rnd() - .5) * 2200, Y = (rnd() - .35) * 1600, s = .7 + rnd() * .7, col = rnd() < .5 ? C.tuftA : C.tuftB, fl = rnd();
+    if (inside(X, Y, .25)) continue;
+    const [x, y] = p(X, Y); if (x < -20 || x > vp.w + 20 || y < -20 || y > vp.h + 20) continue;
+    g += tuft(x, y, s * z, col);
+    if (fl < .16) g += `<circle cx="${x + 7 * z}" cy="${y - 2 * z}" r="${1.9 * z}" fill="${C.flowers[Math.floor(fl * 25) % 4]}" opacity="${o.night ? .55 : 1}"/>`;
+  }
+  for (let i = 0; i < 40; i++) {
+    const ang = rnd() * Math.PI * 2, dist = 70 + rnd() * 380; const cx0 = wx(Nf / 2 - .5, Nf / 2 - .5), cy0 = wy(Nf / 2 - .5, Nf / 2 - .5);
+    const X = cx0 + Math.cos(ang) * (Nf * CW / 2 + dist), Y = cy0 + Math.sin(ang) * (Nf * CH / 2 + dist * .55);
+    if (inside(X, Y, .6)) continue; const [x, y] = p(X, Y); const k = (.7 + rnd() * .8) * z;
+    if (x < -60 || x > vp.w + 60 || y < -40 || y > vp.h + 40) continue;
+    if (rnd() < .7) g += `<g><ellipse cx="${x + 4 * k}" cy="${y + 2 * k}" rx="${22 * k}" ry="${7 * k}" fill="${C.bushShadow}"/><circle cx="${x - 9 * k}" cy="${y - 7 * k}" r="${10 * k}" fill="${C.bush}"/><circle cx="${x + 8 * k}" cy="${y - 6 * k}" r="${11 * k}" fill="${C.bush}"/><circle cx="${x}" cy="${y - 13 * k}" r="${12 * k}" fill="${C.bush}"/><circle cx="${x - 3 * k}" cy="${y - 17 * k}" r="${6 * k}" fill="${C.bushTop}"/><circle cx="${x + 9 * k}" cy="${y - 11 * k}" r="${4 * k}" fill="${C.bushTop}"/></g>`;
+    else g += `<g><ellipse cx="${x}" cy="${y}" rx="${9 * k}" ry="${5 * k}" fill="${C.stoneSide}"/><ellipse cx="${x - 1 * k}" cy="${y - 2 * k}" rx="${8 * k}" ry="${4.4 * k}" fill="${C.stone}"/></g>`;
+  }
+  if (!o.night) [[-.2, .1, 160, 70], [.7, .65, 210, 90]].forEach(([a, b, rx, ry]) => { g += `<ellipse cx="${vp.w * a + 80}" cy="${vp.h * b}" rx="${rx}" ry="${ry}" fill="${C.cloud}" filter="url(#bl12)"/>`; });
+  // the plot: soft shadow, bank, lawn stripes, lip
+  const D = diamond(Nf, p);
+  const Dsh = D.map(([x, y]) => [x + 6 * z, y + (BANK + 10) * z]);
+  g += `<polygon points="${pts(Dsh)}" fill="${C.plotShadow}" filter="url(#bl6)"/>`;
+  const b = BANK * z;
+  g += `<polygon points="${pts([D[3], D[2], [D[2][0], D[2][1] + b], [D[3][0], D[3][1] + b]])}" fill="${C.bankL}"/>`;
+  g += `<polygon points="${pts([D[2], D[1], [D[1][0], D[1][1] + b], [D[2][0], D[2][1] + b]])}" fill="${C.bankR}"/>`;
+  g += `<polyline points="${pts([[D[3][0], D[3][1] + b], [D[2][0], D[2][1] + b], [D[1][0], D[1][1] + b]])}" fill="none" stroke="${C.bankLine}" stroke-width="${1.2 * z}" opacity=".6"/>`;
+  // a few pebbles on the bank
+  for (let i = 0; i < Nf * 3; i++) { const t = rnd(), side = rnd() < .5; const A = side ? D[3] : D[2], B = side ? D[2] : D[1]; const x = A[0] + (B[0] - A[0]) * t, y = A[1] + (B[1] - A[1]) * t + b * (.35 + rnd() * .45); g += `<ellipse cx="${x}" cy="${y}" rx="${1.6 * z}" ry="${1 * z}" fill="${C.bankLine}" opacity=".35"/>`; }
+  for (let c = 0; c < Nf; c++) {
+    const a = -.5, e = Nf - .5;
+    g += `<polygon points="${pts([p(wx(c - .5, a), wy(c - .5, a)), p(wx(c + .5, a), wy(c + .5, a)), p(wx(c + .5, e), wy(c + .5, e)), p(wx(c - .5, e), wy(c - .5, e))])}" fill="${c % 2 ? C.lawnB : C.lawnA}"/>`;
+  }
+  if (o.night) { const [mx, my] = p(wx(Nf / 2 - .5, Nf / 2 - .5), wy(Nf / 2 - .5, Nf / 2 - .5)); g += `<ellipse cx="${mx}" cy="${my}" rx="${Nf * CW * .55 * z}" ry="${Nf * CH * .55 * z}" fill="url(#moon)"/>`; }
+  g += `<polyline points="${pts([D[3], D[2], D[1]])}" fill="none" stroke="${C.lip}" stroke-width="${2 * z}" stroke-linejoin="round"/>`;
+  // lawn tufts inside, very few and small
+  for (let i = 0; i < Nf * Nf * 1.2; i++) { const c = rnd() * Nf - .5, r = rnd() * Nf - .5; const [x, y] = p(wx(c, r), wy(c, r)); g += tuft(x, y, .45 * z, C.lawnA === '#ACD96C' ? '#8FC350' : '#4C7E5A'); }
+  // free cells / target
+  const occ = new Set(o.trees.map(t => `${t.c},${t.r}`));
+  if (o.free) for (let c = 0; c < N; c++) for (let r = 0; r < N; r++) {
+    if (occ.has(`${c},${r}`) && !(o.lift && o.trees.find(t => t.id === o.lift.id && t.c === c && t.r === r))) continue;
+    const P = cellPoly(c, r, p, .8);
+    g += `<polygon points="${pts(P)}" fill="rgba(255,255,255,${o.night ? .08 : .16})" stroke="rgba(255,255,255,${o.night ? .55 : .85})" stroke-width="${1.6}" stroke-dasharray="5 5" stroke-linejoin="round"/>`;
+  }
+  if (o.free === 'buttons') for (let c = 0; c < N; c++) for (let r = 0; r < N; r++) {
+    if (occ.has(`${c},${r}`)) continue; const [x, y] = p(wx(c, r), wy(c, r));
+    g += `<circle cx="${x}" cy="${y}" r="9" fill="rgba(255,255,255,.92)"/><path d="M${x - 4} ${y} H${x + 4} M${x} ${y - 4} V${y + 4}" stroke="#34A64D" stroke-width="2.2" stroke-linecap="round"/>`;
+  }
+  if (o.target) {
+    const P = cellPoly(o.target.c, o.target.r, p, .92); const col = o.target.kind === 'swap' ? '#3FA2DE' : '#4CC764';
+    g += `<polygon points="${pts(P)}" fill="${col}" fill-opacity=".30" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  }
+  // fence: posts at every cell corner along the four edges, two rails
+  const edge = (f) => { const a = []; for (let k = 0; k <= Nf; k++) a.push(f(k - .5)); return a; };
+  const edges = [edge(k => [-.5, k]), edge(k => [k, -.5]), edge(k => [k, Nf - .5]), edge(k => [Nf - .5, k])];
+  const ph = 13 * z, pw = 3.6 * z;
+  edges.forEach((E, ei) => {
+    const S2 = E.map(([c, r]) => p(wx(c, r), wy(c, r)));
+    [10, 5].forEach(h => { g += `<polyline points="${pts(S2.map(([x, y]) => [x, y - h * z]))}" fill="none" stroke="${C.rail}" stroke-width="${1.9 * z}" stroke-linecap="round"/>`; });
+    S2.forEach(([x, y], i) => { if (ei >= 2 && i === 0) return; g += `<rect x="${x - pw / 2}" y="${y - ph}" width="${pw}" height="${ph}" rx="${1 * z}" fill="${C.post}"/><rect x="${x}" y="${y - ph}" width="${pw / 2}" height="${ph}" fill="${C.postSide}"/><ellipse cx="${x}" cy="${y - ph}" rx="${pw / 2}" ry="${pw / 4}" fill="${C.cap}"/>`; });
+  });
+  // shadows, lunkas, stumps, rings
+  o.trees.forEach(t => {
+    if (o.hide && o.hide.includes(t.id)) return;
+    const lifted = o.lift && o.lift.id === t.id;
+    const [x, y] = p(wx(t.c, t.r), wy(t.c, t.r)); const bx = treeBox(t); const w = bx.w * z;
+    if (o.ring && o.ring.id === t.id) {
+      if (o.ring.kind === 'gold') g += `<ellipse cx="${x}" cy="${y}" rx="${70 * z}" ry="${36 * z}" fill="url(#goldglow)"/><ellipse cx="${x}" cy="${y}" rx="${34 * z}" ry="${15 * z}" fill="rgba(255,207,77,.25)" stroke="#FFCF4D" stroke-width="3"/>`;
+      else g += `<ellipse cx="${x}" cy="${y}" rx="${32 * z}" ry="${14 * z}" fill="rgba(255,255,255,.28)" stroke="rgba(255,255,255,.95)" stroke-width="2.5"/>`;
+    }
+    if (lifted) { g += `<ellipse cx="${x}" cy="${y}" rx="${10 * z}" ry="${4 * z}" fill="${C.lunka}" opacity=".7"/>`; }
+    else {
+      g += `<ellipse cx="${x + 5 * z}" cy="${y + 1.5 * z}" rx="${Math.max(10 * z, w * .36)}" ry="${Math.max(4 * z, w * .13)}" fill="${C.shadow}"/>`;
+      g += `<ellipse cx="${x}" cy="${y}" rx="${Math.max(8, Math.min(16, w * .2)) * 1}" ry="${Math.max(3, Math.min(6, w * .075))}" fill="${C.lunka}"/>`;
+    }
+    for (let i = 0; i < Math.min(3, t.past || 0); i++) { const [dx, dy] = [[-24, 7], [21, 9], [-12, 13]][i]; g += stump(x + dx * z, y + dy * z, z, C); }
+  });
+  if (o.lift) { const [tx, ty] = o.lift.shadowAt; g += `<ellipse cx="${tx + 4 * z}" cy="${ty + 2 * z}" rx="${26 * z}" ry="${9 * z}" fill="${C.shadow}" opacity=".9" filter="url(#bl3)"/>`; }
+  if (o.dust) { const [x, y] = p(wx(o.dust.c, o.dust.r), wy(o.dust.c, o.dust.r)); [[-28, -4, 4], [-18, 4, 3], [24, -3, 4], [16, 5, 3], [-6, 8, 2.5], [6, -9, 2.5]].forEach(([dx, dy, s]) => g += `<circle cx="${x + dx * z}" cy="${y + dy * z}" r="${s * z}" fill="${o.night ? '#8A6E52' : '#D9B27A'}" opacity=".75"/>`); }
+  g += `</svg>`;
+  // trees: back to front
+  let tr = '';
+  const order = [...o.trees].sort((a, b) => (a.c + a.r) - (b.c + b.r) || a.c - b.c);
+  order.forEach(t => {
+    if (o.hide && o.hide.includes(t.id)) return;
+    const bx = treeBox(t); let [x, y] = p(wx(t.c, t.r), wy(t.c, t.r));
+    let sc = 1, lift = 0, zi = 2, extra = '';
+    if (o.lift && o.lift.id === t.id) { [x, y] = [o.lift.x, o.lift.y]; sc = 1.08; zi = 8; extra = 'filter:drop-shadow(0 10px 8px rgba(30,30,10,.28));'; }
+    if (o.swapGhost && o.swapGhost === t.id) extra += 'opacity:.55;';
+    if (o.ring && o.ring.id === t.id && o.ring.kind === 'sel') sc = 1.04;
+    let sy = 1; if (o.grow && o.grow.id === t.id) sy = o.grow.k;
+    const h = bx.h * z * sc, w = bx.w * z * sc;
+    tr += `<img class="tree" src="img/${bx.k}.png" style="left:${(x - w / 2).toFixed(1)}px;top:${(y - h - lift).toFixed(1)}px;width:${w.toFixed(1)}px;height:${h.toFixed(1)}px;z-index:${zi};transform-origin:50% 100%;transform:scaleY(${sy}) scaleX(${sy < 1 ? .9 + sy * .1 : 1});${t.dead ? 'filter:saturate(.75);' : ''}${extra}">`;
+    if (t.locked && bx.k !== 'oak-grand' && sy === 1) tr += `<div class="abs" style="left:${x + w * .14}px;top:${y - 17 * z * sc}px;z-index:${zi}">${glyph('plaque', Math.round(17 * z))}</div>`;
+    if (t.thirsty && z < .6 && !o.noBubbles) tr += `<div class="abs" style="left:${x + w * .2 - 4}px;top:${y - h - 6}px;width:8px;height:8px;border-radius:4px;background:#3FA2DE;box-shadow:0 0 0 2px #fff;z-index:4"></div>`;
+    else if (t.thirsty && !(o.lift && o.lift.id === t.id) && !o.noBubbles) tr += `<div class="bubble" style="left:${x + w * .22 - 6}px;top:${y - h - 18}px">${glyph('drop', 15)}</div>`;
+    if (o.newIds && o.newIds.includes(t.id)) tr += `<div class="newtag" style="left:${x - 28}px;top:${y - h * Math.max(sy, .45) - 26}px">${o.lang === 'en' ? 'new' : 'новое'}</div>`;
+  });
+  let ov = '';
+  if (o.night) { seedN = 3; for (let i = 0; i < 14; i++) { const x = rnd() * vp.w, y = 140 + rnd() * (vp.h - 300); ov += `<circle cx="${x}" cy="${y}" r="9" fill="url(#ff)"/><circle cx="${x}" cy="${y}" r="1.6" fill="#F4FFB8"/>`; } }
+  if (o.sparks) o.sparks.forEach(([x, y, k]) => ov += `<path transform="translate(${x} ${y}) scale(${k})" d="M0 -1 Q .16 -.16 1 0 Q .16 .16 0 1 Q -.16 .16 -1 0 Q -.16 -.16 0 -1Z" fill="#FFF6C2"/>`);
+  const ovl = `<svg class="abs" style="left:0;top:0;z-index:9;pointer-events:none" width="${vp.w}" height="${vp.h}"><defs><radialGradient id="ff2" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#E9FF8A" stop-opacity=".5"/><stop offset="1" stop-color="#E9FF8A" stop-opacity="0"/></radialGradient><radialGradient id="vig2" cx="50%" cy="46%" r="72%"><stop offset="58%" stop-color="${C.vignette}" stop-opacity="0"/><stop offset="100%" stop-color="${C.vignette}"/></radialGradient></defs>${ov.replace(/url\(#ff\)/g, 'url(#ff2)')}<rect width="${vp.w}" height="${vp.h}" fill="url(#vig2)"/></svg>`;
+  return `<div class="map">${g}${tr}${ovl}</div>`;
+}
+
+// ============ UI pieces ============
+const BAR = { 375: [47, 34, 812], 320: [20, 0, 568], 430: [59, 34, 932] };
+function statusBar(dark, w) { const c = dark ? '#fff' : '#1E1B16'; const top = BAR[w][0]; return `<div class="sbar" style="color:${c};height:${top}px;${w === 320 ? 'font-size:12px;padding:0 14px' : ''}"><span>9:41</span><span style="display:flex;gap:6px;align-items:center"><svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="${c}"/><rect x="5" y="5" width="3" height="7" rx="1" fill="${c}"/><rect x="10" y="2" width="3" height="10" rx="1" fill="${c}"/><rect x="15" y="0" width="3" height="12" rx="1" fill="${c}" opacity=".35"/></svg><svg width="26" height="13" viewBox="0 0 26 13"><rect x=".5" y=".5" width="22" height="12" rx="3.5" fill="none" stroke="${c}" opacity=".5"/><rect x="2.5" y="2.5" width="16" height="8" rx="2" fill="${c}"/></svg></span></div>`; }
+function phone(inner, o = {}) { const w = o.w || 375; const [, bot, h] = BAR[w]; return `<div class="ph ${o.night ? 'night' : ''}" style="width:${w}px;height:${h}px;${w === 320 ? 'border-radius:24px' : ''}">${inner}${statusBar(o.night, w)}${bot ? '<div class="home"></div>' : ''}</div>`; }
+function handle(w) { return `<div class="handle"><i style="left:${w / 2 - 19}px"></i><i style="left:${w / 2}px"></i></div>`; }
+function topFade(o, w) { const C = o.night ? PC.night : PC.day; return `<div class="topfade" style="height:${BAR[w][0] + 90}px;background:linear-gradient(${C.topFade},rgba(0,0,0,0))"></div>`; }
+function header(o, w) {
+  const top = BAR[w][0] + 6;
+  const mid = o.banner
+    ? `<div class="banner">${icon('move', 18, 'currentColor', 2.4)}<span>${o.banner}</span><div class="x">${icon('close', 16, 'currentColor', 2.6)}</div></div>`
+    : `<div class="cap2">${glyph('forest', 22)}${o.title || 'Мой лес'}</div>`;
+  return `<div class="fh" style="top:${top}px">${o.banner ? '' : `<div class="cbtn">${icon('chevronLeft', 22, 'currentColor', 2.6)}</div>`}${o.banner ? `<div style="width:0"></div>` : ''}${mid}${o.banner ? '' : `<div class="cbtn" style="${o.fitOn ? 'box-shadow:0 0 0 3px var(--accent),var(--e1)' : ''}">${icon('frame', 22, 'currentColor', 2.3)}</div>`}</div>`;
+}
+function pills(w, a, b, c) { const cmp = w < 360 ? ' cmp' : ''; const gs = w < 360 ? 16 : 18; return `<div class="pills">${`<div class="pill${cmp}">${glyph('rings', gs)}${a}</div><div class="pill${cmp}">${glyph('sprout', gs)}${b}</div><div class="pill${cmp}">${glyph('plaque', gs)}${c}</div>`}</div>`; }
+const PEEK_H = 8 + 20 + 4 + 32 + 16; // 80
+function sheetPeek(w, h, bot, inner) { const top = h - bot - PEEK_H; return { top, html: `<div class="sheet" style="top:${top}px">${handle(w)}${inner}</div>` }; }
+function thumbBox(t, size = 76, night) { const bx = treeBox(t); const hh = Math.min(size - 14, bx.h * (size === 76 ? .72 : .5) + 10); const ww = hh * AR[bx.k]; return `<div class="${size === 76 ? 'thumbBox' : 'lt'}"><div class="gr" style="background:${night ? '#594B4A' : '#EED8A0'}"></div><img src="img/${bx.k}.png" style="height:${hh}px;width:${ww}px">${t.locked && bx.k !== 'oak-grand' ? `<div class="abs" style="right:${size === 76 ? 12 : 6}px;bottom:${size === 76 ? 6 : 3}px">${glyph('plaque', size === 76 ? 16 : 12)}</div>` : ''}</div>`; }
+function cardSheet(t, w, h, bot, o = {}) {
+  const narrow = w < 360 || o.twoRows;
+  const chips = (t.chips || []).map(([g, l, isIcon]) => `<div class="pill s">${isIcon ? icon(g, 14, 'currentColor', 2.4) : glyph(g, 14)}${l}</div>`).join('');
+  const prim = o.primary || ['drop', 'Полить', 'pri'];
+  const pBtn = `<div class="btn ${prim[2]}" style="flex:1">${prim[0] ? (prim[0].startsWith('i:') ? icon(prim[0].slice(2), 20, 'currentColor', 2.4) : glyph(prim[0], 22)) : ''}${prim[1]}</div>`;
+  const mBtn = `<div class="btn sec" style="flex:1">${icon('move', 20, 'currentColor', 2.3)}${o.moveLabel || 'Переставить'}</div>`;
+  const more = `<div class="btn sec" style="width:48px;flex:none">${icon('more', 22, 'currentColor')}</div>`;
+  const vBtn = o.view ? `<div class="btn sec" style="flex:1">${w < 360 ? '' : icon('eye', 20, 'currentColor', 2.3)}Посмотреть</div>` : '';
+  const buttons = narrow ? `<div class="brow">${pBtn}</div><div class="brow" style="margin-top:12px">${vBtn}${o.view && w < 360 ? mBtn.replace(icon('move', 20, 'currentColor', 2.3), '') : mBtn}${more}</div>` : `<div class="brow">${pBtn}${mBtn}${more}</div>`;
+  const vis = 8 + 20 + 4 + 82 + 14 + 48 + (narrow ? 60 : 0) + (w < 360 ? 26 : 0) + 18;
+  const top = h - bot - vis;
+  return { top, html: `<div class="sheet" style="top:${top}px">${handle(w)}<div class="card2" style="margin-top:4px">${thumbBox(t, 76, o.night)}<div style="flex:1;min-width:0;padding-right:36px"><div class="cname">${t.name}</div><div class="cline">${t.line}</div><div class="chips">${chips}</div></div><div class="xbtn">${icon('close', 16, 'currentColor', 2.6)}</div></div>${buttons}</div>` };
+}
+function toast(text, top, action = 'Отменить') { return `<div class="toast" style="top:${top}px">${glyph('check', 20)}<span>${text}</span>${action ? `<b>${icon('undo', 16, 'currentColor', 2.6)}${action}</b>` : ''}</div>`; }
+function finger(x, y, trail) { let s = ''; if (trail) { const [dx, dy] = trail; const len = Math.hypot(dx, dy); const ang = Math.atan2(dy, dx) * 180 / Math.PI; s += `<div class="abs" style="left:${x}px;top:${y - 6}px;width:${len}px;height:12px;border-radius:6px;transform-origin:0 50%;transform:rotate(${ang}deg);background:linear-gradient(90deg,rgba(255,255,255,.75),rgba(255,255,255,0));z-index:69"></div>`; } return s + `<div class="finger" style="left:${x - 23}px;top:${y - 23}px"></div>`; }
+function note(x, y, text, w) { return `<div class="note" style="left:${x}px;top:${y}px;${w ? `width:${w}px` : ''}">${text}</div>`; }
+function arrow(x1, y1, x2, y2, col = '#1E1B16') { const a = Math.atan2(y2 - y1, x2 - x1); const hx = x2 - 9 * Math.cos(a - .5), hy = y2 - 9 * Math.sin(a - .5), kx = x2 - 9 * Math.cos(a + .5), ky = y2 - 9 * Math.sin(a + .5); return `<svg class="abs" style="left:0;top:0;z-index:72;overflow:visible" width="1" height="1"><path d="M${x1} ${y1} L${x2} ${y2} M${hx} ${hy} L${x2} ${y2} L${kx} ${ky}" stroke="${col}" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="${''}"/></svg>`; }
+
+// ============ The forest used in most frames (6×6, 8 habits) ============
+const T8 = [
+  { id: 'a', c: 1, r: 1, s: 'oak', st: 'grand', locked: true, name: 'Не есть сладкое', past: 0 },
+  { id: 'b', c: 3, r: 0, s: 'sakura', st: 'tree', name: 'Бег по утрам' },
+  { id: 'c', c: 0, r: 3, s: 'spruce', st: 'tree', thirsty: true, name: 'Не курить', past: 1 },
+  { id: 'd', c: 3, r: 2, s: 'oak', st: 'young', thirsty: true, name: 'Читать 20 минут' },
+  { id: 'e', c: 5, r: 1, s: 'sakura', st: 'young', locked: true, name: 'Медитация' },
+  { id: 'f', c: 1, r: 5, dead: true, s: 'oak', st: 'tree', name: 'Без соцсетей', past: 2 },
+  { id: 'g', c: 2, r: 4, s: 'oak', st: 'bush', name: 'Вода 2 литра' },
+  { id: 'h', c: 4, r: 4, s: 'spruce', st: 'young', name: 'Английский' },
+];
+const CAM8 = { x: 0, y: 44, z: 1 };
+function vpOf(w, sheetTop) { const [top, , h] = BAR[w]; return { w, h, cy: (top + 56 + sheetTop) / 2 + 22 }; }
+
+const F = [];
+const add = (id, title, text, html, opts = {}) => F.push({ id, title, text, html, opts });
+
+function stdForest(o) { // map + header + peek
+  const w = o.w || 375; const [top, bot, h] = BAR[w];
+  const sh = o.sheet || sheetPeek(w, h, bot, pills(w, o.pills?.[0] || '326 дней', o.pills?.[1] || '5 растут', o.pills?.[2] || '2 в лесу'));
+  const vp = vpOf(w, sh.top);
+  const m = forestMap({ vp, night: o.night, N: o.N || 6, cam: o.cam || CAM8, trees: o.trees || T8, ...o.map });
+  return phone(m + topFade(o, w) + header(o, w) + sh.html + (o.over || ''), { w, night: o.night });
+}
+
+// 01
+add('01', 'Карта днём', 'Весь экран — участок: подстриженный газон полосами, приподнятый край земли, низкий забор, вокруг дикий луг с кустами. Растущие, закреплённые (табличка) и погибшее дерево стоят там, куда их поставил человек. У неполитых — капля. Пеньки рядом с деревом — прошлые попытки этой привычки. Внизу свёрнутая плашка с фактами.',
+  stdForest({}));
+// 02
+add('02', 'Карта ночью', 'Те же слои в ночных красках: луг синий, участок — тёмно-зелёный в лунном пятне, светлячки. Капли у неполитых видны так же ярко. Плашка и шапка — ночные токены волны 2.',
+  stdForest({ night: true }));
+// 03
+add('03', 'Одно дерево', 'Первая привычка: участок 4×4, росток в центре, камера ближе (масштаб 1.2). Пустые клетки не подписаны: свободный газон и есть «место для следующих».',
+  stdForest({ N: 4, cam: { x: 0, y: 64, z: 1.2 }, trees: [{ id: 'a', c: 1, r: 1, s: 'oak', st: 'seedling', thirsty: true, name: 'Не есть сладкое' }], pills: ['3 дня', '1 растёт', '0 в лесу'] }));
+// 04 empty
+(function () {
+  const w = 375, [top, bot, h] = BAR[w];
+  const vis = 8 + 20 + 160 + bot; const stop = h - vis;
+  const sh = `<div class="sheet" style="top:${stop}px">${handle(w)}<div style="text-align:center;padding:4px 24px 0"><div style="font-weight:900;font-size:22px;line-height:28px">Здесь вырастет твой лес</div><div style="font-size:15px;line-height:21px;color:var(--soft);margin-top:6px">Каждая привычка — дерево на этом участке. Расставишь их как захочешь.</div></div><div style="padding:16px 16px 0"><div class="btn pri L">${glyph('seed', 24)}Посадить дерево</div></div></div>`;
+  const vp = vpOf(w, stop); const cam = { x: 0, y: 60, z: 1.15 };
+  let m = forestMap({ vp, N: 4, cam, trees: [] });
+  const [x, y] = S(cam, vp)(wx(1.5, 1.5), wy(1.5, 1.5));
+  m += `<svg class="abs" style="left:0;top:0;z-index:3" width="${w}" height="${h}"><ellipse cx="${x}" cy="${y}" rx="44" ry="19" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-dasharray="6 9"/><ellipse cx="${x}" cy="${y}" rx="15" ry="6" fill="rgba(160,116,72,.6)"/><ellipse cx="${x - 2}" cy="${y - 5}" rx="6" ry="4" transform="rotate(-20 ${x - 2} ${y - 5})" fill="#9A6634" stroke="#6B4320" stroke-width="1.2"/></svg>`;
+  add('04', 'Пустой лес', 'Привычек нет: участок 4×4 и пунктирная лунка в центре (как на главном). Плашка — приглашение и кнопка «Посадить дерево». Кнопка «весь участок» скрыта, пока нечего показывать.',
+    phone(m + topFade({}, w) + `<div class="fh" style="top:${top + 6}px"><div class="cbtn">${icon('chevronLeft', 22, 'currentColor', 2.6)}</div><div class="cap2">${glyph('forest', 22)}Мой лес</div><div style="width:44px"></div></div>` + sh, { w }));
+})();
+// 05 big forest
+const BIG = (() => {
+  const N = 12; seedN = 11; const out = []; const kinds = [['oak', 'grand'], ['oak', 'tree'], ['sakura', 'tree'], ['sakura', 'grand'], ['spruce', 'tree'], ['spruce', 'young'], ['oak', 'young'], ['oak', 'bush'], ['sakura', 'young'], ['oak', 'seedling'], ['spruce', 'bush']];
+  for (let c = 0; c < N; c++) for (let r = 0; r < N; r++) {
+    if ((c + r) % 2) continue; if (rnd() > .66) continue;
+    const k = kinds[Math.floor(rnd() * kinds.length)]; const roll = rnd();
+    out.push({ id: `t${c}_${r}`, c, r, s: k[0], st: k[1], locked: roll < .3, dead: roll > .92, thirsty: roll > .55 && roll < .68, past: rnd() < .12 ? 1 : 0 });
+  }
+  return out;
+})();
+add('05', 'Большой лес, весь участок', `${BIG.length} деревьев, участок 12×12. Кнопка «весь участок» (справа сверху, сейчас включена) отдаляет камеру так, что участок целиком помещается между шапкой и плашкой. При масштабе меньше 0.6 капли становятся синими точками, чтобы не закрывать деревья.`,
+  stdForest({ N: 12, cam: { x: 0, y: 176, z: .37 }, trees: BIG, fitOn: true, pills: ['2 410 дней', '18 растут', '21 в лесу'], map: { noBubbles: false } }));
+// 06 pan
+add('06', 'Листание пальцем', 'Палец тянет карту в любую сторону 1:1, после отпускания карта катится по инерции и мягко тормозит. За край участка камера уходит не дальше чем на 120 px, дальше — резинка.',
+  stdForest({ N: 12, cam: { x: 210, y: 300, z: 1 }, trees: BIG, pills: ['2 410 дней', '18 растут', '21 в лесу'], over: finger(150, 470, [110, -70]) + note(196, 560, 'карта едет за пальцем,<br>потом по инерции') }));
+// 07 pinch
+add('07', 'Щипок: ближе', 'Масштаб от «весь участок» до 1.6. Двойной тап по газону — ближе в 1.5 раза в точке тапа; двойной тап на максимуме — обратно ко всему участку. Деревья — картинки, нарисованные с запасом резкости.',
+  stdForest({ cam: { x: -20, y: 70, z: 1.55 }, over: finger(120, 330) + finger(270, 520) + arrow(110, 318, 86, 290) + arrow(282, 534, 306, 562) }));
+// 08 card
+(function () {
+  const w = 375, [top, bot, h] = BAR[w]; const t = { ...T8[3], line: `${glyph('drop', 16)}<span>Ждёт полива · 18 дней</span>`, chips: [['rings', '18 дней'], ['lock', 'Только я', true]] };
+  const sh = cardSheet(t, w, h, bot); const vp = vpOf(w, sh.top);
+  const cam = { x: wx(3, 2), y: wy(3, 2) - 30, z: 1.15 };
+  const m = forestMap({ vp, N: 6, cam, trees: T8, ring: { id: 'd', kind: 'sel' } });
+  add('08', 'Тап по дереву — карточка', 'Тап сразу (без ожидания) выделяет дерево: под ним белое кольцо, дерево чуть крупнее; камера мягко ставит его по центру над плашкой. Плашка превращается в карточку: имя, состояние, факты и кнопки «Полить» (ведёт на главный к этому дереву), «Переставить» и «⋯» (история дерева, удалить).',
+    phone(m + topFade({}, w) + header({}, w) + sh.html, { w }));
+})();
+// 09 memory card
+(function () {
+  const w = 375, [top, bot, h] = BAR[w]; const t = { ...T8[5], line: `${glyph('tombstone', 16)}<span>Погибло · рекорд 34 дня</span>`, chips: [['stump', '3-я попытка'], ['rings', '58 дней всего']] };
+  const sh = cardSheet(t, w, h, bot, { primary: ['seed', 'Посадить из семени', 'pri'], twoRows: true }); const vp = vpOf(w, sh.top);
+  const cam = { x: wx(1, 5) + 10, y: wy(1, 5) - 40, z: 1.25 };
+  const m = forestMap({ vp, N: 6, cam, trees: T8, ring: { id: 'f', kind: 'sel' } });
+  add('09', 'Память: погибшее дерево и пеньки', 'Погибшее дерево остаётся на своём месте. Два пенька рядом — две прошлые попытки этой же привычки (поколения стоят стопкой на одной клетке). В карточке — «Посадить из семени» на всю ширину: новый росток вырастет на этой же клетке. Ниже — «Переставить» и «⋯» (история всех попыток в habit.tsx, удалить).',
+    phone(m + topFade({}, w) + header({}, w) + sh.html, { w }));
+})();
+// 10..14 move
+function moveFrame(o) {
+  const w = 375, [top, bot, h] = BAR[w];
+  const vp = { w, h, cy: (top + 56 + h - bot) / 2 + 10 };
+  const cam = o.cam || { x: 0, y: 64, z: 1 };
+  const P = S(cam, vp);
+  const trees = o.trees || T8;
+  let lift = null;
+  if (o.liftId) { const t = trees.find(x => x.id === o.liftId); const at = o.at ? P(wx(o.at[0], o.at[1]), wy(o.at[0], o.at[1])) : P(wx(t.c, t.r), wy(t.c, t.r)); lift = { id: o.liftId, x: at[0] + (o.dx || 0), y: at[1] - 16 + (o.dy || 0), shadowAt: at }; }
+  const m = forestMap({ vp, N: o.N || 6, cam, trees, free: o.free, target: o.target, lift, swapGhost: o.swapGhost, dust: o.dust, night: o.night, hide: o.hide });
+  return { vp, P, lift, html: (inner) => phone(m + topFade(o, w) + header({ banner: o.banner, night: o.night }, w) + (inner || ''), { w, night: o.night }) };
+}
+(function () {
+  const f = moveFrame({ liftId: 'g', free: true, banner: 'Перенеси «Вода 2 литра»' });
+  const [fx, fy] = [f.lift.x, f.lift.y + 26];
+  add('10', 'Перестановка 1: подняли', 'Долгое нажатие (350 мс) поднимает дерево: оно подрастает на 8 % и отрывается от земли на 16 px, на земле остаётся лунка и тень. Плашка уезжает вниз, сверху — «Перенеси «…»» и крестик отмены. Все свободные клетки проступают пунктиром — волной от дерева. Вибрация «поднял».',
+    f.html(finger(fx, fy) + note(fx + 30, fy + 26, 'держу 350 мс')));
+})();
+(function () {
+  const f = moveFrame({ liftId: 'g', free: true, at: [4, 2], target: { c: 4, r: 2, kind: 'free' }, banner: 'Перенеси «Вода 2 литра»' });
+  const [fx, fy] = [f.lift.x, f.lift.y + 30];
+  add('11', 'Перестановка 2: тащу', 'Дерево висит над пальцем (ноги на 30 px выше пальца, чтобы палец его не закрывал). Клетка под ногами заливается зелёным — сюда встанет. Тень прыгает по клеткам, на каждой новой — лёгкий щелчок вибрации.',
+    f.html(finger(fx, fy, [-70, 80])));
+})();
+(function () {
+  const f = moveFrame({ liftId: 'g', free: true, at: [3, 2], target: { c: 3, r: 2, kind: 'swap' }, swapGhost: 'd', banner: 'Перенеси «Вода 2 литра»' });
+  const [fx, fy] = [f.lift.x, f.lift.y + 30];
+  const [ox, oy] = f.P(wx(2, 4), wy(2, 4));
+  add('12', 'Перестановка 3: на занятое — поменяются', 'Над занятой клеткой подсветка синяя, а её дерево бледнеет до 55 %: если отпустить, деревья поменяются местами (то дерево перепрыгнет на освободившееся место). Тупиков нет — отпустить можно где угодно на участке.',
+    f.html(finger(fx, fy) + arrow(fx - 46, fy - 76, ox + 8, oy - 30, '#3FA2DE') + note(ox - 60, oy + 22, 'туда прыгнет «Читать»')));
+})();
+(function () {
+  const f = moveFrame({ N: 12, trees: BIG.slice(0, 40).concat([{ id: 'm', c: 9, r: 1, s: 'sakura', st: 'tree' }]), cam: { x: 140, y: 210, z: 1 }, liftId: 'm', free: true, at: [10, 3], target: { c: 10, r: 3, kind: 'free' }, banner: 'Перенеси «Бег по утрам»', hide: [] });
+  const [fx, fy] = [f.lift.x, f.lift.y + 30];
+  add('13', 'Перестановка 4: у края экрана', 'Палец в полосе 64 px у края видимой области — камера сама едет в ту сторону; чем ближе к краю, тем быстрее (до 700 px/с). Так дерево можно перенести через весь большой участок одним движением.',
+    f.html(`<div class="abs" style="right:0;top:${103}px;bottom:34px;width:64px;background:linear-gradient(90deg,rgba(76,199,100,0),rgba(76,199,100,.28));z-index:65"></div>` + finger(fx, fy) + arrow(300, 600, 360, 600, '#34A64D') + arrow(300, 620, 360, 620, '#34A64D') + note(170, 640, 'камера едет вправо')));
+})();
+(function () {
+  const trees = T8.map(t => t.id === 'g' ? { ...t, c: 4, r: 2 } : t);
+  const f = moveFrame({ trees, dust: { c: 4, r: 2 } });
+  const ttop = 812 - 34 - PEEK_H - 60;
+  const sh = sheetPeek(375, 812, 34, pills(375, '326 дней', '5 растут', '2 в лесу'));
+  add('14', 'Перестановка 5: поставил', 'Отпустил — дерево опускается на место с «плюхом» (сжалось и распрямилось), из-под него пыль, звук посадки потише. Место сохранено сразу. Плашка вернулась, над ней на 4 с — «Дерево на новом месте · Отменить».',
+    f.html(sh.html + toast('Дерево на новом месте', ttop)));
+})();
+// 15 tap-to-move
+(function () {
+  const f = moveFrame({ liftId: 'd', free: 'buttons', banner: 'Куда поставить «Читать 20 минут»?' });
+  const [x, y] = f.P(wx(4, 2), wy(4, 2));
+  add('15', 'Без перетаскивания: «Переставить»', 'Кнопка «Переставить» в карточке поднимает дерево на месте, а на свободных клетках появляются кружки «+». Тап по клетке — дерево перелетает туда по дуге; тап по другому дереву — поменяются местами. Так переставить можно одним пальцем, без удержания, и с чтением экрана.',
+    f.html(finger(x, y) + note(x + 22, y + 24, 'тап — перелетит сюда')));
+})();
+// 16 list
+(function () {
+  const w = 375, [top, bot, h] = BAR[w]; const stop = top + 64;
+  const row = (t, line, extra = '') => `<div class="lrow">${thumbBox(t, 48)}<div class="ln"><b>${t.name}</b><span>${line}</span></div>${extra}<div style="color:var(--soft)">${icon('locate', 22, 'currentColor', 2.2)}</div></div>`;
+  const rows = `<div class="lcap">Растут · 5</div>` + [
+    row(T8[3], `${glyph('drop', 14)}Ждёт полива · 18 дней`), row(T8[2], `${glyph('drop', 14)}Ждёт полива · 41 день`), row(T8[1], `${glyph('check', 14)}Сегодня полито · 64 дня`), row(T8[7], `${glyph('check', 14)}Сегодня полито · 25 дней`),
+  ].join('<div class="ldiv"></div>') + `<div class="lcap">Закреплены · 2</div>` + [row(T8[0], `${glyph('plaque', 14)}120 дней · закреплено`), row(T8[4], `${glyph('plaque', 14)}30 дней · закреплено`)].join('<div class="ldiv"></div>');
+  const sh = `<div class="sheet" style="top:${stop}px">${handle(w)}<div style="display:flex;align-items:center;padding:2px 16px 0"><div style="flex:1;font-weight:900;font-size:22px;line-height:28px">Все деревья</div><div style="font-size:14px;color:var(--soft);font-weight:800">8</div></div><div class="search">${icon('search', 20, 'currentColor', 2.4)}Найти дерево</div><div class="fchips"><div class="fchip on">Все <i>8</i></div><div class="fchip">Растут <i>5</i></div><div class="fchip">Закреплены <i>2</i></div><div class="fchip">Память <i>1</i></div></div>${rows}</div>`;
+  const vp = vpOf(w, 700);
+  const m = forestMap({ vp, N: 6, cam: CAM8, trees: T8 });
+  add('16', 'Список: найти дерево', 'Плашку тянут вверх — список всех деревьев: поиск (с 12 деревьев), фильтры-фишки с числами и строки по разделам. Тап по строке — плашка опускается в карточку этого дерева, а камера прилетает к нему. Карта под списком затемнена, как сцена под меню.',
+    phone(m + `<div class="abs" style="inset:0;background:rgba(36,24,8,.34);z-index:35"></div>` + header({}, w) + sh, { w }));
+})();
+// 17 new tree
+(function () {
+  const trees = [...T8, { id: 'n', c: 5, r: 3, s: 'oak', st: 'seedling', name: 'Отжимания' }];
+  const w = 375, [top, bot, h] = BAR[w]; const sh = sheetPeek(w, h, bot, pills(w, '326 дней', '6 растут', '2 в лесу'));
+  const vp = vpOf(w, sh.top); const cam = { x: wx(5, 3) - 20, y: wy(5, 3) - 50, z: 1.4 };
+  const m = forestMap({ vp, N: 6, cam, trees, newIds: ['n'], grow: { id: 'n', k: .82 } });
+  const [x, y] = S(cam, vp)(wx(5, 3), wy(5, 3));
+  const dots = [[-26, -4, 3.5], [-16, 5, 3], [22, -2, 3.5], [14, 6, 2.5], [-8, -10, 2]].map(([dx, dy, s]) => `<circle cx="${x + dx}" cy="${y + dy}" r="${s}" fill="#D9B27A" opacity=".8"/>`).join('');
+  add('17', 'Новое дерево после посадки', 'Посаженное дерево само встаёт на ближайшее к центру свободное место (через клетку от соседей). При следующем открытии леса камера прилетает к нему, росток вытягивается из земли с комочками земли, над ним золотая пометка «новое» — до ухода с экрана.',
+    phone(m + `<svg class="abs" style="left:0;top:0;z-index:6" width="375" height="812">${dots}</svg>` + topFade({}, w) + header({}, w) + sh.html, { w }));
+})();
+// 18 plot grows
+(function () {
+  const w = 375, [top, bot, h] = BAR[w];
+  const sh = sheetPeek(w, h, bot, pills(w, '612 дней', '9 растут', '6 в лесу'));
+  const vp = vpOf(w, sh.top); const cam = { x: 0, y: 128, z: .78 };
+  const trees = BIG.filter(t => t.c < 6 && t.r < 6);
+  const m = forestMap({ vp, N: 8, cam, trees, fence: 7.2, noBubbles: true });
+  // a ghost line where the fence will stop
+  const p = S(cam, vp); const D = diamond(8, p);
+  const ghost = `<svg class="abs" style="left:0;top:0;z-index:3" width="375" height="812"><polygon points="${pts(D)}" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-dasharray="4 7"/></svg>`;
+  add('18', 'Участок вырос', 'Деревьев стало много (свободных клеток осталось меньше 60 %) — участок вырастает на клетку с каждой стороны (6×6 → 8×8), деревья остаются на своих местах. При открытии леса забор отъезжает до новой границы (пунктир), газон раскатывается за ним полосами, камера отдаляется, чтобы показать всё. Тост «Участок вырос: 8 × 8».',
+    phone(m + ghost + topFade({}, w) + header({}, w) + sh.html + toast('Участок вырос: 8 × 8', h - bot - PEEK_H - 60, '').replace(glyph('check', 20), glyph('plot', 22)), { w }));
+})();
+// 19 after lock-in
+(function () {
+  const w = 375, [top, bot, h] = BAR[w]; const t = { ...T8[4], line: `${glyph('plaque', 16)}<span>30 дней · закреплено сегодня</span>`, chips: [['rings', '30 дней'], ['snowflake', '2']] };
+  const sh = cardSheet(t, w, h, bot, { primary: ['i:eye', 'Посмотреть', 'gold'] }); const vp = vpOf(w, sh.top);
+  const cam = { x: wx(5, 1) - 30, y: wy(5, 1) - 34, z: 1.3 };
+  const P = S(cam, vp); const [x, y] = P(wx(5, 1), wy(5, 1));
+  const sparks = [[x - 60, y - 100, 7], [x + 50, y - 120, 9], [x + 70, y - 60, 6], [x - 50, y - 40, 5], [x + 10, y - 150, 6], [x - 80, y - 80, 4], [x + 90, y - 100, 4]];
+  const m = forestMap({ vp, N: 6, cam, trees: T8, ring: { id: 'e', kind: 'gold' }, newIds: ['e'], sparks });
+  add('19', 'После закрепления', 'Тап по «Мой лес» после закрепления открывает лес с подсветкой: камера прилетает к этому дереву (оно стоит на своём прежнем месте), под ним золотое кольцо, искры, пометка «новое». Через 600 мс плашка становится карточкой с золотой кнопкой «Посмотреть».',
+    phone(m + topFade({}, w) + header({}, w) + sh.html, { w }));
+})();
+// 20 night move
+(function () {
+  const f = moveFrame({ night: true, liftId: 'h', free: true, at: [5, 3], target: { c: 5, r: 3, kind: 'free' }, banner: 'Перенеси «Английский»' });
+  const [fx, fy] = [f.lift.x, f.lift.y + 30];
+  add('20', 'Ночь: перестановка', 'Ночью пунктир свободных клеток тише (белый 55 %), заливка цели та же зелёная — на тёмном газоне она читается лучше всего. Баннер и кнопки — ночные токены.',
+    f.html(finger(fx, fy, [-40, 60])));
+})();
+// 21-22 320
+add('21', '320×568: карта', 'Маленький экран: те же размеры кнопок (44), таблетки фактов компактнее (отступы 9, текст 12). Камера при открытии вписывает деревья в меньшую область — масштаб 0.78.',
+  stdForest({ w: 320, cam: { x: 0, y: 64, z: .78 } }), { w: 320 });
+(function () {
+  const w = 320, [top, bot, h] = BAR[w]; const t = { ...T8[3], line: `${glyph('drop', 16)}<span>Ждёт полива · 18 дней</span>`, chips: [['rings', '18 дней'], ['lock', 'Только я', true]] };
+  const sh = cardSheet(t, w, h, bot); const vp = vpOf(w, sh.top);
+  const cam = { x: wx(3, 2), y: wy(3, 2) - 40, z: 1 };
+  const m = forestMap({ vp, N: 6, cam, trees: T8, ring: { id: 'd', kind: 'sel' } });
+  add('22', '320×568: карточка', 'На ширине меньше 360 кнопки карточки в два ряда: «Полить» на всю ширину, ниже «Переставить» и «⋯».',
+    phone(m + topFade({}, w) + header({}, w) + sh.html, { w }), { w: 320 });
+})();
+add('23', '430×932: карта', 'Большой экран: камера при открытии ближе (вписывает деревья в большую область, масштаб 1.15), всё остальное то же.',
+  stdForest({ w: 430, cam: { x: 0, y: 70, z: 1.15 } }), { w: 430 });
+
+// 24 motion sheet
+(function () {
+  const C = PC.day; const cell = (inner, cap) => `<div style="width:80px;text-align:center"><div style="width:80px;height:64px;border-radius:12px;background:${C.lawnA};position:relative;overflow:visible;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)">${inner}</div><div class="lbl" style="margin-top:4px;line-height:1.25">${cap}</div></div>`;
+  const tr = (k, h, o = {}) => `<img src="img/${k}.png" style="position:absolute;left:${40 - h * AR[k] * (o.sx || 1) / 2 + (o.dx || 0)}px;bottom:${12 + (o.lift || 0)}px;height:${h * (o.sy || 1)}px;width:${h * AR[k] * (o.sx || 1)}px;${o.f || ''}">`;
+  const sh = (rx = 22, op = .22, dx = 0) => `<div style="position:absolute;left:${40 - rx + 4 + dx}px;bottom:${12}px;width:${rx * 2}px;height:${rx * .7}px;border-radius:50%;background:rgba(52,78,22,${op})"></div>`;
+  const dia = (col, dash) => `<svg style="position:absolute;left:4px;bottom:2px" width="72" height="30"><polygon points="36,2 70,15 36,28 2,15" fill="${col}" fill-opacity="${dash ? .15 : .3}" stroke="${dash ? '#fff' : col}" stroke-width="2" stroke-dasharray="${dash ? '4 4' : ''}"/></svg>`;
+  const row = (title, cells) => `<div style="margin-top:10px"><div style="font-weight:900;font-size:14px;margin-bottom:6px">${title}</div><div style="display:flex;gap:8px;justify-content:space-between">${cells.join('')}</div></div>`;
+  const html = `<div class="abs" style="inset:0;padding:${50}px 16px 16px;overflow:hidden">
+    <div style="font-weight:900;font-size:20px">Ключевые кадры движения</div>
+    ${row('Поднять (долгое нажатие)', [cell(sh() + tr('oak-bush', 38), '0 мс<br>палец лёг'), cell(sh(22, .2) + tr('oak-bush', 38, { sx: .97, sy: 1.03 }), '200 мс<br>чуть вытянулось'), cell(sh(18, .14) + tr('oak-bush', 38, { sx: 1.08, sy: 1.08, lift: 16, f: 'filter:drop-shadow(0 8px 6px rgba(0,0,0,.25))' }), '350 мс<br>оторвалось, «поднял»'), cell(dia('#fff', 1) + sh(18, .14) + tr('oak-bush', 38, { sx: 1.08, sy: 1.08, lift: 16 }), '350–600 мс<br>пунктир волной')])}
+    ${row('Поставить', [cell(dia('#4CC764') + tr('oak-bush', 38, { sx: 1.08, sy: 1.08, lift: 16 }), '0 мс<br>отпустил'), cell(sh(20, .18) + tr('oak-bush', 38, { sx: 1.1, sy: .9, lift: 0 }), '150 мс<br>коснулось, сжалось'), cell(sh() + tr('oak-bush', 38, { sx: .97, sy: 1.04 }) + '<div style="position:absolute;left:10px;bottom:14px;width:6px;height:6px;border-radius:3px;background:#D9B27A"></div><div style="position:absolute;right:12px;bottom:18px;width:5px;height:5px;border-radius:3px;background:#D9B27A"></div>', '260 мс<br>пыль, «посадил»'), cell(sh() + tr('oak-bush', 38), '420 мс<br>стоит')])}
+    ${row('Поменяться местами', [cell(dia('#3FA2DE') + tr('oak-young', 44, { f: 'opacity:.55' }), '0 мс<br>отпустил'), cell(sh(14, .1) + tr('oak-young', 44, { lift: 22, dx: -10 }), '180 мс<br>прыжок вверх'), cell(sh(18, .16) + tr('oak-young', 44, { lift: 8, dx: -22 }), '300 мс<br>по дуге'), cell(sh() + tr('oak-young', 44), '420 мс<br>на старом месте')])}
+    ${row('Новое дерево (при открытии)', [cell('<div style="position:absolute;left:28px;bottom:12px;width:24px;height:9px;border-radius:50%;background:rgba(160,116,72,.6)"></div>', '0 мс<br>лунка'), cell(sh(10) + tr('oak-sprout', 24, { sy: .35 }), '120 мс<br>проклюнулся'), cell(sh(10) + tr('oak-sprout', 24, { sy: 1.15 }), '380 мс<br>перерос'), cell(sh(10) + tr('oak-sprout', 24) + '<div style="position:absolute;left:18px;top:16px" class="newtag">новое</div>', '600 мс<br>пометка')])}
+    ${row('Участок растёт', [cell(`<svg width="80" height="64" viewBox="0 6 80 72" style="background:#CDE7A4;border-radius:12px"><polygon points="40,40 64,52 40,64 16,52" fill="#9FD05E" stroke="#C08F58" stroke-width="2"/></svg>`, '0 мс<br>старый 6×6'), cell(`<svg width="80" height="64" viewBox="0 6 80 72" style="background:#CDE7A4;border-radius:12px"><polygon points="40,36 70,52 40,68 10,52" fill="#9FD05E" stroke="#C08F58" stroke-width="2"/><polygon points="40,40 64,52 40,64 16,52" fill="#ACD96C" stroke="#fff" stroke-dasharray="3 3"/></svg>`, '400 мс<br>забор едет'), cell(`<svg width="80" height="64" viewBox="0 6 80 72" style="background:#CDE7A4;border-radius:12px"><polygon points="40,32 76,52 40,72 4,52" fill="#9FD05E" stroke="#C08F58" stroke-width="2"/><polygon points="40,40 64,52 40,64 16,52" fill="#ACD96C" stroke="#fff" stroke-dasharray="3 3"/></svg>`, '900 мс<br>8×8, тост'), cell(`<svg width="80" height="64" viewBox="0 6 80 72" style="background:#CDE7A4;border-radius:12px"><polygon points="40,32 76,52 40,72 4,52" fill="#ACD96C" stroke="#C08F58" stroke-width="2"/></svg>`, '1300 мс<br>камера отдалилась')])}
+  </div>`;
+  add('24', 'Ключевые кадры движения', 'Раскадровка по времени для поднятия, постановки, обмена местами, появления нового дерева и роста участка. Точные кривые и пружины — спец.md, раздел 4.', phone(html));
+})();
+// 25 elements
+(function () {
+  const sw = (c, n) => `<div style="text-align:center"><div style="height:30px;border-radius:8px;background:${c};box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)"></div><div class="lbl" style="font-size:9.5px;margin-top:2px">${n}</div></div>`;
+  const D = PC.day, N = PC.night;
+  const keys = [['meadow', 'луг'], ['lawnA', 'газон A'], ['lawnB', 'газон B'], ['lip', 'кромка'], ['bankL', 'край Л'], ['bankR', 'край П'], ['post', 'столб'], ['rail', 'жердь'], ['bush', 'куст'], ['stumpTop', 'пенёк']];
+  const html = `<div class="abs" style="inset:0;padding:52px 16px 16px;font-size:12px">
+    <div style="font-weight:900;font-size:20px">Элементы волны 3</div>
+    <div style="font-weight:900;font-size:14px;margin-top:10px">Краски участка: день / ночь</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px">${keys.map(([k, n]) => sw(D[k], n)).join('')}</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:6px">${keys.map(([k, n]) => sw(N[k], n)).join('')}</div>
+    <div style="font-weight:900;font-size:14px;margin-top:12px">Новые значки</div>
+    <div style="display:flex;gap:14px;margin-top:6px;align-items:center">${['move', 'frame', 'search', 'locate', 'undo'].map(n => `<div style="text-align:center">${icon(n, 28, '#1E1B16', 2.2)}<div class="lbl">${n}</div></div>`).join('')}${['stump', 'plot'].map(n => `<div style="text-align:center">${glyph(n, 32)}<div class="lbl">${n}</div></div>`).join('')}</div>
+    <div style="font-weight:900;font-size:14px;margin-top:12px">Маркеры на карте</div>
+    <div style="display:flex;gap:14px;margin-top:8px;align-items:center;background:${D.lawnA};border-radius:14px;padding:12px">
+      <div class="bubble" style="position:relative">${glyph('drop', 15)}</div><div style="width:8px;height:8px;border-radius:4px;background:#3FA2DE;box-shadow:0 0 0 2px #fff"></div>
+      <div class="newtag" style="position:relative">новое</div>
+      <svg width="70" height="30"><ellipse cx="35" cy="15" rx="32" ry="13" fill="rgba(255,255,255,.28)" stroke="#fff" stroke-width="2.5"/></svg>
+      <svg width="70" height="30"><ellipse cx="35" cy="15" rx="32" ry="13" fill="rgba(255,207,77,.25)" stroke="#FFCF4D" stroke-width="3"/></svg>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:8px;align-items:center;background:${D.lawnA};border-radius:14px;padding:10px 12px">
+      <svg width="72" height="30"><polygon points="36,2 70,15 36,28 2,15" fill="rgba(255,255,255,.16)" stroke="#fff" stroke-width="1.6" stroke-dasharray="5 5"/></svg>
+      <svg width="72" height="30"><polygon points="36,2 70,15 36,28 2,15" fill="#4CC764" fill-opacity=".3" stroke="#4CC764" stroke-width="2.5"/></svg>
+      <svg width="72" height="30"><polygon points="36,2 70,15 36,28 2,15" fill="#3FA2DE" fill-opacity=".3" stroke="#3FA2DE" stroke-width="2.5"/></svg>
+      <svg width="30" height="30"><circle cx="15" cy="15" r="9" fill="rgba(255,255,255,.92)"/><path d="M11 15 H19 M15 11 V19" stroke="#34A64D" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="lbl" style="margin-top:4px">свободно · цель · обмен · «+» для тапа</div>
+    <div style="position:relative;height:56px;margin-top:10px">${toast('Дерево на новом месте', 0).replace('left:16px;right:16px', 'left:0;right:0')}</div>
+    <div style="display:flex;gap:8px;margin-top:10px"><div class="cbtn">${icon('chevronLeft', 22, 'currentColor', 2.6)}</div><div class="cap2">${glyph('forest', 22)}Мой лес</div><div class="cbtn">${icon('frame', 22, 'currentColor', 2.3)}</div></div>
+    <div style="display:flex;margin-top:10px"><div class="banner" style="margin:0">${icon('move', 18, 'currentColor', 2.4)}<span>Перенеси «Вода 2 литра»</span><div class="x">${icon('close', 16, 'currentColor', 2.6)}</div></div></div>
+  </div>`;
+  add('25', 'Элементы: краски, значки, маркеры', 'Краски участка (ui/forest/colors.ts) днём и ночью, новые значки (пути — в макете, объекты G и I), маркеры карты, тост, шапка и баннер перестановки.', phone(html));
+})();
+
+// ============ Render ============
+const q = new URLSearchParams(location.search);
+const list = document.getElementById('list');
+if (q.get('f')) {
+  document.body.classList.add('single');
+  document.getElementById('intro').remove();
+  const f = F.find(x => x.id === q.get('f'));
+  list.style.padding = '0'; list.innerHTML = f.html;
+} else {
+  list.innerHTML = F.map(f => `<div class="cell ${f.opts.w === 320 ? 'w320' : f.opts.w === 430 ? 'w430' : ''}">${f.html}<div class="cap"><b>${f.id} · ${f.title}</b><span>${f.text}</span></div></div>`).join('');
+}
+window.FRAMES = F.map(f => ({ id: f.id, title: f.title, w: f.opts.w || 375, h: BAR[f.opts.w || 375][2] }));
+</script>
+</body>
+</html>

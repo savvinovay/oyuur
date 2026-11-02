@@ -1,0 +1,12 @@
+# Neural-network background drafts (large); the chosen ones are in app/assets/bg, all drafts on design/backgrounds/contact.jpg
+design/**/candidates/
+
+# Playwright snapshots and screenshots
+.playwright-mcp/
+
+# Agent worktrees
+.claude/worktrees/
+
+# Test coverage (CI)
+coverage/
+lcov.info

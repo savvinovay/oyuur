@@ -1,0 +1,621 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Жёлуди, магазин, задания, профиль — волна 5</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ===== Токены: числа tokens.ts (волны 2–4) + новые волны 5 (помечены NEW) ===== */
+.ph {
+  --page:#FFF0DA; --sheet:#FFE3BE; --card:#FFFFFF; --sunken:#F7D5A6; --header:#F4C98E; --headerButton:rgba(255,255,255,.55);
+  --text:#1E1B16; --soft:#6E6152; --muted:#A08E78; --outline:#3A2E22; --divider:rgba(58,46,34,.12);
+  --accent:#4CC764; --accentLip:#34A64D; --accentSoft:#DDF5DF; --accentInk:#2E7D3E; --dangerText:#B23A3A;
+  --gold:#FFCF4D; --goldLip:#D99A1E; --goldInk:#5A3A0E; --water:#3FA2DE;
+  --sec:#F5D3A0; --secLip:#DDB47A; --cardLip:#E9D3B0; --skyCard:#DDF5FB; --chip:rgba(255,255,255,.7);
+  --scrim:rgba(36,24,8,.34); --scrimDialog:rgba(36,24,8,.5);
+  --glass:rgba(255,255,255,.92); --glassEdge:rgba(255,255,255,.9);
+  --e1:0 2px 6px rgba(90,58,18,.14); --e2:0 6px 14px rgba(90,58,18,.16); --e3:0 14px 32px rgba(90,58,18,.24);
+  --sheetShadow:0 -6px 24px rgba(90,58,18,.12); --shine:rgba(255,255,255,.55);
+  --tintForest:#E3F4D3; --tintSettings:#F6E9D6;
+  /* NEW */
+  --badge:#E0485F; --goldSoft:#FFF4D6; --goldEdge:rgba(217,154,30,.45);
+  --tintQuests:#FFF0C2; --tintFriends:#DDF0FB; --tintLeaders:#FFE9C7; --tintShop:#FFE1DC; --tintProfile:#ECE6FF;
+}
+.ph.night {
+  --page:#2E2D63; --sheet:#43427A; --card:#6467B3; --sunken:#383769; --header:#34336A; --headerButton:rgba(255,255,255,.14);
+  --text:#FFFFFF; --soft:#C9C8EE; --muted:#9C9BD0; --outline:#15142E; --divider:rgba(255,255,255,.12);
+  --accentSoft:#2E5E55; --accentInk:#FFFFFF; --dangerText:#FF8A80; --sec:#6467B3; --secLip:#4B4E96; --cardLip:#4B4E96; --skyCard:#4A4C9A; --chip:rgba(255,255,255,.14);
+  --scrim:rgba(6,6,26,.5); --scrimDialog:rgba(6,6,26,.6);
+  --glass:rgba(67,66,122,.92); --glassEdge:rgba(255,255,255,.16);
+  --e1:0 2px 6px rgba(5,4,26,.40); --e2:0 6px 14px rgba(5,4,26,.45); --e3:0 14px 32px rgba(5,4,26,.55);
+  --sheetShadow:0 -6px 24px rgba(5,4,26,.35); --shine:rgba(255,255,255,.10);
+  --tintForest:#4A6F70; --tintSettings:#55569A;
+  --goldSoft:#57538F; --goldEdge:rgba(255,207,77,.45);
+  --tintQuests:#5B5A9A; --tintFriends:#4A5F9A; --tintLeaders:#5E5A92; --tintShop:#5F5294; --tintProfile:#55569A;
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { background:#EFE3CF; font-family:'Nunito',system-ui,sans-serif; font-weight:700; color:#1E1B16; }
+.intro { max-width:980px; margin:32px auto 8px; padding:0 16px; }
+.intro h1 { font-weight:900; font-size:30px; }
+.intro p { color:#6E6152; margin-top:6px; line-height:1.45; }
+.group { max-width:1700px; margin:28px auto 0; padding:0 16px; font-weight:900; font-size:20px; color:#5A3A0E; }
+.list { display:flex; flex-wrap:wrap; gap:36px 28px; justify-content:center; padding:20px 16px 40px; }
+.cell .cap { margin-top:10px; max-width:375px; }
+.cap b { font-weight:900; font-size:17px; display:block; }
+.cap span { color:#6E6152; font-size:13.5px; line-height:1.4; display:block; margin-top:3px; }
+.ph { position:relative; overflow:hidden; border-radius:40px; box-shadow:0 18px 40px rgba(60,40,10,.18),0 0 0 1px rgba(0,0,0,.06); background:var(--page); color:var(--text); font-variant-numeric:tabular-nums; }
+.ph.sheetbg { border-radius:24px; }
+body.single { background:transparent; }
+body.single .ph { border-radius:0; box-shadow:none; }
+.abs { position:absolute; }
+.bg { position:absolute; left:0; top:0; display:block; }
+.scrim { position:absolute; inset:0; background:var(--scrim); }
+.scrimD { position:absolute; inset:0; background:var(--scrimDialog); }
+svg { display:block; overflow:visible; }
+
+/* ===== Жёлуди: плашка ===== */
+.wallet { position:absolute; height:34px; border-radius:17px; background:var(--glass); border:1px solid var(--glassEdge); box-shadow:var(--e1); display:flex; align-items:center; gap:5px; padding:0 12px 0 7px; font-weight:900; font-size:16px; line-height:22px; white-space:nowrap; z-index:30; }
+.wallet.compact { height:30px; border-radius:15px; padding:0 10px 0 6px; font-size:15px; gap:4px; }
+.wallet .num { display:inline-block; }
+.plus { position:absolute; height:22px; border-radius:11px; padding:0 8px; background:var(--accent); color:#fff; font-weight:900; font-size:13px; line-height:20px; border:2px solid #fff; z-index:31; box-shadow:var(--e1); }
+.minus { background:#B08A5A; }
+.hearts { position:absolute; height:28px; border-radius:14px; background:#58D46A; display:flex; align-items:center; gap:2px; padding:0 7px; box-shadow:var(--e1); z-index:5; }
+.fly { position:absolute; z-index:40; }
+
+/* ===== Шапка дерева (как в кадрах волны 4) ===== */
+.h1 { position:absolute; left:24px; right:24px; text-align:center; font-weight:900; font-size:18px; line-height:24px; }
+.h2 { position:absolute; left:24px; right:24px; text-align:center; font-weight:700; font-size:14px; line-height:20px; color:var(--soft); }
+.night .h1 { text-shadow:0 1px 2px rgba(0,0,0,.25); }
+
+/* ===== Плашка (лист) ===== */
+.sheet { position:absolute; left:0; right:0; height:1400px; background:var(--sheet); border:1.5px solid var(--outline); border-bottom:0; border-radius:32px 32px 0 0; box-shadow:var(--sheetShadow), inset 0 1px 0 var(--shine); padding-top:8px; z-index:20; }
+.grab { height:20px; display:flex; justify-content:center; align-items:center; gap:0; position:relative; }
+.grab i { width:19px; height:5px; border-radius:3px; background:var(--card); display:block; }
+.grab i + i { margin-left:-2px; }
+.grab .dot { position:absolute; left:calc(50% + 26px); top:5px; width:9px; height:9px; border-radius:50%; background:var(--badge); border:2px solid var(--sheet); }
+.status { text-align:center; padding:2px 16px 0; }
+.status .l1 { display:flex; justify-content:center; align-items:center; gap:6px; font-weight:800; font-size:16px; line-height:22px; color:var(--accentLip); }
+.night .status .l1 { color:#7BE08C; }
+.status .l2 { display:flex; justify-content:center; align-items:center; gap:5px; font-weight:700; font-size:14px; line-height:20px; color:var(--soft); margin-top:2px; }
+.days { display:flex; gap:10px; justify-content:center; padding:16px 0 0; }
+.day { width:64px; height:80px; border-radius:16px; background:var(--card); box-shadow:var(--e1); display:flex; flex-direction:column; align-items:center; padding-top:7px; }
+.day .w { font-size:12px; font-weight:800; line-height:16px; color:var(--soft); }
+.day .n { font-size:22px; font-weight:900; line-height:26px; }
+.day.today { outline:3px solid var(--accent); outline-offset:-3px; }
+.day.fut { opacity:.5; }
+.lockrow { display:flex; justify-content:center; align-items:center; gap:6px; height:36px; font-weight:800; font-size:14px; color:var(--soft); margin-top:6px; }
+
+/* ===== Меню ===== */
+.menu { padding:0 16px; }
+.menu .div { height:1px; background:var(--divider); margin-bottom:16px; }
+.mrow { display:flex; gap:10px; }
+.mcard { flex:1; position:relative; border-radius:20px; background:var(--cardLip); box-shadow:var(--e1); }
+.mcard .face { position:absolute; left:0; right:0; top:0; bottom:3px; border-radius:20px; background:var(--card); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 6px; }
+.mcard.acc { background:var(--accentLip); } .mcard.acc .face { background:var(--accent); color:#fff; }
+.mcard .circ { width:48px; height:48px; border-radius:24px; display:flex; align-items:center; justify-content:center; }
+.mcard .t { font-weight:800; font-size:14px; line-height:17px; text-align:center; margin-top:4px; }
+.mcard .c { font-weight:700; font-size:11.5px; line-height:13px; color:var(--soft); text-align:center; white-space:nowrap; }
+.mcard.wide .face { flex-direction:row; justify-content:flex-start; gap:10px; padding:0 10px 0 12px; }
+.mcard.wide .circ { width:44px; height:44px; }
+.mcard.wide .tx { display:flex; flex-direction:column; min-width:0; }
+.mcard.wide .t { text-align:left; margin-top:0; font-size:15px; line-height:19px; }
+.mcard.wide .c { text-align:left; font-size:12px; line-height:15px; overflow:hidden; text-overflow:ellipsis; }
+.mcard.wide .t { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mcard.narrow .face { justify-content:flex-start; padding-top:9px; }
+.mcard.narrow .circ { width:40px; height:40px; }
+.mcard.narrow .t { font-size:13px; line-height:16px; margin-top:3px; }
+.nb { position:absolute; top:-5px; right:-5px; min-width:22px; height:22px; border-radius:11px; padding:0 6px; background:var(--badge); color:#fff; font-weight:900; font-size:12px; line-height:18px; text-align:center; border:2px solid var(--sheet); z-index:3; }
+.nb.dot { min-width:14px; width:14px; height:14px; padding:0; top:-3px; right:-3px; }
+
+/* ===== Кнопки, сегменты, общие ===== */
+.btn { position:relative; display:flex; align-items:center; justify-content:center; gap:8px; font-weight:800; white-space:nowrap; }
+.btn.L { height:56px; border-radius:16px; font-size:18px; }
+.btn.M { height:48px; border-radius:14px; font-size:16px; }
+.btn.S { height:36px; border-radius:12px; font-size:14px; padding:0 12px; gap:5px; }
+.btn.primary { background:var(--accent); color:#fff; box-shadow:0 4px 0 var(--accentLip); }
+.btn.gold { background:var(--gold); color:var(--goldInk); box-shadow:0 4px 0 var(--goldLip); }
+.btn.secondary { background:var(--sec); color:var(--text); box-shadow:0 4px 0 var(--secLip); }
+.btn.S.primary, .btn.S.gold, .btn.S.secondary { box-shadow:0 3px 0 var(--accentLip); }
+.btn.S.gold { box-shadow:0 3px 0 var(--goldLip); }
+.btn.off { background:var(--sunken); color:var(--muted); box-shadow:none; }
+.btn.text { background:none; color:var(--soft); box-shadow:none; }
+.btn.pressed { transform:translateY(3px); box-shadow:0 1px 0 var(--accentLip); }
+.btn.gold.pressed { box-shadow:0 1px 0 var(--goldLip); }
+.seg { height:44px; border-radius:14px; background:var(--sunken); padding:4px; display:flex; position:relative; }
+.seg div { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; font-weight:800; font-size:15px; color:var(--soft); border-radius:11px; position:relative; z-index:1; }
+.seg div.on { background:var(--card); color:var(--text); box-shadow:var(--e1); }
+.pbar { height:8px; border-radius:4px; background:var(--sunken); overflow:hidden; }
+.pbar i { display:block; height:100%; border-radius:4px; background:var(--accent); }
+.micro { font-weight:900; font-size:10px; line-height:12px; letter-spacing:.6px; text-transform:uppercase; }
+.cap12 { font-weight:800; font-size:12px; line-height:16px; }
+.small { font-weight:700; font-size:14px; line-height:20px; }
+.soft { color:var(--soft); }
+.t3 { font-weight:900; font-size:18px; line-height:24px; }
+.t2 { font-weight:900; font-size:22px; line-height:28px; }
+.bs { font-weight:800; font-size:16px; line-height:22px; }
+
+/* ===== Страница ===== */
+.pbarTop { position:absolute; left:0; right:0; top:0; height:56px; background:var(--header); border-radius:0 0 24px 24px; box-shadow:var(--e1); display:flex; align-items:center; justify-content:center; z-index:10; }
+.pbarTop .tt { font-weight:900; font-size:22px; line-height:28px; }
+.back { position:absolute; left:12px; top:8px; width:40px; height:40px; border-radius:20px; background:var(--headerButton); display:flex; align-items:center; justify-content:center; }
+
+/* ===== Магазин ===== */
+.grid { position:absolute; left:16px; right:16px; display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.scard { position:relative; height:216px; border-radius:20px; background:var(--cardLip); box-shadow:var(--e1); }
+.scard .face { position:absolute; inset:0 0 3px 0; border-radius:20px; background:var(--card); padding:6px; }
+.scard .pv { height:132px; border-radius:15px; overflow:hidden; position:relative; }
+.scard .nm { font-weight:900; font-size:16px; line-height:22px; margin:9px 6px 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.scard .pr { margin:6px 6px 0; }
+.scard.sel { box-shadow:0 0 0 3px var(--accent), var(--e1); }
+.price { display:inline-flex; align-items:center; gap:4px; height:28px; border-radius:14px; padding:0 10px 0 6px; background:var(--sunken); font-weight:900; font-size:15px; }
+.price.poor .n { color:var(--soft); opacity:.7; }
+.own { display:inline-flex; align-items:center; gap:4px; height:28px; border-radius:14px; padding:0 10px 0 5px; background:var(--accentSoft); color:var(--accentInk); font-weight:900; font-size:14px; }
+.selp { display:inline-flex; align-items:center; gap:4px; height:28px; border-radius:14px; padding:0 10px 0 5px; background:var(--accent); color:#fff; font-weight:900; font-size:14px; }
+.newtag { position:absolute; left:8px; top:8px; height:20px; border-radius:8px; padding:0 7px; background:var(--gold); color:var(--goldInk); display:flex; align-items:center; z-index:2; }
+.earn { position:absolute; left:16px; right:16px; border-radius:20px; background:var(--card); box-shadow:var(--e1); padding:14px 16px 6px; }
+.erow { display:flex; align-items:center; gap:12px; height:40px; border-top:1px solid var(--divider); }
+.erow:first-of-type { border-top:0; }
+.erow .x { flex:1; font-weight:700; font-size:14px; line-height:18px; }
+.erow .a { display:flex; align-items:center; gap:3px; font-weight:900; font-size:14px; }
+
+/* окно товара */
+.ipv { position:relative; height:248px; border-radius:24px; overflow:hidden; margin:4px 16px 0; box-shadow:inset 0 0 0 1px rgba(0,0,0,.04); }
+.stages { display:flex; justify-content:space-between; margin:12px 16px 0; }
+.st { width:48px; height:48px; border-radius:12px; background:var(--sunken); overflow:hidden; display:flex; align-items:flex-end; justify-content:center; }
+.st.on { background:var(--card); box-shadow:0 0 0 2px var(--accent), var(--e1); }
+.dn { position:absolute; right:10px; top:10px; height:32px; border-radius:16px; background:var(--glass); box-shadow:var(--e1); display:flex; padding:3px; gap:2px; }
+.dn i { width:30px; height:26px; border-radius:13px; display:flex; align-items:center; justify-content:center; }
+.dn i.on { background:var(--accent); }
+.ribbon { position:absolute; left:50%; transform:translateX(-50%); height:40px; padding:0 26px; background:linear-gradient(#FFD866,#F0B53A); color:#5A3A0E; font-weight:900; font-size:18px; line-height:40px; border-radius:6px; box-shadow:0 3px 0 #B9801E, 0 8px 18px rgba(90,58,18,.25); z-index:5; white-space:nowrap; }
+.ribbon:before, .ribbon:after { content:''; position:absolute; top:10px; width:18px; height:30px; background:#D9962A; z-index:-1; }
+.ribbon:before { left:-12px; clip-path:polygon(0 0,100% 0,100% 100%,0 100%,40% 50%); }
+.ribbon:after { right:-12px; clip-path:polygon(0 0,100% 0,60% 50%,100% 100%,0 100%); }
+.rays { position:absolute; left:50%; top:50%; width:420px; height:420px; margin:-210px 0 0 -210px; background:repeating-conic-gradient(from 0deg, rgba(255,231,160,.55) 0deg 9deg, rgba(255,231,160,0) 9deg 30deg); border-radius:50%; -webkit-mask:radial-gradient(closest-side, #000 30%, transparent 100%); mask:radial-gradient(closest-side, #000 30%, transparent 100%); }
+
+/* ===== Задания ===== */
+.qcard { position:relative; display:flex; align-items:center; gap:12px; height:76px; border-radius:20px; background:var(--card); box-shadow:var(--e1); margin:0 16px 10px; padding:0 12px; }
+.qcard .gc { width:44px; height:44px; border-radius:22px; background:var(--tintQuests); display:flex; align-items:center; justify-content:center; flex:none; }
+.qcard .mid { flex:1; min-width:0; }
+.qcard .qt { font-weight:800; font-size:15px; line-height:19px; }
+.qcard .qp { display:flex; align-items:center; gap:8px; margin-top:6px; }
+.qcard .qp .pbar { flex:1; }
+.qcard .qp b { font-weight:800; font-size:12px; color:var(--soft); }
+.qcard.ready { box-shadow:0 0 0 2px var(--accent), var(--e1); }
+.qcard.done .qt { color:var(--soft); }
+.qcard.done { background:color-mix(in srgb, var(--card) 60%, var(--sheet)); box-shadow:none; }
+.rew { display:inline-flex; align-items:center; gap:3px; height:28px; border-radius:14px; padding:0 9px 0 5px; background:var(--sunken); font-weight:900; font-size:14px; color:var(--soft); flex:none; }
+.bonus { position:relative; display:flex; align-items:center; gap:12px; height:84px; border-radius:20px; background:var(--goldSoft); border:1.5px solid var(--goldEdge); margin:4px 16px 0; padding:0 12px; }
+.dots3 { display:flex; gap:6px; margin-top:6px; }
+.dots3 i { width:10px; height:10px; border-radius:5px; background:var(--sunken); }
+.dots3 i.on { background:var(--accent); }
+
+/* ===== Профиль ===== */
+.av { border-radius:50%; overflow:hidden; position:relative; flex:none; }
+.stat { border-radius:16px; background:var(--card); box-shadow:var(--e1); padding:10px 10px 8px; height:86px; }
+.stat .v { font-weight:900; font-size:22px; line-height:26px; margin-top:4px; }
+.stat .l { font-weight:800; font-size:11.5px; line-height:14px; color:var(--soft); }
+.awards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px 8px; }
+.aw { display:flex; flex-direction:column; align-items:center; position:relative; }
+.aw .an { font-weight:800; font-size:12px; line-height:15px; text-align:center; margin-top:6px; height:30px; overflow:hidden; }
+.aw .ap { font-weight:800; font-size:11px; color:var(--soft); }
+.grp { border-radius:20px; background:var(--card); box-shadow:var(--e1); }
+.row { display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 16px; }
+.sq { width:32px; height:32px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex:none; }
+.field { height:56px; border-radius:16px; background:var(--card); border:2px solid var(--accent); box-shadow:var(--e1); display:flex; align-items:center; padding:0 12px 0 14px; font-weight:800; font-size:18px; }
+.cdot { width:36px; height:36px; border-radius:18px; flex:none; }
+.cdot.on { box-shadow:0 0 0 2px var(--sheet), 0 0 0 4.5px var(--accent); }
+.toast { position:absolute; left:16px; right:16px; height:64px; border-radius:20px; background:var(--card); box-shadow:var(--e3); display:flex; align-items:center; gap:12px; padding:0 14px 0 10px; z-index:50; }
+.dialog { position:absolute; left:24px; right:24px; border-radius:28px; background:var(--card); border:1.5px solid var(--outline); box-shadow:var(--e3); padding:76px 24px 12px; text-align:center; z-index:40; }
+
+/* ===== Листы-шпаргалки ===== */
+.sheetbg { background:#FFF8EC; padding:20px; color:#1E1B16; }
+.sheetbg.night { background:#2E2D63; color:#fff; }
+.sheetbg h3 { font-weight:900; font-size:18px; margin:0 0 10px; }
+.sheetbg .lab { font-size:12px; font-weight:800; color:#6E6152; text-align:center; margin-top:4px; }
+.sheetbg.night .lab { color:#C9C8EE; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="макет-магазин-рисунки.js"></script>
+<script>
+/* ======== Старые глифы (glyphs.tsx, без изменений) ======== */
+const OLD = {
+ "rings": "<circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"#7A4E26\" /> <circle cx=\"12\" cy=\"12\" r=\"9.2\" fill=\"#F3CF92\" /> <circle cx=\"11.6\" cy=\"12.3\" r=\"6.4\" fill=\"none\" stroke=\"#B57A3E\" stroke-width=\"1.8\" /> <circle cx=\"11.35\" cy=\"12.45\" r=\"3.4\" fill=\"none\" stroke=\"#B57A3E\" stroke-width=\"1.8\" /> <circle cx=\"11\" cy=\"12.7\" r=\"1.2\" fill=\"#9A6230\" />",
+ "drop": "<path d=\"M12 2.5 C12 2.5 4.5 11 4.5 15 A7.5 7.5 0 0 0 19.5 15 C19.5 11 12 2.5 12 2.5Z\" fill=\"#3FA2DE\" stroke=\"#2A80BC\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M8.6 15.2 A3.6 3.6 0 0 0 11.4 18.6\" stroke=\"#fff\" stroke-width=\"1.8\" stroke-linecap=\"round\" fill=\"none\" opacity=\"0.85\" />",
+ "check": "<circle cx=\"12\" cy=\"12\" r=\"10.5\" fill=\"#4CC764\" stroke=\"#34A64D\" stroke-width=\"1.3\" /> <path d=\"M7.2 12.4 L10.4 15.5 L16.8 8.9\" stroke=\"#fff\" stroke-width=\"2.6\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\" />",
+ "sprout": "<ellipse cx=\"12\" cy=\"20.8\" rx=\"6.5\" ry=\"1.9\" fill=\"#C99A60\" /> <path d=\"M12 20.5 V12.5\" stroke=\"#5E9A2C\" stroke-width=\"2\" stroke-linecap=\"round\" /> <path d=\"M12 13.5 C7.2 13.6 4.4 10.8 4.2 6.6 C8.6 6.4 11.8 9 12 13.5Z\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M12 11.6 C12.2 7.4 15.2 4.4 19.8 4.3 C19.8 8.8 16.8 11.6 12 11.6Z\" fill=\"#B9DE6C\" stroke=\"#4E8A2A\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M6.8 8.4 C8.3 9 9.6 10.2 10.6 12\" stroke=\"#4E8A2A\" stroke-width=\"0.9\" fill=\"none\" stroke-linecap=\"round\" opacity=\"0.55\" />",
+ "stageUp": "<ellipse cx=\"11\" cy=\"21\" rx=\"6\" ry=\"1.7\" fill=\"#C99A60\" /> <path d=\"M11 21 V13\" stroke=\"#8A6A3B\" stroke-width=\"2.2\" stroke-linecap=\"round\" /> <circle cx=\"11\" cy=\"10.5\" r=\"6.3\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"1.3\" /> <circle cx=\"8.8\" cy=\"8.6\" r=\"2\" fill=\"#B9DE6C\" /> <path d=\"M19 1.8 Q19.5 4.5 22.2 5 Q19.5 5.5 19 8.2 Q18.5 5.5 15.8 5 Q18.5 4.5 19 1.8Z\" fill=\"#FFCF4D\" stroke=\"#D99A1E\" stroke-width=\"0.9\" stroke-linejoin=\"round\" />",
+ "snowflake": "<g stroke=\"#2F86BE\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" fill=\"none\"> <path d=\"M12 3 V21 M4.2 7.5 L19.8 16.5 M4.2 16.5 L19.8 7.5\" /> <path d=\"M9.6 4.6 L12 6.6 L14.4 4.6 M9.6 19.4 L12 17.4 L14.4 19.4\" /> </g> <circle cx=\"12\" cy=\"12\" r=\"1.8\" fill=\"#2F86BE\" />",
+ "tombstone": "<path d=\"M6 21 V10 A6 6 0 0 1 18 10 V21Z\" fill=\"#C3C6CE\" stroke=\"#6F7380\" stroke-width=\"1.4\" stroke-linejoin=\"round\" /> <path d=\"M8.2 10.6 A4 4 0 0 1 11 7.2\" stroke=\"#fff\" stroke-width=\"1.3\" fill=\"none\" stroke-linecap=\"round\" opacity=\"0.7\" /> <path d=\"M9.5 12 H14.5 M9.5 15 H14.5 M9.5 18 H13\" stroke=\"#6F7380\" stroke-width=\"1.4\" stroke-linecap=\"round\" /> <path d=\"M3 21.3 H21\" stroke=\"#5E9A2C\" stroke-width=\"2.4\" stroke-linecap=\"round\" />",
+ "plaque": "<path d=\"M12 14 V22\" stroke=\"#8A6A3B\" stroke-width=\"2.4\" stroke-linecap=\"round\" /> <rect x=\"3.5\" y=\"3.5\" width=\"17\" height=\"11.5\" rx=\"2.6\" fill=\"#FFCF4D\" stroke=\"#B9801E\" stroke-width=\"1.4\" /> <path d=\"M12 5.6 L13.25 8.2 L16 8.5 L13.95 10.35 L14.5 13.1 L12 11.75 L9.5 13.1 L10.05 10.35 L8 8.5 L10.75 8.2Z\" fill=\"#FFF7E0\" stroke=\"#D99A1E\" stroke-width=\"0.8\" stroke-linejoin=\"round\" />",
+ "seed": "<ellipse cx=\"12\" cy=\"20.6\" rx=\"7\" ry=\"2\" fill=\"#C99A60\" /> <ellipse cx=\"10.6\" cy=\"15.6\" rx=\"5.2\" ry=\"3.6\" transform=\"rotate(-20 10.6 15.6)\" fill=\"#9A6634\" stroke=\"#6B4320\" stroke-width=\"1.2\" /> <ellipse cx=\"9.2\" cy=\"14.6\" rx=\"2\" ry=\"1\" transform=\"rotate(-20 9.2 14.6)\" fill=\"#C99060\" /> <path d=\"M14.4 13 C15.2 9.8 17 8 19.8 7.4\" stroke=\"#5E9A2C\" stroke-width=\"1.8\" fill=\"none\" stroke-linecap=\"round\" /> <path d=\"M17.4 8.2 C17.2 5.8 18.6 4.2 20.8 4 C21 6.4 19.6 7.8 17.4 8.2Z\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"1\" />",
+ "heart": "<path d=\"M12 20.5 C5.2 15.2 2.5 12 2.5 8.3 A4.8 4.8 0 0 1 12 6.2 A4.8 4.8 0 0 1 21.5 8.3 C21.5 12 18.8 15.2 12 20.5Z\" fill=\"#E0485F\" stroke=\"#A82A3F\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M6.2 8.4 A2.4 2.4 0 0 1 8.6 6.1\" stroke=\"#fff\" stroke-width=\"1.5\" fill=\"none\" stroke-linecap=\"round\" opacity=\"0.7\" />",
+ "heartEmpty": "<path d=\"M12 20.5 C5.2 15.2 2.5 12 2.5 8.3 A4.8 4.8 0 0 1 12 6.2 A4.8 4.8 0 0 1 21.5 8.3 C21.5 12 18.8 15.2 12 20.5Z\" fill=\"rgba(255,255,255,.35)\" stroke=\"#A82A3F\" stroke-width=\"1.6\" stroke-linejoin=\"round\" />",
+ "coin": "<circle cx=\"12\" cy=\"12\" r=\"10\" fill=\"#FFCF4D\" stroke=\"#C98A16\" stroke-width=\"1.4\" /> <circle cx=\"12\" cy=\"12\" r=\"7\" fill=\"none\" stroke=\"#F0B53A\" stroke-width=\"1.4\" /> <path d=\"M12 7.6 C9.4 9.5 9.2 13.4 12 16.3 C14.8 13.4 14.6 9.5 12 7.6Z\" fill=\"#E59E1E\" /> <path d=\"M12 9 V15.6\" stroke=\"#FFE7A0\" stroke-width=\"0.9\" />",
+ "forest": "<ellipse cx=\"12\" cy=\"20.8\" rx=\"10.5\" ry=\"1.9\" fill=\"#B9DE6C\" opacity=\"0.8\" /> <path d=\"M5.6 15 V19.6\" stroke=\"#8A6A3B\" stroke-width=\"1.6\" stroke-linecap=\"round\" /> <path d=\"M5.6 4.8 L9.6 15.2 H1.6Z\" fill=\"#3E8E4A\" stroke=\"#2A6A36\" stroke-width=\"1.1\" stroke-linejoin=\"round\" /> <path d=\"M18.2 13.4 V19.6\" stroke=\"#8A6A3B\" stroke-width=\"1.6\" stroke-linecap=\"round\" /> <circle cx=\"18.2\" cy=\"9.6\" r=\"4.3\" fill=\"#F4A6C6\" stroke=\"#C9779C\" stroke-width=\"1.1\" /> <path d=\"M12 21 V13\" stroke=\"#8A6A3B\" stroke-width=\"2.2\" stroke-linecap=\"round\" /> <circle cx=\"12\" cy=\"9.8\" r=\"5.6\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"1.2\" /> <circle cx=\"10\" cy=\"8\" r=\"1.8\" fill=\"#B9DE6C\" />",
+ "newHabit": "<g transform=\"translate(-2 0)\"> <path d=\"M12 20.5 V12.5\" stroke=\"#5E9A2C\" stroke-width=\"2\" stroke-linecap=\"round\" /> <path d=\"M12 13.5 C7.2 13.6 4.4 10.8 4.2 6.6 C8.6 6.4 11.8 9 12 13.5Z\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M12 11.6 C12.2 7.4 15.2 4.4 19.8 4.3 C19.8 8.8 16.8 11.6 12 11.6Z\" fill=\"#B9DE6C\" stroke=\"#4E8A2A\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M6.8 8.4 C8.3 9 9.6 10.2 10.6 12\" stroke=\"#4E8A2A\" stroke-width=\"0.9\" fill=\"none\" stroke-linecap=\"round\" opacity=\"0.55\" /> </g> <circle cx=\"18\" cy=\"18\" r=\"5\" fill=\"#fff\" stroke=\"#34A64D\" stroke-width=\"1.3\" /> <path d=\"M18 15.4 V20.6 M15.4 18 H20.6\" stroke=\"#34A64D\" stroke-width=\"2\" stroke-linecap=\"round\" />",
+ "settings": "<path d=\"M19.95 9.97 L22.50 10.52 L22.50 13.48 L19.95 14.03 L19.05 16.18 L20.47 18.38 L18.38 20.47 L16.18 19.05 L14.03 19.95 L13.48 22.50 L10.52 22.50 L9.97 19.95 L7.82 19.05 L5.62 20.47 L3.53 18.38 L4.95 16.18 L4.05 14.03 L1.50 13.48 L1.50 10.52 L4.05 9.97 L4.95 7.82 L3.53 5.62 L5.62 3.53 L7.82 4.95 L9.97 4.05 L10.52 1.50 L13.48 1.50 L14.03 4.05 L16.18 4.95 L18.38 3.53 L20.47 5.62 L19.05 7.82 Z\" fill=\"#CDBB9E\" stroke=\"#8A7458\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <circle cx=\"12\" cy=\"12\" r=\"4.6\" fill=\"#E8DAC4\" stroke=\"#8A7458\" stroke-width=\"1.2\" /> <circle cx=\"12\" cy=\"12\" r=\"2\" fill=\"#8A7458\" />",
+ "friends": "<circle cx=\"16.2\" cy=\"7.6\" r=\"3.2\" fill=\"#BFE6FA\" stroke=\"#2F86BE\" stroke-width=\"1.2\" /> <path d=\"M10.6 19.6 C11 15.4 13.2 12.6 16.2 12.6 C19.6 12.6 22 15.2 22 19.6Z\" fill=\"#7FC8F0\" stroke=\"#2F86BE\" stroke-width=\"1.2\" stroke-linejoin=\"round\" /> <circle cx=\"8.5\" cy=\"8.6\" r=\"3.6\" fill=\"#FFD3A8\" stroke=\"#C47F3E\" stroke-width=\"1.2\" /> <path d=\"M2 20.2 C2 15.8 4.8 13.6 8.5 13.6 C12.2 13.6 15 15.8 15 20.2Z\" fill=\"#FF9E5E\" stroke=\"#C4652A\" stroke-width=\"1.2\" stroke-linejoin=\"round\" />",
+ "leaders": "<rect x=\"2\" y=\"13\" width=\"6.5\" height=\"8\" rx=\"1.2\" fill=\"#E7E9EE\" stroke=\"#8D93A1\" stroke-width=\"1.2\" /> <rect x=\"15.5\" y=\"15\" width=\"6.5\" height=\"6\" rx=\"1.2\" fill=\"#F2B98A\" stroke=\"#B97A4A\" stroke-width=\"1.2\" /> <rect x=\"8.5\" y=\"9\" width=\"7\" height=\"12\" rx=\"1.2\" fill=\"#FFCF4D\" stroke=\"#B9801E\" stroke-width=\"1.2\" /> <path d=\"M9 7 L9.6 2.8 L12 5 L14.4 2.8 L15 7Z\" fill=\"#FFCF4D\" stroke=\"#B9801E\" stroke-width=\"1.1\" stroke-linejoin=\"round\" /> <circle cx=\"12\" cy=\"14\" r=\"1.6\" fill=\"#FFF7E0\" />",
+ "tasks": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"18\" rx=\"3\" fill=\"#FFFFFF\" stroke=\"#B48A55\" stroke-width=\"1.3\" /> <rect x=\"8.5\" y=\"2.4\" width=\"7\" height=\"3.6\" rx=\"1.4\" fill=\"#F4C98E\" stroke=\"#B48A55\" stroke-width=\"1.1\" /> <path d=\"M7.4 11.2 L8.8 12.6 L11 10.2 M7.4 16.4 L8.8 17.8 L11 15.4\" stroke=\"#4CC764\" stroke-width=\"1.7\" fill=\"none\" stroke-linecap=\"round\" stroke-linejoin=\"round\" /> <path d=\"M13 11.4 H16.6 M13 16.6 H16.6\" stroke=\"#D8C3A3\" stroke-width=\"1.7\" stroke-linecap=\"round\" />",
+ "profile": "<circle cx=\"12\" cy=\"12\" r=\"10.3\" fill=\"#B7A6FF\" stroke=\"#7B66D6\" stroke-width=\"1.3\" /> <circle cx=\"12\" cy=\"10\" r=\"3.6\" fill=\"#fff\" /> <path d=\"M5.6 18.4 C7 15.6 9.2 14.4 12 14.4 C14.8 14.4 17 15.6 18.4 18.4 A10.3 10.3 0 0 1 5.6 18.4Z\" fill=\"#fff\" />",
+ "shop": "<rect x=\"4\" y=\"10\" width=\"16\" height=\"11\" rx=\"1.6\" fill=\"#FFF1DC\" stroke=\"#B48A55\" stroke-width=\"1.3\" /> <rect x=\"9.5\" y=\"14\" width=\"5\" height=\"7\" rx=\"1\" fill=\"#F4C98E\" stroke=\"#B48A55\" stroke-width=\"1.1\" /> <path d=\"M3 10 L4.6 3.6 H19.4 L21 10Z\" fill=\"#FF8A80\" stroke=\"#C4554C\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M8.3 3.8 L7.6 10 M12 3.8 V10 M15.7 3.8 L16.4 10\" stroke=\"#fff\" stroke-width=\"1.8\" /> <path d=\"M3 10 A2.25 2.25 0 0 0 7.5 10 A2.25 2.25 0 0 0 12 10 A2.25 2.25 0 0 0 16.5 10 A2.25 2.25 0 0 0 21 10\" fill=\"#FF8A80\" stroke=\"#C4554C\" stroke-width=\"1.3\" stroke-linejoin=\"round\" />",
+ "sparkle": "<path d=\"M12 2 Q13.2 10.8 22 12 Q13.2 13.2 12 22 Q10.8 13.2 2 12 Q10.8 10.8 12 2Z\" fill=\"#FFE27A\" stroke=\"#D99A1E\" stroke-width=\"1\" stroke-linejoin=\"round\" />",
+ "stump": "<ellipse cx=\"12\" cy=\"20.4\" rx=\"9\" ry=\"2.2\" fill=\"#B9DE6C\" opacity=\"0.8\" /> <path d=\"M5.5 11 V18.3 C5.5 19.9 8.4 21 12 21 C15.6 21 18.5 19.9 18.5 18.3 V11Z\" fill=\"#A87644\" stroke=\"#6B4320\" stroke-width=\"1.3\" stroke-linejoin=\"round\" /> <path d=\"M8 13.5 V18.6 M12 14 V19.8 M16 13.5 V18.6\" stroke=\"#8A5A2E\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"0.7\" /> <ellipse cx=\"12\" cy=\"11\" rx=\"6.5\" ry=\"2.9\" fill=\"#F3CF92\" stroke=\"#6B4320\" stroke-width=\"1.3\" /> <ellipse cx=\"12\" cy=\"11\" rx=\"3.6\" ry=\"1.5\" fill=\"none\" stroke=\"#B57A3E\" stroke-width=\"1\" /> <path d=\"M18.4 12.4 C20.6 11.2 21.6 9.4 21.4 7.4 C19.4 7.6 18.2 9 18.4 12.4Z\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"0.9\" />",
+ "plot": "<path d=\"M12 6 L22 11.5 L12 17 L2 11.5Z\" fill=\"#A9D46C\" stroke=\"#4E8A2A\" stroke-width=\"1.2\" stroke-linejoin=\"round\" /> <path d=\"M2 11.5 V13.8 L12 19.3 V17Z\" fill=\"#C08F58\" stroke=\"#8A5E33\" stroke-width=\"1.1\" stroke-linejoin=\"round\" /> <path d=\"M22 11.5 V13.8 L12 19.3 V17Z\" fill=\"#A4733F\" stroke=\"#8A5E33\" stroke-width=\"1.1\" stroke-linejoin=\"round\" /> <path d=\"M7 8.8 L17 14.3 M9.5 7.4 L19.5 12.9\" stroke=\"#B4DC78\" stroke-width=\"1.4\" /> <path d=\"M12 6 V3.2 M2 11.5 V8.7 M22 11.5 V8.7\" stroke=\"#9B7342\" stroke-width=\"1.6\" stroke-linecap=\"round\" />",
+ "nameTag": "<path d=\"M3.2 3.6 C5.4 2.2 7.6 3.2 8.4 6.2\" stroke=\"#7A4E26\" stroke-width=\"1.5\" fill=\"none\" stroke-linecap=\"round\" /> <g transform=\"rotate(28 13 13)\"> <path d=\"M4.6 13 L8.6 8.6 H19.6 Q21.4 8.6 21.4 10.4 V15.6 Q21.4 17.4 19.6 17.4 H8.6 Z\" fill=\"#F2C27E\" stroke=\"#A0692F\" stroke-width=\"1.4\" stroke-linejoin=\"round\" /> <circle cx=\"8.5\" cy=\"13\" r=\"1.35\" fill=\"#7A4E26\" /> <path d=\"M11.4 11.6 H18.4 M11.4 14.4 H16.2\" stroke=\"#C68B4A\" stroke-width=\"1.4\" stroke-linecap=\"round\" /> <path d=\"M9.6 9.6 H19.4\" stroke=\"#FFF3C4\" stroke-width=\"1\" stroke-linecap=\"round\" opacity=\"0.7\" /> </g> <path d=\"M17.6 4.8 C17.8 2.8 19.2 1.7 21.2 1.8 C21.2 3.9 19.8 5 17.6 4.8Z\" fill=\"#8BC34A\" stroke=\"#4E8A2A\" stroke-width=\"1\" />"
+};
+const GL = (name) => G[name] ?? OLD[name];
+const glyph = (name, size = 24, extra = '') => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" ${extra}>${GL(name)}</svg>`;
+const muted = (name, size = 24) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" style="filter:grayscale(.75) opacity(.5)">${GL(name)}</svg>`;
+const ICON = {
+  chevronLeft: '<path d="M15 5 L8 12 L15 19"/>', chevronRight: '<path d="M9 5 L16 12 L9 19"/>', close: '<path d="M6 6 L18 18 M18 6 L6 18"/>',
+  check: '<path d="M5 12.5 L10 17 L19 7"/>', pencil: '<path d="M4 20 L4.6 16.4 L15.8 5.2 A1.9 1.9 0 0 1 18.5 5.2 L18.8 5.5 A1.9 1.9 0 0 1 18.8 8.2 L7.6 19.4 Z"/><path d="M13.6 7.4 L16.6 10.4"/><path d="M12.5 20 L20 20"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 11 V16.5"/><circle cx="12" cy="7.8" r="1.2" fill="currentColor" stroke="none"/>',
+  eye: '<path d="M2.5 12 C5 7.5 8.3 5.5 12 5.5 C15.7 5.5 19 7.5 21.5 12 C19 16.5 15.7 18.5 12 18.5 C8.3 18.5 5 16.5 2.5 12Z"/><circle cx="12" cy="12" r="3"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5 V4.5 M12 19.5 V21.5 M2.5 12 H4.5 M19.5 12 H21.5 M5.3 5.3 L6.7 6.7 M17.3 17.3 L18.7 18.7 M5.3 18.7 L6.7 17.3 M17.3 6.7 L18.7 5.3"/>',
+  moon: '<path d="M19.5 14.5 A8 8 0 1 1 9.5 4.5 A6.5 6.5 0 0 0 19.5 14.5 Z"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7 V12 L15.5 14.2"/>',
+  lock: '<rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5 V8 A4 4 0 0 1 16 8 V10.5"/>',
+};
+const icon = (n, size = 22, color = 'currentColor', w = 2.2) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" style="color:${color}">${ICON[n]}</svg>`;
+const fmt = (n, en) => en ? n.toLocaleString('en-US') : n.toLocaleString('ru-RU').replace(/ /g, ' ');
+
+/* ======== Детали интерфейса ======== */
+const wallet = (n, { x, y, right = 16, compact = false, bump = 1, en = false } = {}) =>
+  `<div class="wallet${compact ? ' compact' : ''}" style="${x !== undefined ? `left:${x}px;` : `right:${right}px;`}top:${y}px"><span style="display:inline-block;transform:scale(${bump})">${glyph('acorn', compact ? 20 : 22)}</span><span class="num">${fmt(n, en)}</span></div>`;
+const hearts = (n, y = 66, right = 16) => `<div class="hearts" style="right:${right}px;top:${y}px">${[0, 1, 2].map((i) => glyph(i < n ? 'heart' : 'heartEmpty', 15)).join('')}</div>`;
+const btn = (v, s, label, pre = '', style = '') => `<div class="btn ${s} ${v}" style="${style}">${pre}${label}</div>`;
+const acornN = (n, size = 16, en) => `<span style="display:inline-flex;align-items:center;gap:3px">${glyph('acorn', size)}<span>${fmt(n, en)}</span></span>`;
+const grab = (dot = false) => `<div class="grab"><i></i><i></i>${dot ? '<span class="dot"></span>' : ''}</div>`;
+const sheet = (top, inner, extra = '') => `<div class="sheet" style="top:${top}px;${extra}">${inner}</div>`;
+const flyAcorn = (x, y, s = 20, rot = 0, op = 1) => `<div class="fly" style="left:${x - s / 2}px;top:${y - s / 2}px;transform:rotate(${rot}deg);opacity:${op}">${glyph('acorn', s)}</div>`;
+const trail = (pts) => `<svg class="abs" style="left:0;top:0;z-index:39" width="375" height="812"><path d="${pts}" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="2" stroke-dasharray="2 6" stroke-linecap="round"/></svg>`;
+const av = (id, color, size, night = false, ring = 0) => `<div class="av" style="width:${size}px;height:${size}px;background:${AV_BG[night ? 'night' : 'day'][color]};${ring ? `box-shadow:0 0 0 ${ring}px ${night ? 'rgba(255,255,255,.22)' : '#FFFFFF'}, var(--e2);` : ''}"><svg width="${size}" height="${size}" viewBox="0 0 48 48">${AV[id]}</svg></div>`;
+
+/* ======== Награды ======== */
+const TIER = { wood: ['#E2B274', '#B07C3E', '#FFE7C2'], silver: ['#DCE4EE', '#98A6B8', '#FFFFFF'], gold: ['#FFCF4D', '#D99A1E', '#FFF2C2'] };
+const AW = [
+  ['firstWater', 'Первый полив', 'First drop', 20, 'drop', '#DCEFFB'],
+  ['days7', 'Неделя', 'One week', 30, 7, null],
+  ['days30', 'Месяц', 'One month', 80, 30, null],
+  ['days100', 'Сто дней', '100 days', 150, 100, null],
+  ['days365', 'Целый год', 'A whole year', 200, 365, null],
+  ['trees3', 'Роща', 'A grove', 30, 'forest', '#E3F4D3'],
+  ['trees10', 'Настоящий лес', 'A real forest', 100, 'forest', '#CDEBB4'],
+  ['firstName', 'Как тебя зовут?', 'Name giver', 20, 'nameTag', '#FFF0C2'],
+  ['firstLockIn', 'Навсегда', 'Forever', 50, 'plaque', '#FFF4D6'],
+  ['seedTree', 'Из семени', 'From a seed', 30, 'seed', '#F3E3CC'],
+  ['noMiss30', 'Ни дня мимо', 'Never missed', 100, 'check', '#DDF5DF'],
+  ['firstBuy', 'Первая покупка', 'First purchase', 20, 'acorn', '#FFE9C7'],
+  ['quests7', 'Неделя заданий', 'Quest week', 80, 'basket', '#FFF0C2'],
+  ['firstFriend', 'Первый друг', 'First friend', 20, 'friends', '#DDF0FB'],
+];
+const tierOf = (r) => (r >= 150 ? 'gold' : r >= 80 ? 'silver' : 'wood');
+/** state: got | locked | progress:p | claim */
+function badge(a, state = 'got', size = 64) {
+  const [id, , , reward, mark, disc] = a;
+  const [face, lip, shine] = TIER[tierOf(reward)];
+  const locked = state === 'locked' || String(state).startsWith('progress');
+  const p = String(state).startsWith('progress') ? +String(state).split(':')[1] : 0;
+  const f = locked ? '#E9D3B0' : face, l = locked ? '#CDB48E' : lip, d = locked ? '#F7E7CF' : (disc || '#F3CF92');
+  let center;
+  if (typeof mark === 'number') {
+    center = `<circle cx="32" cy="31" r="21" fill="${locked ? '#F4E4CA' : '#F3CF92'}"/><circle cx="32" cy="31" r="15.5" fill="none" stroke="${locked ? '#E2CDAA' : '#D9A867'}" stroke-width="1.6"/><circle cx="32" cy="31" r="9.5" fill="none" stroke="${locked ? '#E2CDAA' : '#D9A867'}" stroke-width="1.6"/>
+      <text x="32" y="${mark >= 100 ? 37 : 38}" text-anchor="middle" font-family="Nunito" font-weight="900" font-size="${mark >= 100 ? 16 : 20}" fill="${locked ? '#B9A07E' : '#5A3A0E'}">${mark}</text>`;
+  } else {
+    center = `<circle cx="32" cy="31" r="21" fill="${d}"/><g transform="translate(16 15) scale(1.333)" ${locked ? 'style="filter:grayscale(.8) opacity(.45)"' : ''}>${GL(mark)}</g>`;
+  }
+  const ring = p ? `<circle cx="32" cy="32" r="31" fill="none" stroke="var(--sunken)" stroke-width="3.5"/><circle cx="32" cy="32" r="31" fill="none" stroke="#4CC764" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="${(p * 194.8).toFixed(1)} 300" transform="rotate(-90 32 32)"/>` : '';
+  const glow = state === 'claim' ? `<circle cx="32" cy="31" r="34" fill="url(#bglow)"/>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 64 64"><defs><radialGradient id="bglow"><stop offset=".6" stop-color="#FFE7A0" stop-opacity=".9"/><stop offset="1" stop-color="#FFE7A0" stop-opacity="0"/></radialGradient></defs>${glow}${ring}
+    <circle cx="32" cy="33.5" r="27" fill="${l}"/><circle cx="32" cy="31" r="27" fill="${f}"/>${center}
+    <path d="M14 22 A20 20 0 0 1 24 12.6" fill="none" stroke="${locked ? '#FFF6E6' : shine}" stroke-width="2.6" stroke-linecap="round" opacity=".8"/></svg>`;
+}
+
+/* ======== Фоны и сцены ======== */
+const IMG = { day: 'img/main-day.png', night: 'img/main-night.png', s320: 'img/main-320.png', nightEn: 'img/main-night-en.png' };
+const bgImg = (src, w = 375, h = 812) => `<img class="bg" src="${src}" width="${w}" height="${h}">`;
+const counterRow = (n, y = 56) => `<div class="abs" style="left:0;right:0;top:${y}px;display:flex;justify-content:center;align-items:center;gap:8px;height:52px">${glyph('rings', 40)}<span style="font-weight:900;font-size:46px;line-height:52px;letter-spacing:-.5px">${n}</span></div>`;
+const NAMES = { birch: ['Берёза', 'Birch'], maple: ['Клён', 'Maple'], apple: ['Яблоня', 'Apple tree'], palm: ['Пальма', 'Palm'], oak: ['Дуб', 'Oak'], sakura: ['Сакура', 'Sakura'], spruce: ['Ёлка', 'Spruce'] };
+const PNG = { oak: 'oak-tree', sakura: 'sakura-tree', spruce: 'spruce-tree' };
+/** Превью дерева в карточке (стадия «дерево»). */
+function treeThumb(kind, w, h, night, meadow = 'summer') {
+  const size = Math.min(w * 0.92, h * 0.98 * 300 / 320);
+  const tree = PNG[kind]
+    ? `<img src="../волна-2/img/${PNG[kind]}.png" style="position:absolute;left:50%;bottom:${h * 0.16}px;transform:translateX(-50%);height:${h * 0.78}px">`
+    : `<div style="position:absolute;left:50%;bottom:${h * 0.13}px;transform:translateX(-50%)">${treeSVG(kind, 'tree', { night, size, fill: 0.82 })}</div>`;
+  return `<div style="position:absolute;inset:0">${sceneSVG(meadow, { W: w, H: h, night, horizon: 0.66, sun: false, front: false, weather: false })}</div>${tree}`;
+}
+
+/* ======== Кадры ======== */
+const FR = [];
+const frame = (id, group, title, sub, render, opt = {}) => FR.push({ id, group, title, sub, render, w: opt.w || 375, h: opt.h || 812, night: !!opt.night, cls: opt.cls || '' });
+
+/* ---- Главный ---- */
+function mainBase({ night = false, img, n = 55, bump = 1, plus = null, heartsN = 3, en = false } = {}) {
+  return bgImg(img || (night ? IMG.night : IMG.day)) + wallet(n, { y: 13, bump, en }) + hearts(heartsN) +
+    (plus ? `<div class="plus" style="right:${16 + 66 + 6}px;top:19px">${plus}</div>` : '');
+}
+frame('01', 'Главный экран: плашка желудей', 'День: плашка желудей справа сверху', 'Плашка 34 высотой, справа 16, по центру строки точек. Сердечки дерева спустились в строку счётчика (справа, 28 высотой) — они уходят вместе с шапкой при перелистывании.', () => mainBase());
+frame('02', 'Главный экран: плашка желудей', 'Ночь', 'Плашка — «стекло» ночи (#43427A α 0.92) с тонкой светлой кромкой.', () => mainBase({ night: true, n: 1240 }), { night: true });
+frame('03', 'Главный экран: плашка желудей', '320×568', 'Ширина плашки та же, что у прежней таблетки сердечек, — точкам места столько же.', () => bgImg(IMG.s320, 320, 568) + wallet(55, { y: 13 }) + hearts(3, 66), { w: 320, h: 568 });
+
+frame('04', 'Зачисление после полива', '1 · 2150 мс: жёлуди вылетают из кроны', 'Когда «+1» уже упал в счётчик. 3 жёлудя (+5) веером вверх, 0→1 пружиной pop, разлёт 18–34 px.', () => {
+  const cx = 186, cy = 492;
+  return mainBase({ n: 50 }) + [[-34, -26, -20], [0, -34, 8], [30, -24, 22]].map(([dx, dy, r]) => flyAcorn(cx + dx, cy + dy, 22, r)).join('') +
+    `<div class="abs" style="left:${cx - 40}px;top:${cy - 40}px;width:80px;height:80px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,231,160,.7),rgba(255,231,160,0));z-index:38"></div>`;
+});
+frame('05', 'Зачисление после полива', '2 · 2450 мс: полёт к плашке', 'Каждый жёлудь — своя дуга (квадратичная кривая, вершина сдвинута на 60 px к центру экрана), 520 мс inOut(cubic), старт через 85 мс друг за другом. К концу масштаб 1 → 0.7.', () =>
+  mainBase({ n: 50 }) + trail('M186 462 Q 230 250 313 30') + flyAcorn(296, 66, 18, 30) + flyAcorn(258, 190, 20, 12) + flyAcorn(214, 360, 22, -10));
+frame('06', 'Зачисление после полива', '3 · 2900 мс: плашка поймала, число щёлкнуло', 'Каждый прилёт: жёлудь в плашке 1 → 1.18 → 1 (90 мс + пружина bounce), число прокручивается вверх. После последнего — зелёная «+5» слева от плашки: держится 900 мс, уходит вверх за 250 мс.', () =>
+  mainBase({ n: 55, bump: 1.18, plus: '+5' }));
+
+/* ---- Меню ---- */
+function dayStrip(en = false) {
+  const w = en ? ['Mon', 'Tue', 'today', 'Thu', 'Fri'] : ['пн', 'вт', 'сегодня', 'чт', 'пт'];
+  return `<div class="days">${[26, 27, 28, 29, 30].map((n, i) => `<div class="day${i === 2 ? ' today' : ''}${i > 2 ? ' fut' : ''}"><span class="w">${w[i]}</span><span class="n">${n}</span>${i <= 2 ? glyph('sprout', 18) : ''}</div>`).join('')}</div>`;
+}
+function menuHTML({ narrow = false, en = false, quests = '1 из 3', qBadge = 2, profBadge = 1, shopDot = false, friendsDot = true } = {}) {
+  const T = en ? { forest: 'My forest', trees: '3 trees', nh: 'New habit', q: 'Quests', fr: 'Friends', frc: '4 friends · 2 watered', ld: 'Leaders', ldc: 'You’re 2nd this week', shop: 'Shop', prof: 'Profile', set: 'Settings' }
+    : { forest: 'Мой лес', trees: '3 дерева', nh: 'Новая привычка', q: 'Задания', fr: 'Друзья', frc: '4 друга · 2 полили', ld: 'Лидеры', ldc: 'ты 2-й за неделю', shop: 'Магазин', prof: 'Профиль', set: 'Настройки' };
+  const h1 = narrow ? 92 : 100, h2 = narrow ? 68 : 72, h3 = narrow ? 72 : 76;
+  const card = (t, c, g, tint, gs, extra = '', cls = '') => `<div class="mcard ${cls}" style="height:100%">${extra}<div class="face"><div class="circ" style="background:${tint}">${glyph(g, gs)}</div><div class="t">${t}</div>${c ? `<div class="c">${c}</div>` : ''}</div></div>`;
+  const wide = (t, c, g, tint, extra = '') => `<div class="mcard wide" style="height:100%">${extra}<div class="face"><div class="circ" style="background:${tint}">${glyph(g, 32)}</div><div class="tx"><div class="t">${t}</div><div class="c">${c}</div></div></div></div>`;
+  const nb = (n) => (n ? `<div class="nb">${n}</div>` : '');
+  return `<div class="menu"><div class="div"></div>
+    <div class="mrow" style="height:${h1}px">${card(T.forest, T.trees, 'forest', 'var(--tintForest)', 34)}${card(T.nh, '', 'newHabit', 'rgba(255,255,255,.28)', 34, '', 'acc')}${card(T.q, quests, 'tasks', 'var(--tintQuests)', 32, nb(qBadge))}</div>
+    <div class="mrow" style="height:${h2}px;margin-top:10px">${wide(T.fr, T.frc, 'friends', 'var(--tintFriends)', friendsDot ? '<div class="nb dot"></div>' : '')}${wide(T.ld, T.ldc, 'leaders', 'var(--tintLeaders)')}</div>
+    <div class="mrow" style="height:${h3}px;margin-top:10px">${card(T.shop, '', 'shop', 'var(--tintShop)', 26, shopDot ? '<div class="nb dot"></div>' : '', 'narrow')}${card(T.prof, '', 'profile', 'var(--tintProfile)', 26, nb(profBadge), 'narrow')}${card(T.set, '', 'settings', 'var(--tintSettings)', 25, '', 'narrow')}</div></div>`;
+}
+function statusHTML(en) {
+  return `<div class="status"><div class="l1">${glyph('check', 20)}${en ? 'Grew today — see you tomorrow' : 'Сегодня выросло — до завтра'}</div><div class="l2">${glyph('rings', 16)}${en ? 'Bush in 4 days · Sun 1' : 'Кустик через 4 дня · вс 1'}</div></div>`;
+}
+frame('07', 'Меню: все разделы настоящие', 'Меню поднято (день)', 'Плиток «скоро» больше нет: 3 ряда объёмных плиток с губой. Красные числа — что можно забрать (Задания: 2, Профиль: 1). Точка у «Друзей» — правило из спец-друзья. Плашка желудей остаётся над затемнением и нажимается.', () =>
+  mainBase() + `<div class="scrim" style="z-index:15"></div>` + sheet(258, grab() + statusHTML() + dayStrip() + `<div class="lockrow">${glyph('plaque', 16)}Закрепить результат</div>` + `<div style="height:8px"></div>` + menuHTML()));
+frame('08', 'Меню: все разделы настоящие', 'Ночь, English', 'Подписи узких плиток в одну строку; в широких — подпись и строка состояния.', () =>
+  bgImg(IMG.night) + wallet(1240, { y: 13, en: true }) + hearts(2) + `<div class="scrim" style="z-index:15"></div>` + sheet(258, grab() + statusHTML(true) + dayStrip(true) + `<div class="lockrow">${glyph('plaque', 16)}Lock in the result</div><div style="height:8px"></div>` + menuHTML({ en: true, quests: 'Claim reward', qBadge: 1, profBadge: 0, shopDot: true })), { night: true });
+frame('09', 'Меню: все разделы настоящие', '320×568: меню прокручивается', 'Плиток ниже 92 / 68 / 72. Верх плашки не выше 76 (как в волне 2).', () =>
+  bgImg(IMG.s320, 320, 568) + wallet(55, { y: 13 }) + `<div class="scrim" style="z-index:15"></div>` + sheet(76, grab() + statusHTML() + dayStrip().replace(/width:64px/g, '') + `<div class="lockrow">${glyph('plaque', 16)}Закрепить результат</div><div style="height:8px"></div>` + menuHTML({ narrow: true })), { w: 320, h: 568 });
+frame('09b', 'Меню: все разделы настоящие', 'Плашка опущена: точка у ручки', 'Есть что забрать, а меню закрыто — красная точка 9 px справа от ручки. Исчезает, когда забрали всё.', () =>
+  bgImg(IMG.day).replace('main-day.png', 'main-day.png') + wallet(55, { y: 13 }) + hearts(3) + `<div class="abs" style="left:0;right:0;top:589px;height:12px;z-index:21;display:flex;justify-content:center"><div style="position:relative;width:36px"><span style="position:absolute;left:44px;top:0;width:9px;height:9px;border-radius:50%;background:#E0485F;border:2px solid #FFE3BE"></span></div></div>`);
+
+/* ---- Задания ---- */
+const Q = {
+  waterAll: ['drop', 'Полей все деревья', 'Water all your trees'],
+  visitForest: ['forest', 'Загляни в «Мой лес»', 'Visit My forest'],
+  nameTree: ['nameTag', 'Дай имя дереву', 'Name a tree'],
+  moveTree: ['plot', 'Переставь дерево в лесу', 'Move a tree in your forest'],
+  visitFriend: ['friends', 'Загляни к другу', 'Visit a friend'],
+  cheerFriend: ['heart', 'Подбодри друга', 'Cheer a friend on'],
+  plantHabit: ['newHabit', 'Посади новую привычку', 'Plant a new habit'],
+  waterShared: ['drop', 'Полей общее дерево с другом', 'Water the tree you share'],
+};
+function qcard(id, st, { p = null, en = false } = {}) {
+  const [g, ru, eng] = Q[id];
+  const t = en ? eng : ru;
+  const right = st === 'ready' ? btn('primary', 'S', en ? 'Claim' : 'Забрать', glyph('acorn', 18)) :
+    st === 'done' ? `<div class="cap12 soft" style="display:flex;align-items:center;gap:4px">${en ? 'Done' : 'Готово'}</div>` :
+    st === 'press' ? btn('primary', 'S', en ? 'Claim' : 'Забрать', glyph('acorn', 18), 'transform:scale(.94) translateY(2px);box-shadow:0 1px 0 #34A64D') :
+    `<span class="rew">${glyph('acorn', 18)}+10</span>`;
+  const circ = st === 'done' ? `<div class="gc" style="background:transparent">${glyph('check', 30)}</div>` : `<div class="gc">${glyph(g, 28)}</div>`;
+  const prog = p ? `<div class="qp"><div class="pbar"><i style="width:${(p[0] / p[1]) * 100}%"></i></div><b>${p[0]} / ${p[1]}</b></div>` : '';
+  return `<div class="qcard ${st === 'ready' || st === 'press' ? 'ready' : st}">${circ}<div class="mid"><div class="qt">${t}</div>${prog}</div>${right}${st === 'todo' ? `<span style="margin-left:-6px;opacity:.6">${icon('chevronRight', 16, 'var(--soft)', 2.6)}</span>` : ''}</div>`;
+}
+function bonus(n, st, en = false) {
+  const right = st === 'ready' ? btn('gold', 'S', en ? 'Claim +15' : 'Забрать +15', '') : st === 'done' ? `<div class="cap12 soft">${en ? 'Done' : 'Готово'}</div>` : `<span class="rew">${glyph('acorn', 18)}+15</span>`;
+  return `<div class="bonus">${glyph('basket', st === 'ready' ? 52 : 46)}<div style="flex:1"><div class="qt" style="font-weight:800;font-size:15px;line-height:19px">${en ? 'All three — a basket of acorns' : 'Все три — корзинка желудей'}</div><div class="dots3">${[0, 1, 2].map((i) => `<i class="${i < n ? 'on' : ''}"></i>`).join('')}</div></div>${right}</div>`;
+}
+function questsSheet(top, cards, bon, { en = false, allDone = false, timer = '5 ч 12 мин' } = {}) {
+  const head = allDone
+    ? `<div style="text-align:center;padding:2px 16px 14px"><div style="display:flex;justify-content:center;position:relative">${glyph('basket', 64)}${glyph('sparkle', 16, 'style="position:absolute;left:calc(50% + 30px);top:2px"')}${glyph('sparkle', 12, 'style="position:absolute;left:calc(50% - 44px);top:20px"')}</div><div class="t2" style="margin-top:6px">${en ? 'All done!' : 'Всё сделано!'}</div><div class="small soft" style="display:flex;justify-content:center;align-items:center;gap:5px;margin-top:2px">${icon('clock', 16, 'var(--soft)')}${en ? 'New quests in ' + timer : 'Новые задания через ' + timer}</div></div>`
+    : `<div style="padding:4px 16px 14px"><div class="t2">${en ? 'Today’s quests' : 'Задания на сегодня'}</div><div class="small soft" style="display:flex;align-items:center;gap:5px;margin-top:2px">${icon('clock', 16, 'var(--soft)')}${en ? 'New ones in ' + timer : 'Новые через ' + timer}</div></div>`;
+  return sheet(top, grab() + head + cards + bon + `<div class="cap12 soft" style="text-align:center;margin-top:14px">${en ? 'Quests count by themselves as you go.' : 'Задания засчитываются сами, по ходу дня.'}</div>`);
+}
+frame('10', 'Задания', 'Лист заданий: обычный день', 'Открывается из меню поверх главного. 1-е выполнено — зелёная рамка и «Забрать»; 2-е в процессе (полоска 1/3); 3-е не начато — шеврон: нажатие ведёт туда, где его делают.', () =>
+  mainBase() + `<div class="scrimD" style="z-index:15"></div>` + questsSheet(300, qcard('visitForest', 'ready') + qcard('waterAll', 'todo', { p: [1, 3] }) + qcard('nameTree', 'todo'), bonus(1, 'todo')));
+frame('11', 'Задания', '«Забрать»: жёлуди летят в плашку', '0 мс — кнопка сжата (0.94); 60 мс — 4 жёлудя из кнопки; 300 мс — строка становится «Готово»; ~1100 мс — плашка ловит последний, «+10» слева от неё.', () =>
+  mainBase({ n: 55 }) + `<div class="scrimD" style="z-index:15"></div>` + questsSheet(300, qcard('visitForest', 'press') + qcard('waterAll', 'todo', { p: [1, 3] }) + qcard('nameTree', 'todo'), bonus(1, 'todo')) +
+  trail('M318 386 Q 360 200 313 30') + flyAcorn(318, 300, 22, 10) + flyAcorn(336, 196, 20, -14) + flyAcorn(320, 96, 18, 20));
+frame('12', 'Задания', 'Все три выполнены: корзинка', 'Бонус становится золотой кнопкой «Забрать +15»; корзинка подпрыгивает один раз (1 → 1.12 → 1). Число на плитке меню — 1.', () =>
+  mainBase({ n: 85 }) + `<div class="scrimD" style="z-index:15"></div>` + questsSheet(300, qcard('visitForest', 'done') + qcard('waterAll', 'done', { p: [3, 3] }) + qcard('nameTree', 'done'), bonus(3, 'ready')));
+frame('13', 'Задания', 'Всё забрано', 'Сверху — корзинка и «Всё сделано!» с таймером. Таймер обновляется раз в минуту; меньше часа — «через 42 мин».', () =>
+  mainBase({ n: 100 }) + `<div class="scrimD" style="z-index:15"></div>` + questsSheet(238, qcard('visitForest', 'done') + qcard('waterAll', 'done', { p: [3, 3] }) + qcard('nameTree', 'done'), bonus(3, 'done'), { allDone: true }));
+frame('14', 'Задания', 'Ночь, English', 'Ночью бонус — на тёмно-сиреневой подложке с золотой кромкой.', () =>
+  bgImg(IMG.nightEn) + wallet(1240, { y: 13, en: true }) + hearts(2) + `<div class="scrimD" style="z-index:15"></div>` +
+  questsSheet(300, qcard('waterAll', 'todo', { p: [0, 2], en: true }) + qcard('cheerFriend', 'ready', { en: true }) + qcard('moveTree', 'todo', { en: true }), bonus(1, 'todo', true), { en: true, timer: '42 min' }), { night: true });
+
+/* ---- Магазин ---- */
+function pageBar(title, right = '') {
+  return `<div class="pbarTop"><div class="back">${icon('chevronLeft', 22, 'var(--text)', 2.6)}</div><div class="tt">${title}</div>${right}</div>`;
+}
+function shopCard(kind, state, { night = false, en = false, meadow = 'summer', isMeadow = false, price = 0, poor = false, top = 0 } = {}) {
+  const pv = isMeadow ? `<div style="position:absolute;inset:0">${sceneSVG(kind, { W: 154, H: 132, night, horizon: 0.5, tree: treeSVG('birch', 'young', { night, size: 70 }).replace(/<svg[^>]*>/, '<svg width="70" height="75" viewBox="0 0 300 320">'), treeW: 0.46, sun: true, front: true })}</div>` : treeThumb(kind, 154, 132, night, meadow);
+  const label = state === 'sel' ? `<span class="selp">${glyph('check', 20)}${en ? 'Selected' : 'Выбран'}</span>` : state === 'own' ? `<span class="own">${icon('check', 18, 'currentColor', 2.8)}${en ? 'Owned' : 'Есть'}</span>` : `<span class="price${poor ? ' poor' : ''}">${glyph('acorn', 20)}<span class="n">${fmt(price, en)}</span></span>`;
+  const nm = isMeadow ? (en ? { summer: 'Summer', autumn: 'Autumn', winter: 'Winter', bloom: 'Blossom' }[kind] : { summer: 'Летний', autumn: 'Осенний', winter: 'Зимний', bloom: 'Цветочный' }[kind]) : NAMES[kind][en ? 1 : 0];
+  return `<div class="scard${state === 'sel' ? ' sel' : ''}"><div class="face"><div class="pv">${pv}</div><div class="nm">${nm}</div><div class="pr">${label}</div></div></div>`;
+}
+function earnCard(top, en = false) {
+  const rows = en ? [['drop', 'Water a tree (up to 3 a day)', '+5'], ['stageUp', 'A new stage', '+10…150'], ['tasks', 'Daily quests', '+10'], ['basket', 'All three quests', '+15'], ['plaque', 'Achievements', '+20…200']]
+    : [['drop', 'Полив (до 3 деревьев в день)', '+5'], ['stageUp', 'Новая стадия дерева', '+10…150'], ['tasks', 'Задание дня', '+10'], ['basket', 'Все три задания', '+15'], ['plaque', 'Награды в профиле', '+20…200']];
+  return `<div class="earn" style="top:${top}px"><div class="t3" style="display:flex;align-items:center;gap:8px;margin-bottom:4px">${glyph('acorn', 24)}${en ? 'How to earn acorns' : 'Как заработать жёлуди'}</div>${rows.map(([g, t, a]) => `<div class="erow">${glyph(g, 24)}<div class="x">${t}</div><div class="a">${a}</div></div>`).join('')}</div>`;
+}
+function shopPage({ tab = 'trees', night = false, en = false, n = 320, scroll = 0 } = {}) {
+  const segs = en ? ['Trees', 'Meadows'] : ['Деревья', 'Луга'];
+  let grid;
+  if (tab === 'trees') {
+    const items = [['birch', 'own'], ['maple', 'buy', 400], ['apple', 'buy', 600], ['palm', 'buy', 900], ['oak', 'own'], ['sakura', 'own'], ['spruce', 'own']];
+    grid = items.map(([k, st, p]) => shopCard(k, st, { night, en, price: p, poor: p > n })).join('');
+  } else {
+    grid = [['summer', 'sel'], ['autumn', 'buy', 500], ['winter', 'own'], ['bloom', 'buy', 1200]].map(([k, st, p]) => shopCard(k, st, { night, en, isMeadow: true, price: p, poor: p > n })).join('');
+  }
+  return `<div class="abs" style="left:0;right:0;top:${-scroll}px">` +
+    `<div class="seg abs" style="left:16px;right:16px;top:72px">${segs.map((s, i) => `<div class="${(i === 0) === (tab === 'trees') ? 'on' : ''}">${glyph(i ? 'plot' : 'forest', 20)}${s}</div>`).join('')}</div>` +
+    `<div class="grid" style="top:132px">${grid}</div>` + (tab === 'meadows' ? earnCard(132 + 2 * 228 + 8, en) : earnCard(132 + 4 * 228 + 8, en)) + `</div>` +
+    pageBar(en ? 'Shop' : 'Магазин', wallet(n, { right: 12, y: 11, en }));
+}
+frame('15', 'Магазин', 'Деревья', 'Сетка 2 столбца, карточка 165×216. Порядок постоянный: платные по цене, потом три бесплатных. Цена на подложке; не хватает — число бледнее (цвет — не единственный знак: в окне товара будет «не хватает N»).', () => shopPage({ n: 320 }));
+frame('16', 'Магазин', 'Луга', 'Превью луга — та же сцена, что на главном, в маленьком виде, с берёзкой. Выбранный — зелёная рамка 3 px и «Выбран». Внизу — «Как заработать».', () => shopPage({ tab: 'meadows', n: 320 }));
+frame('24', 'Магазин', 'Ночь, English', 'Превью следуют теме: ночью — ночные деревья и луг.', () => shopPage({ night: true, en: true, n: 1240 }), { night: true });
+
+function itemSheet({ kind = 'birch', stage = 'tree', night = false, en = false, n = 320, state = 'buy', price = 250, top = 222, pvNight = null, meadow = null, extra = '', btnState = '', left = null } = {}) {
+  const isMeadow = !!meadow;
+  const pn = pvNight ?? night;
+  const pv = isMeadow
+    ? sceneSVG(meadow, { W: 343, H: 248, night: pn, horizon: 0.48, tree: treeSVG('maple', 'young', { night: pn, size: 150 }), treeW: 0.42, treeX: 0.52 })
+    : sceneSVG('summer', { W: 343, H: 248, night: pn, horizon: 0.52, sun: true, front: true, weather: false, tree: treeSVG(kind, stage, { night: pn, size: 210, fill: 0.85 }), treeW: 0.62 });
+  const stages = ['sprout', 'seedling', 'bush', 'young', 'tree', 'grand'];
+  const stRow = isMeadow ? '' : `<div class="stages">${stages.map((s) => `<div class="st${s === stage ? ' on' : ''}">${treeSVG(kind, s, { night, size: 46, fill: 0.8 })}</div>`).join('')}</div>
+    <div class="small soft" style="text-align:center;margin-top:6px">${en ? 'Tree · from day 50' : 'Дерево · с 50-го дня'}</div>`;
+  const D = {
+    birch: ['Берёза', 'Белый ствол с чёрными чёрточками и лёгкая плакучая крона. Весной — серёжки.', 'Birch', 'A white trunk with black dashes and a light weeping crown.'],
+    palm: ['Пальма', 'Растёт из кокоса. Изогнутый ствол, перистые листья, на больших — кокосы.', 'Palm', 'Grows from a coconut: a curved trunk, feathery fronds and coconuts.'],
+    winter: ['Зимний луг', 'Снег на холмах, иней на траве и тихий снегопад. Ночью снег светится.', 'Winter meadow', 'Snowy hills, frosty grass and quiet snowfall.'],
+  }[isMeadow ? meadow : kind];
+  let action = '';
+  if (state === 'buy') action = btn('gold', 'L', (en ? 'Buy for ' : 'Купить за ') + acornN(price, 22, en), '', btnState) + `<div class="small soft" style="text-align:center;margin-top:10px">${en ? 'You’ll have ' : 'Останется '}${fmt(left ?? n - price, en)}</div>`;
+  if (state === 'poor') action = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div class="pbar" style="flex:1;height:10px;border-radius:5px"><i style="width:${(n / price) * 100}%;background:var(--gold)"></i></div><span class="cap12">${acornN(n, 16)} / ${fmt(price)}</span></div>` +
+    btn('off', 'L', (en ? 'Need ' : 'Не хватает ') + acornN(price - n, 22, en)) + `<div class="btn text M" style="margin-top:4px;color:var(--accentLip)">${glyph('tasks', 20)}${en ? 'How to earn' : 'Как заработать'} ${icon('chevronRight', 16, 'currentColor', 2.6)}</div>`;
+  if (state === 'owned') action = btn('primary', 'L', en ? 'Put on a tree' : 'Поставить на дерево', glyph('sprout', 24)) + `<div class="btn text M" style="margin-top:4px">${en ? 'Plant a new one' : 'Посадить новое такое'}</div>`;
+  if (state === 'meadowBuy') action = btn('gold', 'L', (en ? 'Buy for ' : 'Купить за ') + acornN(price, 22, en)) + `<div class="small soft" style="text-align:center;margin-top:10px">Останется ${fmt(n - price)}</div>`;
+  const dn = `<div class="dn"><i class="${pn ? '' : 'on'}">${icon('sun', 18, pn ? 'var(--soft)' : '#fff')}</i><i class="${pn ? 'on' : ''}">${icon('moon', 18, pn ? '#fff' : 'var(--soft)')}</i></div>`;
+  return sheet(top, grab() + `<div class="ipv">${pv}${dn}${extra}</div>` + stRow +
+    `<div style="display:flex;align-items:flex-start;gap:10px;margin:14px 16px 0"><div style="flex:1"><div class="t2">${en ? D[2] : D[0]}</div><div class="small soft" style="margin-top:4px">${en ? D[3] : D[1]}</div></div>${state === 'owned' || state === 'new' ? '' : wallet(n, { compact: true, en }).replace('position:absolute', '').replace(/class="wallet compact" style="[^"]*"/, 'class="wallet compact" style="position:relative"')}</div>` +
+    `<div style="margin:16px 16px 0">${action}</div>`);
+}
+const shopUnder = (n = 320, night = false) => shopPage({ n, night }) + `<div class="scrimD" style="z-index:15"></div>`;
+frame('17', 'Окно товара', 'Берёза: хватает', 'Окно поднимается на тап по карточке. При открытии превью один раз «прокручивает рост»: росток → … → дерево, по 450 мс. Внизу золотая «Купить за 250» и «Останется 70». Окно и есть подтверждение: второго вопроса нет.', () =>
+  shopUnder() + itemSheet({ kind: 'birch', n: 320, price: 250, state: 'buy' }));
+frame('18', 'Окно товара', 'Пальма: не хватает', 'Полоска 320 / 900, кнопка «Не хватает 580» недоступна, ниже — «Как заработать» (ведёт в лист заданий; если всё сделано — в «Как заработать» магазина).', () =>
+  shopUnder() + itemSheet({ kind: 'palm', stage: 'grand', n: 320, price: 900, state: 'poor' }));
+frame('19', 'Окно товара', 'Покупка: жёлуди летят в превью', '0 мс — нажатие; 120 мс — 6 жёлудей из плашки окна, через 70 мс друг за другом, по 480 мс; число откручивается 320 → 70 за 600 мс.', () =>
+  shopUnder() + itemSheet({ kind: 'birch', n: 190, left: 70, price: 250, state: 'buy', btnState: 'transform:translateY(3px);box-shadow:0 1px 0 #D99A1E' }) +
+  trail('M318 596 Q 300 420 190 360') + flyAcorn(300, 520, 20, 12) + flyAcorn(262, 432, 22, -8) + flyAcorn(214, 380, 22, 16));
+frame('20', 'Окно товара', '«Новое!»: праздник покупки', 'Вспышка 120 мс, лучи 12°/с, лента «Новое!» падает сверху пружиной, листья и жёлуди разлетаются. Кнопка сменилась на «Поставить на дерево». Тап по превью — пропустить.', () => {
+  const rays = `<div class="rays"></div>`;
+  const conf = Array.from({ length: 14 }, (_, i) => { const a = (i / 14) * Math.PI * 2, r = 90 + (i % 3) * 22; return `<div class="abs" style="left:${171 + Math.cos(a) * r}px;top:${124 + Math.sin(a) * r * 0.7}px;transform:rotate(${i * 47}deg)">${i % 3 ? `<svg width="12" height="14" viewBox="0 0 12 14"><path d="M6 14 C1 10 0 5 6 0 C12 5 11 10 6 14Z" fill="${['#A8D45A', '#D6EC7A', '#74AA3A'][i % 3]}"/></svg>` : glyph('acorn', 14)}</div>`; }).join('');
+  return shopUnder(70) + itemSheet({ kind: 'birch', n: 70, state: 'owned', extra: rays.replace('class="rays"', 'class="rays" style="z-index:0;mix-blend-mode:screen"') + conf + `<div class="ribbon" style="top:14px">${'Новое!'}</div>` });
+});
+frame('21', 'Окно товара', '«На какое дерево?»', 'Второй шаг того же окна (содержимое уезжает влево, 240 мс). Строка — растущее дерево; «Сменить» ставит берёзу сразу, превью строки меняется облачком листьев. Смена бесплатна и обратима.', () => {
+  const rows = [['oak', 'Тихон', 'Не курить', 'Дуб', true], ['sakura', 'Соня', 'Читать 20 минут', 'Сакура', false], ['spruce', 'Шишка', 'Медитация', 'Ёлка', false]];
+  const r = rows.map(([k, nm, h, kindNm, done], i) => `<div class="row" style="${i ? 'border-top:1px solid var(--divider)' : ''}"><div style="width:48px;height:48px;border-radius:12px;background:var(--skyCard);overflow:hidden;display:flex;align-items:flex-end;justify-content:center">${done ? treeSVG('birch', 'young', { size: 46, fill: 0.85 }) : `<img src="../волна-2/img/${PNG[k]}.png" style="height:40px">`}</div><div style="flex:1;min-width:0"><div class="bs">${nm}</div><div class="cap12 soft">${h} · ${done ? 'Берёза' : kindNm}</div></div>${done ? `<span class="own">${icon('check', 18, 'currentColor', 2.8)}Берёза</span>` : btn('secondary', 'S', 'Сменить')}</div>`).join('');
+  return shopUnder(70) + sheet(330, grab() + `<div style="display:flex;align-items:center;gap:8px;padding:2px 12px 12px"><div class="back" style="position:relative;left:0;top:0;background:var(--card);box-shadow:var(--e1)">${icon('chevronLeft', 22, 'var(--text)', 2.6)}</div><div class="t2">На какое дерево?</div></div>` +
+    `<div class="grp" style="margin:0 16px">${r}</div><div class="small soft" style="margin:12px 20px 0;text-align:center">Погибшие и закреплённые не меняются. Новое дерево такого вида — «Новая привычка».</div><div style="margin:16px">${btn('primary', 'L', 'Готово')}</div>`);
+});
+frame('22', 'Окно товара', 'Зимний луг: день ↔ ночь', 'У луга нет стадий: вместо них переключатель день / ночь в углу превью. В превью идёт снег (живой холст Skia — единственный в окне).', () =>
+  shopPage({ tab: 'meadows', n: 900 }) + `<div class="scrimD" style="z-index:15"></div>` + itemSheet({ meadow: 'winter', n: 900, price: 800, state: 'meadowBuy', top: 286, pvNight: true }));
+frame('23', 'Окно товара', 'Главный экран на зимнем луге', 'Луг меняет только краски и погоду; сцена, дерево и интерфейс те же. После выбора на главном — мягкая смена за 500 мс.', () => {
+  const tree = treeSVG('maple', 'young', { size: 300, days: 24 });
+  return `<div class="abs" style="inset:0">${sceneSVG('winter', { W: 375, H: 812, horizon: 0.47, tree, treeW: 0.66, treeX: 0.5, sun: true, groundAt: 0.4 })}</div>` +
+    counterRow(24) + `<div class="h1" style="top:110px">Рыжик</div><div class="h2" style="top:134px">Бегать по утрам</div>` +
+    wallet(1135, { y: 13 }) + hearts(3) +
+    sheet(588, grab() + statusHTML() + dayStrip());
+});
+
+/* ---- Профиль ---- */
+function profilePage({ night = false, en = false, narrow = false } = {}) {
+  const W = narrow ? 320 : 375, inner = W - 32;
+  const stats = en ? [['drop', '312', 'days watered'], ['rings', '48', 'best streak'], ['acorn', '1,240', 'acorns earned'], ['sprout', '3', 'growing'], ['forest', '5', 'in the forest'], ['tombstone', '1', 'memory']]
+    : [['drop', '312', 'дней полива'], ['rings', '48', 'лучшая серия'], ['acorn', '1 240', 'жёлудей всего'], ['sprout', '3', 'растут'], ['forest', '5', 'в лесу'], ['tombstone', '1', 'в памяти']];
+  const states = { firstWater: 'got', days7: 'got', days30: 'claim', days100: 'progress:0.48', days365: 'progress:0.13', trees3: 'got', trees10: 'progress:0.5', firstName: 'got', firstLockIn: 'locked', seedTree: 'locked', noMiss30: 'progress:0.7', firstBuy: 'got', quests7: 'progress:0.43', firstFriend: 'got' };
+  const order = ['days30', 'firstWater', 'days7', 'trees3', 'firstName', 'firstBuy', 'firstFriend', 'noMiss30', 'trees10', 'days100', 'quests7', 'days365', 'firstLockIn', 'seedTree'];
+  const bs = narrow ? 56 : 64;
+  const prog = { days100: '48/100', days365: '48/365', trees10: '5/10', noMiss30: '21/30', quests7: '3/7' };
+  const aw = order.slice(0, narrow ? 8 : 12).map((id) => { const a = AW.find((x) => x[0] === id); const st = states[id];
+    return `<div class="aw">${badge(a, st, bs)}${st === 'claim' ? `<div class="nb" style="top:-4px;right:${narrow ? 0 : 4}px">+${a[3]}</div>` : ''}<div class="an" style="${st === 'locked' || st.startsWith('progress') ? 'color:var(--soft)' : ''}">${en ? a[2] : a[1]}</div>${prog[id] ? `<div class="ap">${prog[id]}</div>` : ''}</div>`; }).join('');
+  return `<div class="abs" style="left:0;right:0;top:56px">
+    <div style="display:flex;flex-direction:column;align-items:center;padding-top:20px">
+      <div style="position:relative">${av('fox', 0, 96, night, 4)}<div class="abs" style="right:-4px;bottom:-2px;width:34px;height:34px;border-radius:17px;background:var(--card);box-shadow:var(--e1);display:flex;align-items:center;justify-content:center">${icon('pencil', 18, 'var(--text)')}</div></div>
+      <div style="font-weight:900;font-size:28px;line-height:34px;margin-top:12px">${en ? 'Ivan' : 'Иван'}</div>
+      <div class="small soft">${en ? 'Growing since Oct 12' : 'Растит лес с 12 октября'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 16px 0">${stats.map(([g, v, l]) => `<div class="stat">${glyph(g, 22)}<div class="v" style="${narrow ? 'font-size:20px' : ''}">${v}</div><div class="l">${l}</div></div>`).join('')}</div>
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin:24px 20px 12px"><div class="t3">${en ? 'Achievements' : 'Награды'}</div><div class="cap12 soft">${en ? '6 of 14' : '6 из 14'}</div></div>
+    <div class="awards" style="margin:0 16px">${aw}</div>
+    <div class="t3" style="margin:24px 20px 10px">${en ? 'Who sees your trees' : 'Кто видит деревья'}</div>
+    <div class="grp" style="margin:0 16px"><div class="row"><div class="sq" style="background:#4FB6E8">${icon('eye', 20, '#fff')}</div><div style="flex:1"><div class="bs">${en ? 'Friends see 3 of 5 trees' : 'Друзья видят 3 из 5 деревьев'}</div><div class="cap12 soft">${en ? 'Private trees stay private' : 'Скрытые никто не увидит'}</div></div>${icon('chevronRight', 18, 'var(--soft)', 2.6)}</div></div>
+  </div>` + pageBar(en ? 'Profile' : 'Профиль', wallet(en ? 1240 : 320, { right: 12, y: 11, en }));
+}
+frame('25', 'Профиль', 'Профиль', 'Аватар 96 с белым кольцом 4, карандаш 34. Статистика 3×2. Награды сеткой 4 в ряд: «Забрать» первыми (красное «+80»), потом полученные, потом с прогрессом (кольцо и «48/100»), потом закрытые.', () => profilePage());
+frame('26', 'Профиль', 'Изменить: имя, аватар, цвет', 'Лист снизу. Превью вверху меняется сразу. 12 рисунков 4×3, 8 цветов круга. «Сохранить» прилипла к низу.', () => {
+  const ids = Object.keys(AV);
+  return profilePage() + `<div class="scrimD" style="z-index:15"></div>` + sheet(70, grab() +
+    `<div style="display:flex;flex-direction:column;align-items:center;margin-top:2px">${av('owl', 3, 88, false, 4)}</div>` +
+    `<div style="margin:16px 16px 0"><div class="field">Иван<span style="flex:1"></span><span class="cap12 soft">4/20</span></div></div>` +
+    `<div class="cap12 soft" style="margin:18px 22px 8px;letter-spacing:.8px;font-weight:900">АВАТАР</div>` +
+    `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px 0;margin:0 16px;justify-items:center">${ids.map((id) => `<div style="position:relative;${id === 'owl' ? 'box-shadow:0 0 0 3px var(--sheet),0 0 0 6px var(--accent);border-radius:50%' : ''}">${av(id, id === 'owl' ? 3 : 0, 64).replace(AV_BG.day[0], AV_BG.day[3])}${id === 'owl' ? `<div class="abs" style="right:-6px;top:-6px">${glyph('check', 22)}</div>` : ''}</div>`).join('')}</div>` +
+    `<div class="cap12 soft" style="margin:18px 22px 10px;letter-spacing:.8px;font-weight:900">ЦВЕТ КРУГА</div>` +
+    `<div style="display:flex;justify-content:space-between;margin:0 20px">${AV_BG.day.map((c, i) => `<div class="cdot${i === 3 ? ' on' : ''}" style="background:${c}"></div>`).join('')}</div>` +
+    `<div style="position:absolute;left:16px;right:16px;top:${812 - 70 - 72 - 8}px">${btn('primary', 'L', 'Сохранить')}</div>`);
+});
+function awardDialog(id, st, { en = false } = {}) {
+  const a = AW.find((x) => x[0] === id);
+  const desc = { days30: ['У одного дерева 30 дней роста.', '30 days of growth on one tree.'], days100: ['100 дней роста у одного дерева.', '100 days of growth on one tree.'] }[id];
+  const body = st === 'claim'
+    ? `<div style="margin-top:20px">${btn('gold', 'L', (en ? 'Claim ' : 'Забрать ') + '+' + a[3], glyph('acorn', 24))}</div><div class="btn text M">${en ? 'Later' : 'Позже'}</div>`
+    : `<div style="display:flex;align-items:center;gap:10px;margin-top:18px"><div class="pbar" style="flex:1;height:10px;border-radius:5px"><i style="width:48%"></i></div><span class="cap12">48 / 100</span></div><div class="small soft" style="margin-top:8px">${en ? '52 more days' : 'Ещё 52 дня — и она твоя'}</div><div style="display:flex;justify-content:center;align-items:center;gap:6px;margin-top:14px" class="bs">${en ? 'Reward' : 'Награда'} ${acornN(a[3], 20)}</div><div class="btn text M" style="margin-top:6px">${en ? 'Close' : 'Закрыть'}</div>`;
+  return `<div class="scrimD" style="z-index:35"></div><div class="dialog" style="top:250px">
+    <div class="abs" style="left:50%;top:-60px;transform:translateX(-50%)">${st === 'claim' ? `<div class="abs" style="left:-40px;top:-40px;width:200px;height:200px"><div class="rays" style="width:200px;height:200px;margin:0;left:0;top:0"></div></div>` : ''}<div style="position:relative">${badge(a, st === 'claim' ? 'claim' : 'progress:0.48', 120)}</div></div>
+    <div class="micro" style="color:${st === 'claim' ? 'var(--goldLip)' : 'var(--soft)'}">${st === 'claim' ? (en ? 'New achievement' : 'Новая награда') : (en ? 'In progress' : 'В процессе')}</div>
+    <div class="t2" style="margin-top:4px">${en ? a[2] : a[1]}</div><div class="small soft" style="margin-top:6px">${en ? desc[1] : desc[0]}</div>${body}</div>`;
+}
+frame('27', 'Профиль', 'Окно награды: забрать', 'Награда 120 выходит за край карточки на 60. Лучи за ней. «Забрать +80» — жёлуди летят из награды в плашку шапки.', () => profilePage() + awardDialog('days30', 'claim'));
+frame('28', 'Профиль', 'Окно награды: с прогрессом', 'Кольцо прогресса вокруг награды, полоска, сколько осталось и сколько дадут.', () => profilePage() + awardDialog('days100', 'progress'));
+frame('29', 'Профиль', 'Тост «Новая награда» на главном', 'Появляется после всех анимаций полива (+400 мс). Сверху вниз 300 мс, живёт 4 с, тап — профиль с открытым окном награды. Свайп вверх — убрать.', () =>
+  mainBase({ n: 85 }) + `<div class="toast" style="top:56px">${badge(AW[1], 'got', 44)}<div style="flex:1"><div class="micro" style="color:#D99A1E">Новая награда</div><div class="bs">Неделя · забери +30</div></div>${icon('chevronRight', 20, 'var(--soft)', 2.6)}</div>`);
+frame('30', 'Профиль', 'Ночь, 320×568', 'Награды 56, статистика 20; список прокручивается под шапкой.', () => profilePage({ night: true, en: false, narrow: true }), { night: true, w: 320, h: 568 });
+
+/* ---- Листы ---- */
+frame('31', 'Листы: рисунки', 'Новые виды деревьев по стадиям (день и ночь)', 'Росток · сеянец · кустик · деревце · дерево · большое. Рисунки — функции файла «макет-магазин-рисунки.js», переносятся в Skia один к одному.', () => {
+  const kinds = ['birch', 'maple', 'apple', 'palm'], st = ['sprout', 'seedling', 'bush', 'young', 'tree', 'grand'];
+  return `<div class="sheetbg" style="width:1180px">${kinds.map((k) => `<h3>${NAMES[k][0]} · ${NAMES[k][1]}</h3><div style="display:flex;gap:6px;margin-bottom:14px">${st.map((s) => `<div><div style="background:#DDF5FB;border-radius:14px;overflow:hidden;width:150px;height:160px;display:flex;align-items:flex-end;justify-content:center">${treeSVG(k, s, { size: 150 })}</div><div class="lab">${s}</div></div>`).join('')}<div><div style="background:#4A4C9A;border-radius:14px;overflow:hidden;width:150px;height:160px">${treeSVG(k, 'tree', { size: 150, night: true })}</div><div class="lab">tree · ночь</div></div><div><div style="background:#DDF5FB;border-radius:14px;overflow:hidden;width:150px;height:160px">${treeSVG(k, 'young', { size: 150, thirst: 1 })}</div><div class="lab">young · не полито</div></div></div>`).join('')}</div>`;
+}, { w: 1220, h: 820, cls: 'sheetbg' });
+frame('32', 'Листы: рисунки', 'Луга: летний, осенний, зимний, цветочный — день и ночь', 'Меняются только краски (таблицы спеки, раздел 7) и погода: листопад, снег, лепестки и бабочки.', () => {
+  const ids = [['summer', 'Летний · бесплатно'], ['autumn', 'Осенний · 500'], ['winter', 'Зимний · 800'], ['bloom', 'Цветочный · 1200']];
+  return `<div class="sheetbg" style="width:1180px"><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">${ids.map(([id, l]) => `<div>${[false, true].map((n) => `<div style="border-radius:16px;overflow:hidden;margin-bottom:8px">${sceneSVG(id, { W: 280, H: 300, night: n, horizon: 0.5, tree: treeSVG(id === 'winter' ? 'birch' : id === 'autumn' ? 'maple' : id === 'bloom' ? 'apple' : 'birch', 'young', { size: 150, night: n }), treeW: 0.5 })}</div>`).join('')}<div class="lab" style="font-size:14px;color:#1E1B16">${l}</div></div>`).join('')}</div></div>`;
+}, { w: 1220, h: 700, cls: 'sheetbg' });
+frame('33', 'Листы: рисунки', 'Значки, аватары, награды', 'Жёлудь при 16/20/24/48. Бирка: было (похоже на ценник) → стало (табличка с именем на веточке). Корзинка. 12 аватаров на 8 цветах днём и ночью. 14 наград: дерево / серебро / золото.', () => {
+  const sizes = [16, 20, 24, 48, 96];
+  const avs = Object.keys(AV);
+  return `<div class="sheetbg" style="width:1180px">
+    <h3>Жёлудь (acorn)</h3><div style="display:flex;align-items:flex-end;gap:20px;margin-bottom:16px">${sizes.map((s) => `<div>${glyph('acorn', s)}<div class="lab">${s}</div></div>`).join('')}
+      <div style="margin-left:30px"><div class="wallet" style="position:relative">${glyph('acorn', 22)}<span>1 240</span></div><div class="lab">плашка</div></div>
+      <div><span class="price">${glyph('acorn', 20)}<span>250</span></span><div class="lab">цена</div></div>
+      <div style="margin-left:30px">${glyph('basket', 48)}<div class="lab">basket 48</div></div><div>${glyph('basket', 24)}<div class="lab">24</div></div></div>
+    <h3>Бирка имени (nameTag)</h3><div style="display:flex;align-items:flex-end;gap:20px;margin-bottom:16px"><div style="opacity:.55">${`<svg width="48" height="48" viewBox="0 0 24 24">${OLD.nameTag}</svg>`}<div class="lab">было</div></div><div>${glyph('nameTag', 48)}<div class="lab">стало 48</div></div>${[24, 16].map((s) => `<div>${glyph('nameTag', s)}<div class="lab">${s}</div></div>`).join('')}
+      <div style="display:flex;align-items:center;gap:6px;background:#fff;border-radius:19px;height:38px;padding:0 14px 0 10px;box-shadow:0 6px 14px rgba(30,70,100,.22);font-weight:900;font-size:14px;margin-left:30px">${glyph('nameTag', 20)}Как меня зовут?</div></div>
+    <h3>Аватары (12) × цвета круга (8)</h3><div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">${avs.map((id, i) => `<div>${av(id, i % 8, 72)}<div class="lab">${id}</div></div>`).join('')}</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;background:#2E2D63;border-radius:14px;padding:10px">${avs.map((id, i) => av(id, (i + 3) % 8, 56, true)).join('')}</div>
+    <h3>Награды (14): получено · с прогрессом · закрыто · «Забрать»</h3><div style="display:flex;gap:6px;flex-wrap:nowrap">${AW.map((a) => `<div style="width:74px;text-align:center">${badge(a, 'got', 64)}<div class="lab" style="height:46px">${a[1]}<br>+${a[3]}</div></div>`).join('')}</div>
+    <div style="display:flex;gap:16px;margin-top:10px">${badge(AW[3], 'progress:0.48', 64)}${badge(AW[8], 'locked', 64)}${badge(AW[2], 'claim', 64)}${badge(AW[12], 'got', 120)}</div></div>`;
+}, { w: 1220, h: 1000, cls: 'sheetbg' });
+frame('34', 'Листы: рисунки', 'Смена вида из «Моего леса»: ⋯ → «Вид дерева»', 'В карточке дерева в лесу пункт «Вид дерева» открывает лист: виды, которые есть, — с этим деревом в его стадии. Чего нет — замок и цена, тап ведёт в магазин.', () => {
+  const kinds = [['oak', 1], ['sakura', 1], ['spruce', 1], ['birch', 1], ['maple', 0, 400], ['apple', 0, 600], ['palm', 0, 900]];
+  return bgImg('../волна-4/img/f375-card.png') + `<div class="scrimD" style="z-index:15"></div>` + sheet(380, grab() + `<div style="padding:4px 16px 12px"><div class="t2">Вид дерева</div><div class="small soft">Тихон · Не курить</div></div>` +
+    `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 16px">${kinds.map(([k, own, p], i) => `<div style="position:relative;border-radius:16px;background:var(--card);box-shadow:${i === 0 ? '0 0 0 3px var(--accent),' : ''}var(--e1);height:112px;overflow:hidden"><div style="height:80px;background:var(--skyCard);display:flex;align-items:flex-end;justify-content:center;${own ? '' : 'opacity:.55'}">${PNG[k] ? `<img src="../волна-2/img/oak-young.png" style="height:70px;${k !== 'oak' ? 'display:none' : ''}">${k !== 'oak' ? `<img src="../волна-2/img/${k}-young.png" style="height:70px">` : ''}` : treeSVG(k, 'young', { size: 80, fill: 0.8 })}</div><div style="display:flex;align-items:center;justify-content:center;gap:4px;height:32px" class="cap12">${own ? NAMES[k][0] : `${icon('lock', 14, 'var(--soft)')}${acornN(p, 14)}`}</div>${i === 0 ? `<div class="abs" style="right:4px;top:4px">${glyph('check', 22)}</div>` : ''}</div>`).join('')}</div>`);
+});
+
+/* ======== Сборка ======== */
+const params = new URLSearchParams(location.search);
+const only = params.get('f');
+const root = document.getElementById('root');
+if (only) {
+  document.body.classList.add('single');
+  const f = FR.find((x) => x.id === only);
+  root.innerHTML = `<div class="ph ${f.night ? 'night' : ''} ${f.cls}" style="width:${f.w}px;height:${f.h}px">${f.render()}</div>`;
+} else {
+  let html = `<div class="intro"><h1>Волна 5: жёлуди, магазин, задания, профиль</h1><p>Кадры к «спец-магазин.md». Один кадр — ?f=01 … ?f=34. Сцена главного — снимки v0.9 (вырезы iPhone не учтены: в приложении всё сдвигается на insets.top). Деревья и луга нарисованы кодом файла «макет-магазин-рисунки.js» — это эскиз будущего Skia.</p></div>`;
+  let g = '';
+  for (const f of FR) {
+    if (f.group !== g) { if (g) html += '</div>'; g = f.group; html += `<div class="group">${g}</div><div class="list">`; }
+    html += `<div class="cell"><div class="ph ${f.night ? 'night' : ''} ${f.cls}" style="width:${f.w}px;height:${f.h}px">${f.render()}</div><div class="cap"><b>${f.id} · ${f.title}</b><span>${f.sub}</span></div></div>`;
+  }
+  root.innerHTML = html + '</div>';
+}
+window.FRAMES = FR.map((f) => [f.id, f.title, f.w, f.h]);
+</script>
+</body>
+</html>
