@@ -171,7 +171,7 @@ jobs:
           distribution: temurin
           java-version: 17
       - if: steps.key.outputs.have
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: apk-test-key
       - if: steps.key.outputs.have
@@ -198,10 +198,10 @@ jobs:
       contents: write
     steps:
       # Only the signed APK and the web build: never the test-key APK.
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: apk
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: web
       - uses: softprops/action-gh-release@v2
