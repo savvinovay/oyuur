@@ -132,7 +132,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - run: npm ci
       - run: npx expo prebuild -p android --no-install --clean
       # Gradle signs with the open test key; the sign job re-signs it with the Oyuur key (app/credentials/README.md).
