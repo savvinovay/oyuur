@@ -25,4 +25,4 @@ cd server && DB_PATH=./dev.db PORT=8790 node src/main.js
 
 Номер версии — `expo.version` в `app/app.json` (x.y.z), такой же в `app/package.json` и `server/package.json`. Метка `vX.Y.Z` собирает APK и веб-версию и кладёт их в [Releases](https://github.com/savvinovay/oyuur/releases).
 
-APK подписан открытым тестовым ключом React Native (`app/credentials/`), чтобы вставать поверх прежних тестовых сборок. Это сборка для тестеров, не для магазина.
+APK подписан закрытым ключом Oyuur со сменой ключа (APK Signature Scheme v3) от открытого тестового ключа React Native, которым подписаны первые сборки, — поэтому встаёт поверх них (`app/credentials/`). Сборки без секретов ключа (например, из форков) подписаны открытым ключом, называются `*-test-key.apk` и не для раздачи. Это сборка для тестеров, не для магазина.

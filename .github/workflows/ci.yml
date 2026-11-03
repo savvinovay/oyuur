@@ -135,33 +135,75 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - run: npm ci
       - run: npx expo prebuild -p android --no-install --clean
-      # The open React Native test key (app/credentials/README.md): the same as APK 1.0, so it installs over it.
+      # Gradle signs with the open test key; the sign job re-signs it with the Oyuur key (app/credentials/README.md).
       - run: cp credentials/test-debug.keystore android/app/debug.keystore
       - run: ./gradlew assembleRelease --no-daemon
         working-directory: app/android
-      - name: Check the signing key
-        run: |
-          apk=android/app/build/outputs/apk/release/app-release.apk
-          "$ANDROID_HOME"/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner verify --print-certs "$apk" \
-            | grep -qi '5e8f16062ea3cd2c4a0d547876baa6f38cabf625' || { echo "::error::APK is not signed with the test key"; exit 1; }
-          mv "$apk" "../oyuur-${{ needs.version.outputs.version }}.apk"
+      - run: mv android/app/build/outputs/apk/release/app-release.apk "../oyuur-${{ needs.version.outputs.version }}-test-key.apk"
       - uses: actions/upload-artifact@v4
         with:
+          name: apk-test-key
+          path: oyuur-*-test-key.apk
+          if-no-files-found: error
+
+  # The Oyuur key with the rotation from the test key, so APK 1.0 / 1.2 update over it. A job of its own:
+  # the key never meets npm or Gradle code. Without the secrets (pull requests from forks) there is only
+  # the test-key APK above: a build check, not for people; a release then fails.
+  sign:
+    name: Sign APK
+    needs: [version, android]
+    runs-on: ubuntu-latest
+    env:
+      OYUUR_KEYSTORE_BASE64: ${{ secrets.OYUUR_KEYSTORE_BASE64 }}
+      OYUUR_KEYSTORE_PASSWORD: ${{ secrets.OYUUR_KEYSTORE_PASSWORD }}
+    steps:
+      - name: Check the secrets
+        id: key
+        run: |
+          if [ -n "$OYUUR_KEYSTORE_BASE64" ]; then echo "have=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          [[ "$GITHUB_REF" != refs/tags/v* ]] || { echo "::error::no Oyuur key secrets: a release needs them"; exit 1; }
+          echo "::warning::no Oyuur key secrets: only the test-key APK, do not hand it out"
+      - if: steps.key.outputs.have
+        uses: actions/checkout@v5
+      - if: steps.key.outputs.have
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+      - if: steps.key.outputs.have
+        uses: actions/download-artifact@v4
+        with:
+          name: apk-test-key
+      - if: steps.key.outputs.have
+        run: |
+          export OYUUR_KEYSTORE="$RUNNER_TEMP/oyuur.p12" OYUUR_KEYSTORE_PASS_FILE="$RUNNER_TEMP/oyuur.pass"
+          trap 'rm -f "$OYUUR_KEYSTORE" "$OYUUR_KEYSTORE_PASS_FILE"' EXIT
+          tr -d '\r\n ' <<<"$OYUUR_KEYSTORE_BASE64" | base64 -d > "$OYUUR_KEYSTORE"
+          printf '%s' "$OYUUR_KEYSTORE_PASSWORD" > "$OYUUR_KEYSTORE_PASS_FILE"
+          v="${{ needs.version.outputs.version }}"
+          bash app/tools/sign-apk.sh "oyuur-$v-test-key.apk" "oyuur-$v.apk"
+      - if: steps.key.outputs.have
+        uses: actions/upload-artifact@v4
+        with:
           name: apk
-          path: oyuur-*.apk
+          path: oyuur-${{ needs.version.outputs.version }}.apk
           if-no-files-found: error
 
   release:
     name: Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [app, server, web, android]
+    needs: [app, server, web, sign]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      # Only the signed APK and the web build: never the test-key APK.
       - uses: actions/download-artifact@v4
         with:
-          merge-multiple: true
+          name: apk
+      - uses: actions/download-artifact@v4
+        with:
+          name: web
       - uses: softprops/action-gh-release@v2
         with:
           files: |
