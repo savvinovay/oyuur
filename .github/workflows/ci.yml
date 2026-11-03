@@ -103,7 +103,7 @@ jobs:
       - run: npm ci
       - run: npx expo export -p web
       - run: tar -czf "../oyuur-web-${{ needs.version.outputs.version }}.tar.gz" -C dist .
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: web
           path: oyuur-web-*.tar.gz
@@ -140,7 +140,7 @@ jobs:
       - run: ./gradlew assembleRelease --no-daemon
         working-directory: app/android
       - run: mv android/app/build/outputs/apk/release/app-release.apk "../oyuur-${{ needs.version.outputs.version }}-test-key.apk"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: apk-test-key
           path: oyuur-*-test-key.apk
@@ -183,7 +183,7 @@ jobs:
           v="${{ needs.version.outputs.version }}"
           bash app/tools/sign-apk.sh "oyuur-$v-test-key.apk" "oyuur-$v.apk"
       - if: steps.key.outputs.have
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: apk
           path: oyuur-${{ needs.version.outputs.version }}.apk
